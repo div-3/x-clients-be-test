@@ -32,42 +32,55 @@ import io.restassured.http.ContentType;
 import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 import org.apache.http.impl.io.ContentLengthInputStream;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
+import java.time.Duration;
 import java.util.List;
 
 import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
-* Тесты:
-* Позитивные:
-* 1. Получить список компаний +
-* 2. Авторизация +
-* 3. Добавление новой компании +
-* 4. Получение компании по ID +
-* 5. Изменение компании по ID
-* 6. Удаление компании по ID
-* 7. Активировать компанию по ID
-* 8. Деактивировать компанию по ID*/
+ * Тесты:
+ * Позитивные:
+ * 1. Получить список компаний +
+ * 2. Авторизация +
+ * 3. Добавление новой компании +
+ * 4. Получение компании по ID +
+ * 5. Изменение компании по ID +
+ * 6. Удаление компании по ID +
+ * 7. Активировать компанию по ID
+ * 8. Деактивировать компанию по ID*/
 @DisplayName("X-Clients-Be contract tests:")
 public class CompanyContractTest {
-    private final String login = "raphael";
-    private final String password = "cool-but-crude";
+    private final static String login = "raphael";
+    private final static String password = "cool-but-crude";
+    private final static String companyName = "ООО Рога и копыта";
+    private final static String companyDescription = "Все понемногу";
+    private final static String newName = "ООО РиК2";
+    private final static String newDescription = "То же самое";
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         baseURI = "https://x-clients-be.onrender.com";
         basePath = "/company";
+    }
+
+    @AfterAll
+    public static void clearUp() {
+        List<Company> listToDelete = getGetResponse(getGetResponse());
+        String token = getAuthToken(login, password);
+        for (Company c : listToDelete) {
+            if (c.getName().equals(companyName) || c.getName().equals(newName))
+                deleteCompanyById(token, c.getId());
+        }
     }
 
     @Test
     @Tag("Positive")
     @DisplayName("1. Получить список компаний")
-    public void shouldGetCompaniesList(){
+    public void shouldGetCompaniesList() {
         Response response = getGetResponse();
 
         response
@@ -85,7 +98,7 @@ public class CompanyContractTest {
     @Test
     @Tag("Positive")
     @DisplayName("2. Авторизация")
-    public void shouldAuth(){
+    public void shouldAuth() {
         String token = getAuthToken(login, password);
 
         //Проверка, что токен с нужной длиной
@@ -95,13 +108,11 @@ public class CompanyContractTest {
     @Test
     @Tag("Positive")
     @DisplayName("3. Добавление новой компании")
-    public void shouldAddNewCompany(){
+    public void shouldAddNewCompany() {
         //Аутентификация и получение токена
-
-        String companyName = "ООО Рога и копыта";
-        String companyDescription = "Все понемногу";
-
         String token = getAuthToken(login, password);
+
+        //Создание новой компании с companyName, companyDescription
         int id = createAndGetNewCompanyId(token, companyName, companyDescription);
 
         //Проверка, что номер новой компании больше 0
@@ -111,14 +122,11 @@ public class CompanyContractTest {
     @Test
     @Tag("Positive")
     @DisplayName("4. Получение компании по ID")
-    public void shouldGetCompanyById(){
-        //Аутентификация и получение токена
-
-        String companyName = "ООО Рога и копыта";
-        String companyDescription = "Все понемногу";
-
+    public void shouldGetCompanyById() {
         //Создаём компанию
         String token = getAuthToken(login, password);
+
+        //Создание новой компании с companyName, companyDescription
         int id = createAndGetNewCompanyId(token, companyName, companyDescription);
 
         //Проверка, что номер новой компании больше 0
@@ -145,54 +153,101 @@ public class CompanyContractTest {
 
     @Test
     @Tag("Positive")
-    @DisplayName("6. Удаление компании по ID")
-    public void shouldDeleteCompanyById(){
+    @DisplayName("5. Изменение компании по ID")
+    public void shouldPatchCompanyById() {
+
+
         //Аутентификация и получение токена
-
-        String companyName = "ООО Рога и копыта";
-        String companyDescription = "Все понемногу";
-
         String token = getAuthToken(login, password);
+
+        //Создание новой компании с companyName, companyDescription
+        int id = createAndGetNewCompanyId(token, companyName, companyDescription);
+
+        //Проверка, что номер новой компании больше 0
+        assertTrue(id > 0);
+
+        //Изменение компании по ID
+        Company companyAfterPatch = given()
+                .header("x-client-token", token)
+                .log().ifValidationFails()
+                .contentType("application/json; charset=utf-8")
+                .body("{\"name\": \"" + newName + "\",\"description\": \"" + newDescription + "\"}")
+                .when()
+                .basePath(basePath + "/" + id)
+                .patch()
+                .then()
+                .log().ifValidationFails()
+                .statusCode(200)
+                .contentType("application/json; charset=utf-8")
+                .extract()
+                .body().as(Company.class);
+
+        //Проверка тела ответа на команду PATCH
+        assertEquals(id, companyAfterPatch.getId());
+        assertEquals(newName, companyAfterPatch.getName());
+        assertEquals(newDescription, companyAfterPatch.getDescription());
+        assertFalse(companyAfterPatch.isActive());
+        assertNotEquals(companyAfterPatch.getCreateDateTime(), companyAfterPatch.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
+        assertNull(companyAfterPatch.getDeletedAt());
+
+        //Проверка, что по ID компания с изменёнными данными
+        Company companyById = given()
+                .basePath("/company/" + id)
+                .log().ifValidationFails()
+                .when()
+                .get()
+                .then()
+                .log().ifValidationFails()
+                .statusCode(200)
+                .contentType("application/json; charset=utf-8")
+                .extract()
+                .body().as(Company.class);
+
+        //Проверка тела ответа на команду PATCH
+        assertEquals(id, companyById.getId());
+        assertEquals(newName, companyById.getName());
+        assertEquals(newDescription, companyById.getDescription());
+        assertFalse(companyById.isActive());
+        assertNotEquals(companyById.getCreateDateTime(), companyById.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
+        assertNull(companyById.getDeletedAt());
+    }
+
+    @Test
+    @Tag("Positive")
+    @DisplayName("6. Удаление компании по ID")
+    public void shouldDeleteCompanyById() {
+        //Аутентификация и получение токена
+        String token = getAuthToken(login, password);
+
+        //Создание новой компании с companyName, companyDescription
         int id = createAndGetNewCompanyId(token, companyName, companyDescription);
 
         //Проверка, что номер новой компании больше 0
         assertTrue(id > 0);
 
         //Удаление компании по ID
-        given()
-                .header("x-client-token", token)
-                .log().all()
-                .when()
-                .basePath(basePath + "/delete/" + id)
-                .get()
-                .then()
-                .log().all()
-                .statusCode(200)
-                .contentType("application/json; charset=utf-8");
+        deleteCompanyById(token, id);
 
-        getGetResponse();
+        //Задержка для гарантированного прохождения теста
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         //Проверка, что по ID компания больше недоступна
-//        Company companyResult = given()
-        String s = given()
-//                .basePath("/company/" + id)
-                .basePath("/company/" + 888888)
-                .log().all()
+        given()
+                .basePath("/company/" + id)
+                .log().ifValidationFails()
                 .when()
                 .get()
                 .then()
-                .log().all()
-                .statusCode(200).
-
-//                .headers("Content-Length")
-//                .header("Content-Length: 0");
-//                .extract().body().as(String.class);
-//        assertNull(s);
-//                .assertThat()
-//                .extract()
-//                .extract().body().as(Company.class).notNull();
-//                .assertThat().body().equals(null);
-//                .extract().body().as(Company.class);
+                .log().ifValidationFails()
+                //-----------------------BUG--------------------------------//
+                .statusCode(200)            //Завести BUG-репорт. SC должен быть 404, если компании нет
+//                .header("Content-Length", nullValue())               //Проверка, что Content-Length = null
+                .header("Content-Length", equalTo("0"))      //Проверка, что "Content-Length" = "0"
+                .body(emptyOrNullString());                            //Проверка, что тело ответа пустое
     }
 
     private static int createAndGetNewCompanyId(String token, String companyName, String companyDescription) {
@@ -200,7 +255,7 @@ public class CompanyContractTest {
                 .header("x-client-token", token)
                 .contentType("application/json; charset=utf-8")
                 .body("{\"name\": \"" + companyName + "\",\"description\": \"" + companyDescription + "\"}")
-                .contentType(ContentType.JSON)
+//                .contentType(ContentType.JSON)
                 .when()
                 .post()
                 .then()
@@ -218,7 +273,8 @@ public class CompanyContractTest {
     }
 
     private static List<Company> getGetResponse(Response response) {
-        return response.then().extract().body().as(new TypeRef<List<Company>>() {});
+        return response.then().extract().body().as(new TypeRef<List<Company>>() {
+        });
     }
 
     private static String getAuthToken(String login, String password) {
@@ -237,5 +293,17 @@ public class CompanyContractTest {
                 .path("userToken").toString();
     }
 
+    private static void deleteCompanyById(String token, int id) {
+        //Удаление компании по ID
+        given()
+                .header("x-client-token", token)
+                .log().ifValidationFails()
+                .when()
+                .basePath(basePath + "/delete/" + id)
+                .get()
+                .then()
+                .log().ifValidationFails()
+                .statusCode(200);
+    }
 
 }
