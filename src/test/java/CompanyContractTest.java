@@ -81,8 +81,6 @@ public class CompanyContractTest {
         assertTrue(s.endsWith("]"));
     }
 
-
-
     @Test
     @Tag("Positive")
     @DisplayName("2. Авторизация")
@@ -107,6 +105,41 @@ public class CompanyContractTest {
 
         //Проверка, что номер новой компании больше 0
         assertTrue(id > 0);
+    }
+
+    @Test
+    @Tag("Positive")
+    @DisplayName("4. Получение компании по ID")
+    public void shouldGetCompanyById(){
+        //Аутентификация и получение токена
+
+        String companyName = "ООО Рога и копыта";
+        String companyDescription = "Все понемногу";
+
+        //Создаём компанию
+        String token = getAuthToken(login, password);
+        int id = createAndGetNewCompanyId(token, companyName, companyDescription);
+
+        //Проверка, что номер новой компании больше 0
+        assertTrue(id > 0);
+
+        //Получаем компанию из общего списка
+        List<Company> companies = getGetResponse(getGetResponse());
+        Company companyExpected = null;
+        for (Company c : companies) {
+            if (c.getId() == id) companyExpected = c;
+        }
+
+        //Получение компании по ID
+        Company companyResult = given().basePath("/company/" + id).when()
+                .get()
+                .then()
+                .statusCode(200)
+                .contentType("application/json; charset=utf-8")
+                .extract().body().as(Company.class);
+
+        //Проверка, что по Id мы получили такую же компанию, что и в общем списке
+        assertEquals(companyExpected, companyResult);
     }
 
     private static int createAndGetNewCompanyId(String token, String companyName, String companyDescription) {
