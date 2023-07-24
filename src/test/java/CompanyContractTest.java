@@ -31,6 +31,7 @@ import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
+import org.apache.http.impl.io.ContentLengthInputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -47,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.*;
 * 1. Получить список компаний +
 * 2. Авторизация +
 * 3. Добавление новой компании +
-* 4. Получение компании по ID
+* 4. Получение компании по ID +
 * 5. Изменение компании по ID
 * 6. Удаление компании по ID
 * 7. Активировать компанию по ID
@@ -140,6 +141,58 @@ public class CompanyContractTest {
 
         //Проверка, что по Id мы получили такую же компанию, что и в общем списке
         assertEquals(companyExpected, companyResult);
+    }
+
+    @Test
+    @Tag("Positive")
+    @DisplayName("6. Удаление компании по ID")
+    public void shouldDeleteCompanyById(){
+        //Аутентификация и получение токена
+
+        String companyName = "ООО Рога и копыта";
+        String companyDescription = "Все понемногу";
+
+        String token = getAuthToken(login, password);
+        int id = createAndGetNewCompanyId(token, companyName, companyDescription);
+
+        //Проверка, что номер новой компании больше 0
+        assertTrue(id > 0);
+
+        //Удаление компании по ID
+        given()
+                .header("x-client-token", token)
+                .log().all()
+                .when()
+                .basePath(basePath + "/delete/" + id)
+                .get()
+                .then()
+                .log().all()
+                .statusCode(200)
+                .contentType("application/json; charset=utf-8");
+
+        getGetResponse();
+
+        //Проверка, что по ID компания больше недоступна
+//        Company companyResult = given()
+        String s = given()
+//                .basePath("/company/" + id)
+                .basePath("/company/" + 888888)
+                .log().all()
+                .when()
+                .get()
+                .then()
+                .log().all()
+                .statusCode(200).
+
+//                .headers("Content-Length")
+//                .header("Content-Length: 0");
+//                .extract().body().as(String.class);
+//        assertNull(s);
+//                .assertThat()
+//                .extract()
+//                .extract().body().as(Company.class).notNull();
+//                .assertThat().body().equals(null);
+//                .extract().body().as(Company.class);
     }
 
     private static int createAndGetNewCompanyId(String token, String companyName, String companyDescription) {
