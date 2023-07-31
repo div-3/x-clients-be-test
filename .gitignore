@@ -2,6 +2,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+/workspace.xml
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -39,3 +40,4 @@ build/
 .DS_Store
 /.idea/encodings.xml
 /.idea/
+/src/main/resources/JDBC.properties
