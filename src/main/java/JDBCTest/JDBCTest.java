@@ -13,7 +13,6 @@ public class JDBCTest {
     public static void main(String[] args) throws SQLException {
         //Получение параметров подключения из файла
         Properties JDBCProperties = getProperties();
-        System.out.println(JDBCProperties.getProperty("text"));
 
         try (Connection connection = DriverManager.getConnection(
                 JDBCProperties.getProperty("connectionString"),
@@ -22,7 +21,7 @@ public class JDBCTest {
             {
             //Получение и печать списка компаний
 //            printList(getCarListFromDB(connection));
-            printList(getListFromDB(connection, Car.class));
+            printList(getCarListFromDB(connection));
 
             System.out.println("----------------------\nДобавляем машины\n---------------------");
             Car car1 = new Car("М345ЕМ49", "Honda Civic", "Пономарёв Л.К.");
@@ -47,7 +46,7 @@ public class JDBCTest {
 
     //Получить параметры подключения к DB
     private static Properties getProperties(){
-        File prop = new File("src/main/resources/JDBC.properties");
+        File prop = new File("src/main/resources/JDBC_autoservice.properties");
         Properties JDBCProperties = new Properties();
         try {
             JDBCProperties.load(new FileReader(prop));
@@ -85,27 +84,6 @@ public class JDBCTest {
         return cars;
     }
 
-    private static <T> List<T> getListFromDB(Connection connection, T t) throws SQLException {
-        String query = "SELECT * FROM car;";
-        ResultSet resultSet = connection.createStatement().executeQuery(query);
-        List<T> t1 = new ArrayList<>();
-        int i = 0;
-        while (resultSet.next()){
-
-            String id = resultSet.getString("id");
-            String model = resultSet.getString("model");
-            String owner = resultSet.getString("owner");
-            System.out.println(t.getClass().getName().toString());
-            switch (t.getClass().getName()){
-                case "JDBCTest.Car":
-                    T t2 =  (T) new Car(id, model, owner);
-            }
-            T t2 = null;
-            t1.add(i, t2);
-            i++;
-        }
-        return t1;
-    }
 
     private static <X> void printList(List<X> cList){
         for (X x: cList) {

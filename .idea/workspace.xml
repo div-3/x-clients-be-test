@@ -4,12 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8b344d2-5027-4642-b583-7ea5d4fbb24e" name="Changes" comment="* Позитивные тесты на API-контракт:&#10;4. Получение компании по ID">
-      <change afterPath="$PROJECT_DIR$/src/main/java/JDBCTest/Car.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/JDBCTest/JDBCTest.java" afterDir="false" />
+    <list default="true" id="d8b344d2-5027-4642-b583-7ea5d4fbb24e" name="Changes" comment="Добавил JDBC к базе">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Model/CompanyDBEntity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/api/CompanyService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/api/CompanyServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/db/CompanyRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/db/CompanyRepositoryJDBC.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/ext/CompanyDBRepositoryResolver.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/ext/ConnectionResolver.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/test/XClientJDBCTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/JDBCTest/JDBCTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/JDBCTest/JDBCTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Model/Company.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Model/Company.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/junit-platform.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/junit-platform.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/CompanyContractTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,6 +28,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -46,7 +56,7 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+    "settings.editor.selected.configurable": "nele.options"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -60,7 +70,7 @@
       <recent name="" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.JDBCTest">
+  <component name="RunManager" selected="JUnit.CompanyContractTest">
     <configuration name="JDBCTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="JDBCTest.JDBCTest" />
       <module name="x-clients-be-test" />
@@ -70,38 +80,50 @@
     </configuration>
     <configuration name="CompanyContractTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
-      <option name="PACKAGE_NAME" value="" />
-      <option name="MAIN_CLASS_NAME" value="CompanyContractTest" />
+      <option name="PACKAGE_NAME" value="test" />
+      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CompanyContractTest.shouldAuth" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="CompanyContractTest.testById (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
-      <option name="PACKAGE_NAME" value="" />
-      <option name="MAIN_CLASS_NAME" value="CompanyContractTest" />
-      <option name="METHOD_NAME" value="shouldAuth" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test" />
+      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
+      <option name="METHOD_NAME" value="testById(db.CompanyRepository)" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CompanyContractTest.shouldGetCompaniesList" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="CompanyContractTest.testById" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
-      <option name="PACKAGE_NAME" value="" />
-      <option name="MAIN_CLASS_NAME" value="CompanyContractTest" />
-      <option name="METHOD_NAME" value="shouldGetCompaniesList" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test" />
+      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
+      <option name="METHOD_NAME" value="testById(db.CompanyRepositoryJDBC)" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CompanyContractTest.shouldGetCompanyById" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="XClientJDBCTest.shouldConnectToDB" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
-      <option name="PACKAGE_NAME" value="" />
-      <option name="MAIN_CLASS_NAME" value="CompanyContractTest" />
-      <option name="METHOD_NAME" value="shouldGetCompanyById" />
+      <option name="PACKAGE_NAME" value="test" />
+      <option name="MAIN_CLASS_NAME" value="test.XClientJDBCTest" />
+      <option name="METHOD_NAME" value="shouldConnectToDB" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -109,11 +131,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.JDBCTest" />
-        <item itemvalue="JUnit.CompanyContractTest.shouldGetCompanyById" />
         <item itemvalue="JUnit.CompanyContractTest" />
-        <item itemvalue="JUnit.CompanyContractTest.shouldAuth" />
-        <item itemvalue="JUnit.CompanyContractTest.shouldGetCompaniesList" />
+        <item itemvalue="JUnit.CompanyContractTest.testById (1)" />
+        <item itemvalue="JUnit.CompanyContractTest.testById" />
+        <item itemvalue="JUnit.XClientJDBCTest.shouldConnectToDB" />
+        <item itemvalue="Application.JDBCTest" />
       </list>
     </recent_temporary>
   </component>
@@ -161,7 +183,14 @@
       <option name="project" value="LOCAL" />
       <updated>1690188609923</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Добавил JDBC к базе">
+      <created>1690794824001</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1690794824001</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -192,17 +221,7 @@
     <MESSAGE value=".gitignore update" />
     <MESSAGE value="* Позитивные тесты на API-контракт:&#10;* 1. Получить список компаний&#10;* 2. Авторизация" />
     <MESSAGE value="* Позитивные тесты на API-контракт:&#10;4. Получение компании по ID" />
-    <option name="LAST_COMMIT_MESSAGE" value="* Позитивные тесты на API-контракт:&#10;4. Получение компании по ID" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/JDBCTest/JDBCTest.java</url>
-          <line>99</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Добавил JDBC к базе" />
+    <option name="LAST_COMMIT_MESSAGE" value="Добавил JDBC к базе" />
   </component>
 </project>

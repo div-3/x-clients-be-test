@@ -1,19 +1,24 @@
 package Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class Company {
     private int id;
+    @JsonProperty("isActive")
     private boolean isActive;
-    private String createDateTime;
-    private String lastChangedDateTime;
     private String name;
     private String description;
-    private String deletedAt;
 
     public Company() {
+    }
+
+    public Company(int id, boolean isActive, String name, String description) {
+        this.id = id;
+        this.isActive = isActive;
+        this.name = name;
+        this.description = description;
     }
 
     public int getId() {
@@ -32,22 +37,6 @@ public class Company {
         isActive = active;
     }
 
-    public String getCreateDateTime() {
-        return createDateTime;
-    }
-
-    public void setCreateDateTime(String createDateTime) {
-        this.createDateTime = createDateTime;
-    }
-
-    public String getLastChangedDateTime() {
-        return lastChangedDateTime;
-    }
-
-    public void setLastChangedDateTime(String lastChangedDateTime) {
-        this.lastChangedDateTime = lastChangedDateTime;
-    }
-
     public String getName() {
         return name;
     }
@@ -64,25 +53,17 @@ public class Company {
         this.description = description;
     }
 
-    public String getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(String deletedAt) {
-        this.deletedAt = deletedAt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Company company = (Company) o;
-        return id == company.id && isActive == company.isActive && Objects.equals(createDateTime, company.createDateTime) && Objects.equals(lastChangedDateTime, company.lastChangedDateTime) && Objects.equals(name, company.name) && Objects.equals(description, company.description) && Objects.equals(deletedAt, company.deletedAt);
+        return id == company.id && isActive == company.isActive && Objects.equals(name, company.name) && Objects.equals(description, company.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, isActive, createDateTime, lastChangedDateTime, name, description, deletedAt);
+        return Objects.hash(id, isActive, name, description);
     }
 
     @Override
@@ -90,11 +71,8 @@ public class Company {
         return "Company{" +
                 "id=" + id +
                 ", isActive=" + isActive +
-                ", createDateTime='" + createDateTime + '\'' +
-                ", lastChangedDateTime='" + lastChangedDateTime + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", deletedAt='" + deletedAt + '\'' +
                 '}';
     }
 }

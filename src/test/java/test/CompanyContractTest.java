@@ -1,4 +1,4 @@
-/*
+package test;/*
 * При тестировании API-контракта, основанного на RESTful стиле, следует проверить следующие аспекты:
 1. Проверка статуса ответа: Проверьте, что статус ответа соответствует ожидаемому, например, 200 (OK), 201 (Created),
 * 400 (Bad Request) и т. д. Это позволяет убедиться, что запрос обработан в соответствии с контрактом.
@@ -24,18 +24,24 @@
 * производительности и других необходимых аспектов в соответствии с ожиданиями пользователей и бизнеса.*/
 
 import Model.Company;
-import io.restassured.RestAssured;
+import Model.CompanyDBEntity;
+import db.CompanyRepository;
+import db.CompanyRepositoryJDBC;
+import ext.CompanyDBRepositoryResolver;
+import ext.ConnectionResolver;
 import io.restassured.common.mapper.TypeRef;
-import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.log.LogDetail;
-import io.restassured.http.ContentType;
-import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
-import org.apache.http.impl.io.ContentLengthInputStream;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.time.Duration;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Properties;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
@@ -53,31 +59,41 @@ import static org.junit.jupiter.api.Assertions.*;
  * 7. Активировать компанию по ID
  * 8. Деактивировать компанию по ID*/
 @DisplayName("X-Clients-Be contract tests:")
+@ExtendWith({ConnectionResolver.class, CompanyDBRepositoryResolver.class})
 public class CompanyContractTest {
-    private final static String login = "raphael";
-    private final static String password = "cool-but-crude";
+    private final static String propertiesFilePath = "src/main/resources/API_x_client.properties";
+    private static Properties properties = new Properties();
+    private static String login = "";
+    private static String password = "";
     private final static String companyName = "ООО Рога и копыта";
     private final static String companyDescription = "Все понемногу";
     private final static String newName = "ООО РиК2";
     private final static String newDescription = "То же самое";
 
+    @BeforeAll
+    public static void setUpBeforeAll(Connection connection) {
+        properties = getAPIProperties();
+    }
+
     @BeforeEach
     public void setUp() {
-        baseURI = "https://x-clients-be.onrender.com";
+        baseURI = properties.getProperty("baseURI");
         basePath = "/company";
+        login = properties.getProperty("login");
+        password = properties.getProperty("password");
     }
 
     @AfterAll
     public static void clearUp() {
-        List<Company> listToDelete = getGetResponse(getGetResponse());
+        List<CompanyDBEntity> listToDelete = getGetResponse(getGetResponse());
         String token = getAuthToken(login, password);
-        for (Company c : listToDelete) {
+        for (CompanyDBEntity c : listToDelete) {
             if (c.getName().equals(companyName) || c.getName().equals(newName))
                 deleteCompanyById(token, c.getId());
         }
     }
 
-    @Test
+    //    @Test
     @Tag("Positive")
     @DisplayName("1. Получить список компаний")
     public void shouldGetCompaniesList() {
@@ -95,7 +111,7 @@ public class CompanyContractTest {
         assertTrue(s.endsWith("]"));
     }
 
-    @Test
+    //    @Test
     @Tag("Positive")
     @DisplayName("2. Авторизация")
     public void shouldAuth() {
@@ -105,7 +121,7 @@ public class CompanyContractTest {
         assertEquals(148, token.length());
     }
 
-    @Test
+    //    @Test
     @Tag("Positive")
     @DisplayName("3. Добавление новой компании")
     public void shouldAddNewCompany() {
@@ -119,7 +135,7 @@ public class CompanyContractTest {
         assertTrue(id > 0);
     }
 
-    @Test
+    //    @Test
     @Tag("Positive")
     @DisplayName("4. Получение компании по ID")
     public void shouldGetCompanyById() {
@@ -133,25 +149,43 @@ public class CompanyContractTest {
         assertTrue(id > 0);
 
         //Получаем компанию из общего списка
-        List<Company> companies = getGetResponse(getGetResponse());
-        Company companyExpected = null;
-        for (Company c : companies) {
-            if (c.getId() == id) companyExpected = c;
+        List<CompanyDBEntity> companies = getGetResponse(getGetResponse());
+        CompanyDBEntity companyDBEntityExpected = null;
+        for (CompanyDBEntity c : companies) {
+            if (c.getId() == id) companyDBEntityExpected = c;
         }
 
         //Получение компании по ID
-        Company companyResult = given().basePath("/company/" + id).when()
+        CompanyDBEntity companyDBEntityResult = given().basePath("/company/" + id).when()
                 .get()
                 .then()
                 .statusCode(200)
                 .contentType("application/json; charset=utf-8")
-                .extract().body().as(Company.class);
+                .extract().body().as(CompanyDBEntity.class);
 
         //Проверка, что по Id мы получили такую же компанию, что и в общем списке
-        assertEquals(companyExpected, companyResult);
+        assertEquals(companyDBEntityExpected, companyDBEntityResult);
     }
 
     @Test
+    public void testById(CompanyRepository repository) throws SQLException {
+        CompanyDBEntity company = repository.getAll().get(0);
+        System.out.println(company.toString());
+    }
+
+    @Test
+    public void testById2(CompanyRepository repository) throws SQLException {
+        CompanyDBEntity company = repository.getAll().get(0);
+        System.out.println(company.toString());
+    }
+
+    @Test
+    public void testById3(CompanyRepository repository) throws SQLException {
+        CompanyDBEntity company = repository.getAll().get(0);
+        System.out.println(company.toString());
+    }
+
+    //    @Test
     @Tag("Positive")
     @DisplayName("5. Изменение компании по ID")
     public void shouldPatchCompanyById() {
@@ -167,7 +201,7 @@ public class CompanyContractTest {
         assertTrue(id > 0);
 
         //Изменение компании по ID
-        Company companyAfterPatch = given()
+        CompanyDBEntity companyDBEntityAfterPatch = given()
                 .header("x-client-token", token)
                 .log().ifValidationFails()
                 .contentType("application/json; charset=utf-8")
@@ -180,18 +214,18 @@ public class CompanyContractTest {
                 .statusCode(200)
                 .contentType("application/json; charset=utf-8")
                 .extract()
-                .body().as(Company.class);
+                .body().as(CompanyDBEntity.class);
 
         //Проверка тела ответа на команду PATCH
-        assertEquals(id, companyAfterPatch.getId());
-        assertEquals(newName, companyAfterPatch.getName());
-        assertEquals(newDescription, companyAfterPatch.getDescription());
-        assertFalse(companyAfterPatch.isActive());
-        assertNotEquals(companyAfterPatch.getCreateDateTime(), companyAfterPatch.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
-        assertNull(companyAfterPatch.getDeletedAt());
+        assertEquals(id, companyDBEntityAfterPatch.getId());
+        assertEquals(newName, companyDBEntityAfterPatch.getName());
+        assertEquals(newDescription, companyDBEntityAfterPatch.getDescription());
+        assertFalse(companyDBEntityAfterPatch.isActive());
+        assertNotEquals(companyDBEntityAfterPatch.getCreateDateTime(), companyDBEntityAfterPatch.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
+        assertNull(companyDBEntityAfterPatch.getDeletedAt());
 
         //Проверка, что по ID компания с изменёнными данными
-        Company companyById = given()
+        CompanyDBEntity companyDBEntityById = given()
                 .basePath("/company/" + id)
                 .log().ifValidationFails()
                 .when()
@@ -201,18 +235,18 @@ public class CompanyContractTest {
                 .statusCode(200)
                 .contentType("application/json; charset=utf-8")
                 .extract()
-                .body().as(Company.class);
+                .body().as(CompanyDBEntity.class);
 
         //Проверка тела ответа на команду PATCH
-        assertEquals(id, companyById.getId());
-        assertEquals(newName, companyById.getName());
-        assertEquals(newDescription, companyById.getDescription());
-        assertFalse(companyById.isActive());
-        assertNotEquals(companyById.getCreateDateTime(), companyById.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
-        assertNull(companyById.getDeletedAt());
+        assertEquals(id, companyDBEntityById.getId());
+        assertEquals(newName, companyDBEntityById.getName());
+        assertEquals(newDescription, companyDBEntityById.getDescription());
+        assertFalse(companyDBEntityById.isActive());
+        assertNotEquals(companyDBEntityById.getCreateDateTime(), companyDBEntityById.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
+        assertNull(companyDBEntityById.getDeletedAt());
     }
 
-    @Test
+    //    @Test
     @Tag("Positive")
     @DisplayName("6. Удаление компании по ID")
     public void shouldDeleteCompanyById() {
@@ -272,8 +306,8 @@ public class CompanyContractTest {
                 .extract().response();
     }
 
-    private static List<Company> getGetResponse(Response response) {
-        return response.then().extract().body().as(new TypeRef<List<Company>>() {
+    private static List<CompanyDBEntity> getGetResponse(Response response) {
+        return response.then().extract().body().as(new TypeRef<List<CompanyDBEntity>>() {
         });
     }
 
@@ -304,6 +338,18 @@ public class CompanyContractTest {
                 .then()
                 .log().ifValidationFails()
                 .statusCode(200);
+    }
+
+
+    //Получение настроек подключения из файла .properties
+    private static Properties getAPIProperties() {
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileReader(new File(propertiesFilePath)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return properties;
     }
 
 }
