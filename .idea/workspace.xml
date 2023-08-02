@@ -4,21 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8b344d2-5027-4642-b583-7ea5d4fbb24e" name="Changes" comment="Добавил JDBC к базе">
-      <change afterPath="$PROJECT_DIR$/src/main/java/Model/CompanyDBEntity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/api/CompanyService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/api/CompanyServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/db/CompanyRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/db/CompanyRepositoryJDBC.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/ext/CompanyDBRepositoryResolver.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/ext/ConnectionResolver.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/test/XClientJDBCTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="d8b344d2-5027-4642-b583-7ea5d4fbb24e" name="Changes" comment="Добавил ConnectionResolver, CompanyDBRepositoryResolver и много других классов.">
+      <change afterPath="$PROJECT_DIR$/src/test/java/ext/MyMatchers.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/JDBCTest/JDBCTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/JDBCTest/JDBCTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Model/Company.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Model/Company.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/junit-platform.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/junit-platform.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/CompanyContractTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,19 +60,44 @@
       <recent name="" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.CompanyContractTest">
-    <configuration name="JDBCTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="JDBCTest.JDBCTest" />
-      <module name="x-clients-be-test" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="JUnit.CompanyContractTest.shouldGetCompanyById">
     <configuration name="CompanyContractTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
       <option name="PACKAGE_NAME" value="test" />
       <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
       <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CompanyContractTest.shouldAddNewCompany" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="x-clients-be-test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test" />
+      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
+      <option name="METHOD_NAME" value="shouldAddNewCompany(db.CompanyRepository)" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CompanyContractTest.shouldGetCompanyById" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="x-clients-be-test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test" />
+      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
+      <option name="METHOD_NAME" value="shouldGetCompanyById(db.CompanyRepository)" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -119,23 +134,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="XClientJDBCTest.shouldConnectToDB" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="x-clients-be-test" />
-      <option name="PACKAGE_NAME" value="test" />
-      <option name="MAIN_CLASS_NAME" value="test.XClientJDBCTest" />
-      <option name="METHOD_NAME" value="shouldConnectToDB" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.CompanyContractTest.shouldGetCompanyById" />
+        <item itemvalue="JUnit.CompanyContractTest.shouldAddNewCompany" />
         <item itemvalue="JUnit.CompanyContractTest" />
         <item itemvalue="JUnit.CompanyContractTest.testById (1)" />
         <item itemvalue="JUnit.CompanyContractTest.testById" />
-        <item itemvalue="JUnit.XClientJDBCTest.shouldConnectToDB" />
-        <item itemvalue="Application.JDBCTest" />
       </list>
     </recent_temporary>
   </component>
@@ -190,7 +195,14 @@
       <option name="project" value="LOCAL" />
       <updated>1690794824001</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Добавил ConnectionResolver, CompanyDBRepositoryResolver и много других классов.">
+      <created>1690959538571</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1690959538571</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -222,6 +234,7 @@
     <MESSAGE value="* Позитивные тесты на API-контракт:&#10;* 1. Получить список компаний&#10;* 2. Авторизация" />
     <MESSAGE value="* Позитивные тесты на API-контракт:&#10;4. Получение компании по ID" />
     <MESSAGE value="Добавил JDBC к базе" />
-    <option name="LAST_COMMIT_MESSAGE" value="Добавил JDBC к базе" />
+    <MESSAGE value="Добавил ConnectionResolver, CompanyDBRepositoryResolver и много других классов." />
+    <option name="LAST_COMMIT_MESSAGE" value="Добавил ConnectionResolver, CompanyDBRepositoryResolver и много других классов." />
   </component>
 </project>

@@ -26,7 +26,6 @@ package test;/*
 import Model.Company;
 import Model.CompanyDBEntity;
 import db.CompanyRepository;
-import db.CompanyRepositoryJDBC;
 import ext.CompanyDBRepositoryResolver;
 import ext.ConnectionResolver;
 import io.restassured.common.mapper.TypeRef;
@@ -43,6 +42,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
+
+import static ext.MyMatchers.*;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -93,7 +94,7 @@ public class CompanyContractTest {
         }
     }
 
-    //    @Test
+    @Test
     @Tag("Positive")
     @DisplayName("1. Получить список компаний")
     public void shouldGetCompaniesList() {
@@ -111,7 +112,7 @@ public class CompanyContractTest {
         assertTrue(s.endsWith("]"));
     }
 
-    //    @Test
+    @Test
     @Tag("Positive")
     @DisplayName("2. Авторизация")
     public void shouldAuth() {
@@ -121,11 +122,11 @@ public class CompanyContractTest {
         assertEquals(148, token.length());
     }
 
-    //    @Test
+    @Test
     @Tag("Positive")
     @DisplayName("3. Добавление новой компании")
-    public void shouldAddNewCompany() {
-        //Аутентификация и получение токена
+    public void shouldAddNewCompany(CompanyRepository companyRepository) throws SQLException {
+        //Авторизация и получение токена
         String token = getAuthToken(login, password);
 
         //Создание новой компании с companyName, companyDescription
@@ -133,13 +134,20 @@ public class CompanyContractTest {
 
         //Проверка, что номер новой компании больше 0
         assertTrue(id > 0);
+
+        //Получение компании из DB
+        CompanyDBEntity companyDBEntity = companyRepository.getById(id);
+        assertEquals(companyName, companyDBEntity.getName());
+        assertEquals(companyDescription, companyDBEntity.getDescription());
+        assertTrue(companyDBEntity.isActive());
+        assertNull(companyDBEntity.getDeletedAt());
     }
 
-    //    @Test
+    @Test
     @Tag("Positive")
     @DisplayName("4. Получение компании по ID")
-    public void shouldGetCompanyById() {
-        //Создаём компанию
+    public void shouldGetCompanyById(CompanyRepository repository) throws SQLException {
+        //Авторизация
         String token = getAuthToken(login, password);
 
         //Создание новой компании с companyName, companyDescription
@@ -148,25 +156,22 @@ public class CompanyContractTest {
         //Проверка, что номер новой компании больше 0
         assertTrue(id > 0);
 
-        //Получаем компанию из общего списка
-        List<CompanyDBEntity> companies = getGetResponse(getGetResponse());
-        CompanyDBEntity companyDBEntityExpected = null;
-        for (CompanyDBEntity c : companies) {
-            if (c.getId() == id) companyDBEntityExpected = c;
-        }
-
-        //Получение компании по ID
-        CompanyDBEntity companyDBEntityResult = given().basePath("/company/" + id).when()
+        //Получение компании по API по ID
+        Company companyAPIResult = given().basePath("/company/" + id).when()
                 .get()
                 .then()
                 .statusCode(200)
                 .contentType("application/json; charset=utf-8")
-                .extract().body().as(CompanyDBEntity.class);
+                .extract().body().as(Company.class);
 
-        //Проверка, что по Id мы получили такую же компанию, что и в общем списке
-        assertEquals(companyDBEntityExpected, companyDBEntityResult);
+        //Получение компании из DB по ID
+        CompanyDBEntity companyDBEntityExpected = repository.getById(id);
+
+        //Проверка, что по Id мы получили одинаковые компании по API и из БД
+        assertTrue(isCompaniesEqual(companyAPIResult, companyDBEntityExpected));
     }
 
+    // 3 теста для проверки работы Resolver'ов
     @Test
     public void testById(CompanyRepository repository) throws SQLException {
         CompanyDBEntity company = repository.getAll().get(0);
@@ -289,7 +294,6 @@ public class CompanyContractTest {
                 .header("x-client-token", token)
                 .contentType("application/json; charset=utf-8")
                 .body("{\"name\": \"" + companyName + "\",\"description\": \"" + companyDescription + "\"}")
-//                .contentType(ContentType.JSON)
                 .when()
                 .post()
                 .then()
@@ -341,7 +345,7 @@ public class CompanyContractTest {
     }
 
 
-    //Получение настроек подключения из файла .properties
+    //Получение настроек подключения по API из файла .properties
     private static Properties getAPIProperties() {
         Properties properties = new Properties();
         try {
