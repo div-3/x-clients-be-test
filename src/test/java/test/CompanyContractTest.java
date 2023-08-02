@@ -137,6 +137,7 @@ public class CompanyContractTest {
 
         //Получение компании из DB
         CompanyDBEntity companyDBEntity = companyRepository.getById(id);
+
         assertEquals(companyName, companyDBEntity.getName());
         assertEquals(companyDescription, companyDBEntity.getDescription());
         assertTrue(companyDBEntity.isActive());
@@ -147,17 +148,15 @@ public class CompanyContractTest {
     @Tag("Positive")
     @DisplayName("4. Получение компании по ID")
     public void shouldGetCompanyById(CompanyRepository repository) throws SQLException {
-        //Авторизация
-        String token = getAuthToken(login, password);
 
-        //Создание новой компании с companyName, companyDescription
-        int id = createAndGetNewCompanyId(token, companyName, companyDescription);
+        //Создание компании через БД
+        int createdId = repository.create(companyName, companyDescription);
 
         //Проверка, что номер новой компании больше 0
-        assertTrue(id > 0);
+        assertTrue(createdId > 0);
 
         //Получение компании по API по ID
-        Company companyAPIResult = given().basePath("/company/" + id).when()
+        Company companyAPIResult = given().basePath("/company/" + createdId).when()
                 .get()
                 .then()
                 .statusCode(200)
@@ -165,7 +164,7 @@ public class CompanyContractTest {
                 .extract().body().as(Company.class);
 
         //Получение компании из DB по ID
-        CompanyDBEntity companyDBEntityExpected = repository.getById(id);
+        CompanyDBEntity companyDBEntityExpected = repository.getById(createdId);
 
         //Проверка, что по Id мы получили одинаковые компании по API и из БД
         assertTrue(isCompaniesEqual(companyAPIResult, companyDBEntityExpected));
@@ -190,11 +189,10 @@ public class CompanyContractTest {
         System.out.println(company.toString());
     }
 
-    //    @Test
+    @Test
     @Tag("Positive")
     @DisplayName("5. Изменение компании по ID")
-    public void shouldPatchCompanyById() {
-
+    public void shouldPatchCompanyById(CompanyRepository repository) throws SQLException {
 
         //Аутентификация и получение токена
         String token = getAuthToken(login, password);
@@ -225,28 +223,18 @@ public class CompanyContractTest {
         assertEquals(id, companyDBEntityAfterPatch.getId());
         assertEquals(newName, companyDBEntityAfterPatch.getName());
         assertEquals(newDescription, companyDBEntityAfterPatch.getDescription());
-        assertFalse(companyDBEntityAfterPatch.isActive());
+        assertTrue(companyDBEntityAfterPatch.isActive());
         assertNotEquals(companyDBEntityAfterPatch.getCreateDateTime(), companyDBEntityAfterPatch.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
         assertNull(companyDBEntityAfterPatch.getDeletedAt());
 
-        //Проверка, что по ID компания с изменёнными данными
-        CompanyDBEntity companyDBEntityById = given()
-                .basePath("/company/" + id)
-                .log().ifValidationFails()
-                .when()
-                .get()
-                .then()
-                .log().ifValidationFails()
-                .statusCode(200)
-                .contentType("application/json; charset=utf-8")
-                .extract()
-                .body().as(CompanyDBEntity.class);
+        //Проверка, что в БД по ID компания с изменёнными данными
+        CompanyDBEntity companyDBEntityById = repository.getById(id);
 
         //Проверка тела ответа на команду PATCH
         assertEquals(id, companyDBEntityById.getId());
         assertEquals(newName, companyDBEntityById.getName());
         assertEquals(newDescription, companyDBEntityById.getDescription());
-        assertFalse(companyDBEntityById.isActive());
+        assertTrue(companyDBEntityById.isActive());
         assertNotEquals(companyDBEntityById.getCreateDateTime(), companyDBEntityById.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
         assertNull(companyDBEntityById.getDeletedAt());
     }

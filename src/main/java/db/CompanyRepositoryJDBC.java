@@ -2,16 +2,9 @@ package db;
 
 import Model.CompanyDBEntity;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 public class CompanyRepositoryJDBC implements CompanyRepository{
     Connection connection;
@@ -50,12 +43,25 @@ public class CompanyRepositoryJDBC implements CompanyRepository{
 
     @Override
     public int create(String name) throws SQLException {
-        return 0;
+        String insertQuery = "insert into company (\"name\") values (?);";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
+        preparedStatement.setString(1, name);
+        preparedStatement.executeUpdate();
+        ResultSet createdId = preparedStatement.getGeneratedKeys();
+        createdId.next();
+        return createdId.getInt(1);
     }
 
     @Override
     public int create(String name, String description) throws SQLException {
-        return 0;
+        String insertQuery = "insert into company (\"name\", \"description\") values (?, ?);";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
+        preparedStatement.setString(1, name);
+        preparedStatement.setString(2, description);
+        preparedStatement.executeUpdate();
+        ResultSet createdId = preparedStatement.getGeneratedKeys();
+        createdId.next();
+        return createdId.getInt(1);
     }
 
     @Override
