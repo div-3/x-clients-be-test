@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8b344d2-5027-4642-b583-7ea5d4fbb24e" name="Changes" comment="Добавил MyMatcher ля сравнения компаний с разным набором полей.">
+    <list default="true" id="d8b344d2-5027-4642-b583-7ea5d4fbb24e" name="Changes" comment="Позитивные контрактные тесты:&#10; * 5. Изменение компании по ID +&#10; * 6. Удаление компании по ID +">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/db/CompanyRepositoryJDBC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/db/CompanyRepositoryJDBC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -17,7 +18,6 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -40,36 +40,22 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "D:/Ivan/!QA/x-clients-be-test/src/main/resources",
-    "onboarding.tips.debug.path": "D:/Ivan/!QA/x-clients-be-test/src/main/java/org/example/Main.java",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "nele.options"
+    "TODO_SCOPE": "All Places",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "F:/!QA/!INNOPOLIS/AQA/x-clients-be-test/src/main/resources",
+    "onboarding.tips.debug.path": "D:/Ivan/!QA/x-clients-be-test/src/main/java/org/example/Main.java"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Ivan\!QA\x-clients-be-test\src\main\resources" />
-    </key>
-    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
-      <recent name="" />
+      <recent name="F:\!QA\!INNOPOLIS\AQA\x-clients-be-test\src\main\resources" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.CompanyContractTest">
-    <configuration name="CompanyContractTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="x-clients-be-test" />
-      <option name="PACKAGE_NAME" value="test" />
-      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="CompanyContractTest.shouldAddNewCompany" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.CompanyContractTest.shouldDeleteCompanyById">
+    <configuration name="CompanyContractTest (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
       <extension name="coverage">
         <pattern>
@@ -79,7 +65,31 @@
       </extension>
       <option name="PACKAGE_NAME" value="test" />
       <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
-      <option name="METHOD_NAME" value="shouldAddNewCompany(db.CompanyRepository)" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CompanyContractTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="x-clients-be-test" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="CompanyContractTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CompanyContractTest.shouldDeleteCompanyById" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="x-clients-be-test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test" />
+      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
+      <option name="METHOD_NAME" value="shouldDeleteCompanyById(db.CompanyRepository)" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -101,7 +111,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CompanyContractTest.shouldPatchCompanyById" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="CompanyContractTest.shouldPatchCompanyById (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
       <extension name="coverage">
         <pattern>
@@ -117,29 +127,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CompanyContractTest.testById (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="x-clients-be-test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="test.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="test" />
-      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
-      <option name="METHOD_NAME" value="testById(db.CompanyRepository)" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.CompanyContractTest" />
-        <item itemvalue="JUnit.CompanyContractTest.shouldPatchCompanyById" />
+        <item itemvalue="JUnit.CompanyContractTest.shouldDeleteCompanyById" />
+        <item itemvalue="JUnit.CompanyContractTest.shouldPatchCompanyById (1)" />
         <item itemvalue="JUnit.CompanyContractTest.shouldGetCompanyById" />
-        <item itemvalue="JUnit.CompanyContractTest.shouldAddNewCompany" />
-        <item itemvalue="JUnit.CompanyContractTest.testById (1)" />
+        <item itemvalue="JUnit.CompanyContractTest (1)" />
+        <item itemvalue="JUnit.CompanyContractTest" />
       </list>
     </recent_temporary>
   </component>
@@ -173,42 +167,14 @@
       <option name="project" value="LOCAL" />
       <updated>1689825741190</updated>
     </task>
-    <task id="LOCAL-00004" summary="* Позитивные тесты на API-контракт:&#10;* 1. Получить список компаний&#10;* 2. Авторизация">
-      <created>1689838626828</created>
+    <task id="LOCAL-00004" summary="Позитивные контрактные тесты:&#10; * 5. Изменение компании по ID +&#10; * 6. Удаление компании по ID +">
+      <created>1690218209150</created>
       <option name="number" value="00004" />
       <option name="presentableId" value="LOCAL-00004" />
       <option name="project" value="LOCAL" />
-      <updated>1689838626828</updated>
+      <updated>1690218209150</updated>
     </task>
-    <task id="LOCAL-00005" summary="* Позитивные тесты на API-контракт:&#10;4. Получение компании по ID">
-      <created>1690188609923</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1690188609923</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Добавил JDBC к базе">
-      <created>1690794824001</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1690794824001</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Добавил ConnectionResolver, CompanyDBRepositoryResolver и много других классов.">
-      <created>1690959538571</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1690959538571</updated>
-    </task>
-    <task id="LOCAL-00008" summary="Добавил MyMatcher ля сравнения компаний с разным набором полей.">
-      <created>1690963147210</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1690963147210</updated>
-    </task>
-    <option name="localTasksCounter" value="9" />
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -237,11 +203,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Start" />
     <MESSAGE value=".gitignore update" />
-    <MESSAGE value="* Позитивные тесты на API-контракт:&#10;* 1. Получить список компаний&#10;* 2. Авторизация" />
-    <MESSAGE value="* Позитивные тесты на API-контракт:&#10;4. Получение компании по ID" />
-    <MESSAGE value="Добавил JDBC к базе" />
-    <MESSAGE value="Добавил ConnectionResolver, CompanyDBRepositoryResolver и много других классов." />
-    <MESSAGE value="Добавил MyMatcher ля сравнения компаний с разным набором полей." />
-    <option name="LAST_COMMIT_MESSAGE" value="Добавил MyMatcher ля сравнения компаний с разным набором полей." />
+    <MESSAGE value="Позитивные контрактные тесты:&#10; * 5. Изменение компании по ID +&#10; * 6. Удаление компании по ID +" />
+    <option name="LAST_COMMIT_MESSAGE" value="Позитивные контрактные тесты:&#10; * 5. Изменение компании по ID +&#10; * 6. Удаление компании по ID +" />
   </component>
 </project>

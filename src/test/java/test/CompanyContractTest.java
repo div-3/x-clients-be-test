@@ -31,6 +31,7 @@ import ext.ConnectionResolver;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.response.Response;
+import net.datafaker.Faker;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -40,6 +41,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 
@@ -66,10 +68,10 @@ public class CompanyContractTest {
     private static Properties properties = new Properties();
     private static String login = "";
     private static String password = "";
-    private final static String companyName = "ООО Рога и копыта";
-    private final static String companyDescription = "Все понемногу";
-    private final static String newName = "ООО РиК2";
-    private final static String newDescription = "То же самое";
+    private static String companyName = "ООО Рога и копыта";
+    private static String companyDescription = "Все понемногу";
+    private static String newName = "ООО РиК2";
+    private static String newDescription = "То же самое";
 
     @BeforeAll
     public static void setUpBeforeAll(Connection connection) {
@@ -149,6 +151,11 @@ public class CompanyContractTest {
     @DisplayName("4. Получение компании по ID")
     public void shouldGetCompanyById(CompanyRepository repository) throws SQLException {
 
+        //Библиотека с рандомными данными DataFaker
+        Faker faker = new Faker(new Locale("ru"));
+        companyName = faker.company().name();
+        companyDescription = faker.company().industry();
+
         //Создание компании через БД
         int createdId = repository.create(companyName, companyDescription);
 
@@ -171,23 +178,23 @@ public class CompanyContractTest {
     }
 
     // 3 теста для проверки работы Resolver'ов
-    @Test
-    public void testById(CompanyRepository repository) throws SQLException {
-        CompanyDBEntity company = repository.getAll().get(0);
-        System.out.println(company.toString());
-    }
-
-    @Test
-    public void testById2(CompanyRepository repository) throws SQLException {
-        CompanyDBEntity company = repository.getAll().get(0);
-        System.out.println(company.toString());
-    }
-
-    @Test
-    public void testById3(CompanyRepository repository) throws SQLException {
-        CompanyDBEntity company = repository.getAll().get(0);
-        System.out.println(company.toString());
-    }
+//    @Test
+//    public void testById(CompanyRepository repository) throws SQLException {
+//        CompanyDBEntity company = repository.getAll().get(0);
+//        System.out.println(company.toString());
+//    }
+//
+//    @Test
+//    public void testById2(CompanyRepository repository) throws SQLException {
+//        CompanyDBEntity company = repository.getAll().get(0);
+//        System.out.println(company.toString());
+//    }
+//
+//    @Test
+//    public void testById3(CompanyRepository repository) throws SQLException {
+//        CompanyDBEntity company = repository.getAll().get(0);
+//        System.out.println(company.toString());
+//    }
 
     @Test
     @Tag("Positive")
@@ -198,7 +205,7 @@ public class CompanyContractTest {
         String token = getAuthToken(login, password);
 
         //Создание новой компании с companyName, companyDescription
-        int id = createAndGetNewCompanyId(token, companyName, companyDescription);
+        int id = repository.create(companyName, companyDescription);
 
         //Проверка, что номер новой компании больше 0
         assertTrue(id > 0);
@@ -230,7 +237,6 @@ public class CompanyContractTest {
         //Проверка, что в БД по ID компания с изменёнными данными
         CompanyDBEntity companyDBEntityById = repository.getById(id);
 
-        //Проверка тела ответа на команду PATCH
         assertEquals(id, companyDBEntityById.getId());
         assertEquals(newName, companyDBEntityById.getName());
         assertEquals(newDescription, companyDBEntityById.getDescription());
@@ -239,18 +245,22 @@ public class CompanyContractTest {
         assertNull(companyDBEntityById.getDeletedAt());
     }
 
-    //    @Test
+    @Test
     @Tag("Positive")
     @DisplayName("6. Удаление компании по ID")
-    public void shouldDeleteCompanyById() {
+    public void shouldDeleteCompanyById(CompanyRepository repository) throws SQLException {
         //Аутентификация и получение токена
         String token = getAuthToken(login, password);
 
         //Создание новой компании с companyName, companyDescription
-        int id = createAndGetNewCompanyId(token, companyName, companyDescription);
+        int id = repository.create(companyName, companyDescription);
 
         //Проверка, что номер новой компании больше 0
         assertTrue(id > 0);
+
+        //Проверка, что в БД у компании deletedAt нулевое
+        CompanyDBEntity companyDB = repository.getById(id);
+        assertNull(companyDB.getDeletedAt());
 
         //Удаление компании по ID
         deleteCompanyById(token, id);
@@ -262,7 +272,7 @@ public class CompanyContractTest {
             throw new RuntimeException(e);
         }
 
-        //Проверка, что по ID компания больше недоступна
+        //Проверка, что по ID компания больше недоступна (дополнительно, проверка ответа на запрос GET с невалидным ID)
         given()
                 .basePath("/company/" + id)
                 .log().ifValidationFails()
@@ -275,6 +285,10 @@ public class CompanyContractTest {
 //                .header("Content-Length", nullValue())               //Проверка, что Content-Length = null
                 .header("Content-Length", equalTo("0"))      //Проверка, что "Content-Length" = "0"
                 .body(emptyOrNullString());                            //Проверка, что тело ответа пустое
+
+        //Проверка, что в БД у компании deletedAt ненулевое
+        companyDB = repository.getById(id);
+        assertNotNull(companyDB.getDeletedAt());
     }
 
     private static int createAndGetNewCompanyId(String token, String companyName, String companyDescription) {

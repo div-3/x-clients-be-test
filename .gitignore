@@ -43,3 +43,4 @@ build/
 /src/main/resources/JDBC_autoservice.properties
 /src/main/resources/JDBC_x_client.properties
 /src/main/resources/API_x_client.properties
+/src/main/resources/JDBC.properties
