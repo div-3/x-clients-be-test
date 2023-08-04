@@ -46,7 +46,9 @@ import java.util.Properties;
 
 
 import static ext.MyMatchers.*;
+import static ext.IsCompanyEqual.*;
 import static io.restassured.RestAssured.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -174,7 +176,10 @@ public class CompanyContractTest {
         CompanyDBEntity companyDBEntityExpected = repository.getById(createdId);
 
         //Проверка, что по Id мы получили одинаковые компании по API и из БД
+        System.out.println("Проверка по моему матчеру");
         assertTrue(isCompaniesEqual(companyAPIResult, companyDBEntityExpected));
+        System.out.println("Проверка по матчеру для Hamcrest");
+        assertThat(companyAPIResult, isEqual(companyDBEntityExpected));
     }
 
     // 3 теста для проверки работы Resolver'ов
