@@ -2,18 +2,20 @@ package test;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Properties;
+
+import static ext.commonHelper.getProperties;
 
 public class XClientJDBCTest {
     private final String propFilePath = "src/main/resources/JDBC_x_client.properties";
 
     @Test
     public void shouldConnectToDB(){
-        Properties properties = getProperties();
+        Properties properties = getProperties(propFilePath);
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("user"),
@@ -26,17 +28,5 @@ public class XClientJDBCTest {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    //Получить параметры подключения к DB из файла
-    private Properties getProperties(){
-        File propFile = new File(propFilePath);
-        Properties JDBCProperties = new Properties();
-        try {
-            JDBCProperties.load(new FileReader(propFile));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return JDBCProperties;
     }
 }

@@ -2,13 +2,12 @@ package ext;
 
 import org.junit.jupiter.api.extension.*;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+
+import static ext.commonHelper.getProperties;
 
 public class ConnectionResolver implements ParameterResolver, AfterAllCallback {
     private final String propFilePath = "src/main/resources/JDBC_x_client.properties";  //Путь к настройкам подключения к БД
@@ -22,7 +21,7 @@ public class ConnectionResolver implements ParameterResolver, AfterAllCallback {
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        Properties properties = getProperties();
+        Properties properties = getProperties(propFilePath);
         String connectionString = properties.getProperty("connectionString");
         String user = properties.getProperty("user");
         String password = properties.getProperty("password");
@@ -40,17 +39,5 @@ public class ConnectionResolver implements ParameterResolver, AfterAllCallback {
     public void afterAll(ExtensionContext extensionContext) throws Exception {
         connection.close();
         if (connection.isClosed()) System.out.println("Соединение закрыто!");
-    }
-
-    //Получить параметры подключения к DB из файла
-    private Properties getProperties() {
-        File propFile = new File(propFilePath);
-        Properties JDBCProperties = new Properties();
-        try {
-            JDBCProperties.load(new FileReader(propFile));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return JDBCProperties;
     }
 }

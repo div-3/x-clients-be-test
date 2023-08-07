@@ -2,18 +2,42 @@ package Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Objects;
+
+/*Для Hibernate надо:
+* 1. Подключить в maven
+* 2. Создать Data-класс (POJO)
+* 3. Желательно имплементить к нему интерфейс Serializable
+* 4. Добавить аннотации:
+* 4.1. @Entity
+* 4.2. @Table(name = "company")   - не обязательно, но можно указать название таблицы в БД
+* 4.3. @Column(name = "description", nullable = true, length = 300) - не обязательно, но можно для каждого поля указать ограничения из БД и название столбца
+ * 4.4. @Id - для первичного ключа
+* 4.5. @GeneratedValue(strategy = GenerationType.IDENTITY) - определяет способ создания ключа при заполнении таблицы
+* */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CompanyDBEntity {
+@Entity
+@Table(name = "company")
+public class CompanyDBEntity implements Serializable {
+    @Id
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @JsonProperty("isActive")
+    @Column(name = "isActive", nullable = false)
     private boolean isActive;
+    @Column(name = "createDateTime", nullable = false)
     private String createDateTime;
+    @Column(name = "lastChangedDateTime", nullable = false)
     private String lastChangedDateTime;
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
+    @Column(name = "description", nullable = true, length = 300)
     private String description;
+    @Column(name = "deletedAt", nullable = true)
     private String deletedAt;
 
     public CompanyDBEntity() {
