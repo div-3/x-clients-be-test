@@ -21,7 +21,7 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "company")
-public class CompanyDBEntity implements Serializable {
+public class CompanyDBEntity {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

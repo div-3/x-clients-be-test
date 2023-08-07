@@ -4,6 +4,7 @@ import db.CompanyRepositoryHiper;
 
 
 import db.MyPersistenceUnitInfo;
+
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -42,6 +43,7 @@ public class HiberSessionResolver implements ParameterResolver {
         properties.put("hibernate.c3p0.timeout", "1800");
         properties.put("hibernate.c3p0.max_statements", "50");
         properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQL82Dialect");
+
 
         PersistenceUnitInfo persistenceUnitInfo = new MyPersistenceUnitInfo(properties);
         HibernatePersistenceProvider hibernatePersistenceProvider = new HibernatePersistenceProvider();
