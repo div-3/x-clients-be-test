@@ -1,25 +1,20 @@
 package ext;
 
-import db.CompanyRepositoryHiper;
-
 
 import db.MyPersistenceUnitInfo;
 
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.extension.*;
 
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import java.util.Properties;
 
 import static ext.commonHelper.getProperties;
 
-public class HiberSessionResolver implements ParameterResolver {
+public class HiberSessionResolver implements ParameterResolver,  AfterAllCallback {
 
     private final String propFilePath = "src/main/resources/JDBC_x_client.properties";  //Путь к настройкам подключения к БД
 
@@ -50,8 +45,13 @@ public class HiberSessionResolver implements ParameterResolver {
         EntityManagerFactory entityManagerFactory = hibernatePersistenceProvider.createContainerEntityManagerFactory(persistenceUnitInfo, properties);
         EntityManager em = entityManagerFactory.createEntityManager();
 
-        return new CompanyRepositoryHiper(em);
+
+        return em;
     }
 
 
+    @Override
+    public void afterAll(ExtensionContext extensionContext) throws Exception {
+
+    }
 }

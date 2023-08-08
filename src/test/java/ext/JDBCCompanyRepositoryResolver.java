@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class CompanyDBRepositoryResolver implements ParameterResolver{
+public class JDBCCompanyRepositoryResolver implements ParameterResolver{
     public static String KEY = "connection";    //KEY для глобального хранилища в extensionContext
 
     @Override

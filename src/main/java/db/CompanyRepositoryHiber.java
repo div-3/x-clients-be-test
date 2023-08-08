@@ -2,20 +2,23 @@ package db;
 
 import Model.CompanyDBEntity;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+
 import java.sql.SQLException;
 import java.util.List;
 
-public class CompanyRepositoryHiper implements CompanyRepository{
+public class CompanyRepositoryHiber implements CompanyRepository{
     private EntityManager em;
 
-    public CompanyRepositoryHiper(EntityManager em) {
+    public CompanyRepositoryHiber(EntityManager em) {
         this.em = em;
     }
 
     @Override
     public List<CompanyDBEntity> getAll() throws SQLException {
-        return null;
+        TypedQuery<CompanyDBEntity> query = em.createQuery("SELECT c FROM CompanyEntity c WHERE c.eletedAt is not null", CompanyDBEntity.class);
+        return query.getResultList();
     }
 
     @Override

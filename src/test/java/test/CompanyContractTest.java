@@ -26,7 +26,7 @@ package test;/*
 import Model.Company;
 import Model.CompanyDBEntity;
 import db.CompanyRepository;
-import ext.CompanyDBRepositoryResolver;
+import ext.JDBCCompanyRepositoryResolver;
 import ext.ConnectionResolver;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.filter.log.LogDetail;
@@ -35,9 +35,6 @@ import net.datafaker.Faker;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -52,6 +49,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import static ext.commonHelper.getProperties;
+
 /*
  * Тесты:
  * Позитивные:
@@ -64,7 +63,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 7. Активировать компанию по ID
  * 8. Деактивировать компанию по ID*/
 @DisplayName("X-Clients-Be contract tests:")
-@ExtendWith({ConnectionResolver.class, CompanyDBRepositoryResolver.class})
+@ExtendWith({ConnectionResolver.class, JDBCCompanyRepositoryResolver.class})
 public class CompanyContractTest {
     private final static String propertiesFilePath = "src/main/resources/API_x_client.properties";
     private static Properties properties = new Properties();
@@ -77,7 +76,7 @@ public class CompanyContractTest {
 
     @BeforeAll
     public static void setUpBeforeAll(Connection connection) {
-        properties = getAPIProperties();
+        properties = getProperties(propertiesFilePath);
     }
 
     @BeforeEach
@@ -350,17 +349,4 @@ public class CompanyContractTest {
                 .log().ifValidationFails()
                 .statusCode(200);
     }
-
-
-    //Получение настроек подключения по API из файла .properties
-    private static Properties getAPIProperties() {
-        Properties properties = new Properties();
-        try {
-            properties.load(new FileReader(new File(propertiesFilePath)));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return properties;
-    }
-
 }
