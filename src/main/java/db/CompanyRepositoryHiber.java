@@ -17,7 +17,8 @@ public class CompanyRepositoryHiber implements CompanyRepository{
 
     @Override
     public List<CompanyDBEntity> getAll() throws SQLException {
-        TypedQuery<CompanyDBEntity> query = em.createQuery("SELECT c FROM CompanyEntity c WHERE c.eletedAt is not null", CompanyDBEntity.class);
+//        TypedQuery<CompanyDBEntity> query = em.createQuery("SELECT c FROM company c WHERE c.deleted_at is not null", CompanyDBEntity.class);
+        TypedQuery<CompanyDBEntity> query = em.createQuery("SELECT c FROM company c", CompanyDBEntity.class);
         return query.getResultList();
     }
 

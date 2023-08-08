@@ -3,8 +3,11 @@ package Model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.type.descriptor.jdbc.TimestampWithTimeZoneJdbcType;
+
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 /*Для Hibernate надо:
@@ -21,29 +24,30 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "company")
-public class CompanyDBEntity {
+public class CompanyDBEntity implements Serializable {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @JsonProperty("isActive")
-    @Column(name = "isActive", nullable = false)
+    @JsonProperty("is_active")
+    @Column(name = "is_active", nullable = false)
     private boolean isActive;
-    @Column(name = "createDateTime", nullable = false)
-    private String createDateTime;
-    @Column(name = "lastChangedDateTime", nullable = false)
-    private String lastChangedDateTime;
+
+    @Column(name = "create_timestamp", nullable = false)
+    private Timestamp createDateTime;
+    @Column(name = "change_timestamp", nullable = false)
+    private Timestamp lastChangedDateTime;
     @Column(name = "name", nullable = false, length = 100)
     private String name;
     @Column(name = "description", nullable = true, length = 300)
     private String description;
-    @Column(name = "deletedAt", nullable = true)
-    private String deletedAt;
+    @Column(name = "deleted_at", nullable = true)
+    private Timestamp deletedAt;
 
     public CompanyDBEntity() {
     }
 
-    public CompanyDBEntity(int id, boolean isActive, String createDateTime, String lastChangedDateTime, String name, String description, String deletedAt) {
+    public CompanyDBEntity(int id, boolean isActive, Timestamp createDateTime, Timestamp lastChangedDateTime, String name, String description, Timestamp deletedAt) {
         this.id = id;
         this.isActive = isActive;
         this.createDateTime = createDateTime;
@@ -69,19 +73,19 @@ public class CompanyDBEntity {
         isActive = active;
     }
 
-    public String getCreateDateTime() {
+    public Timestamp getCreateDateTime() {
         return createDateTime;
     }
 
-    public void setCreateDateTime(String createDateTime) {
+    public void setCreateDateTime(Timestamp createDateTime) {
         this.createDateTime = createDateTime;
     }
 
-    public String getLastChangedDateTime() {
+    public Timestamp getLastChangedDateTime() {
         return lastChangedDateTime;
     }
 
-    public void setLastChangedDateTime(String lastChangedDateTime) {
+    public void setLastChangedDateTime(Timestamp lastChangedDateTime) {
         this.lastChangedDateTime = lastChangedDateTime;
     }
 
@@ -101,11 +105,11 @@ public class CompanyDBEntity {
         this.description = description;
     }
 
-    public String getDeletedAt() {
+    public Timestamp getDeletedAt() {
         return deletedAt;
     }
 
-    public void setDeletedAt(String deletedAt) {
+    public void setDeletedAt(Timestamp deletedAt) {
         this.deletedAt = deletedAt;
     }
 
