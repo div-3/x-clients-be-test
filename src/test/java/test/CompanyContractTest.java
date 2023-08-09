@@ -23,8 +23,8 @@ package test;/*
 * установленным стандартам и спецификациям, а также выполняет требования функциональности, безопасности,
 * производительности и других необходимых аспектов в соответствии с ожиданиями пользователей и бизнеса.*/
 
-import Model.Company;
-import Model.CompanyDBEntity;
+import model.api.Company;
+import model.db.CompanyEntity;
 import db.CompanyRepository;
 import ext.JDBCCompanyRepositoryResolver;
 import ext.ConnectionResolver;
@@ -89,9 +89,9 @@ public class CompanyContractTest {
 
     @AfterAll
     public static void clearUp() {
-        List<CompanyDBEntity> listToDelete = getGetResponse(getGetResponse());
+        List<CompanyEntity> listToDelete = getGetResponse(getGetResponse());
         String token = getAuthToken(login, password);
-        for (CompanyDBEntity c : listToDelete) {
+        for (CompanyEntity c : listToDelete) {
             if (c.getName().equals(companyName) || c.getName().equals(newName))
                 deleteCompanyById(token, c.getId());
         }
@@ -139,12 +139,12 @@ public class CompanyContractTest {
         assertTrue(id > 0);
 
         //Получение компании из DB
-        CompanyDBEntity companyDBEntity = companyRepository.getById(id);
+        CompanyEntity companyEntity = companyRepository.getById(id);
 
-        assertEquals(companyName, companyDBEntity.getName());
-        assertEquals(companyDescription, companyDBEntity.getDescription());
-        assertTrue(companyDBEntity.isActive());
-        assertNull(companyDBEntity.getDeletedAt());
+        assertEquals(companyName, companyEntity.getName());
+        assertEquals(companyDescription, companyEntity.getDescription());
+        assertTrue(companyEntity.isActive());
+        assertNull(companyEntity.getDeletedAt());
     }
 
     @Test
@@ -172,13 +172,13 @@ public class CompanyContractTest {
                 .extract().body().as(Company.class);
 
         //Получение компании из DB по ID
-        CompanyDBEntity companyDBEntityExpected = repository.getById(createdId);
+        CompanyEntity companyEntityExpected = repository.getById(createdId);
 
         //Проверка, что по Id мы получили одинаковые компании по API и из БД
         System.out.println("Проверка по моему матчеру");
-        assertTrue(isCompaniesEqual(companyAPIResult, companyDBEntityExpected));
+        assertTrue(isCompaniesEqual(companyAPIResult, companyEntityExpected));
         System.out.println("Проверка по матчеру для Hamcrest");
-        assertThat(companyAPIResult, isEqual(companyDBEntityExpected));
+        assertThat(companyAPIResult, isEqual(companyEntityExpected));
     }
 
     // 3 теста для проверки работы Resolver'ов
@@ -215,7 +215,7 @@ public class CompanyContractTest {
         assertTrue(id > 0);
 
         //Изменение компании по ID
-        CompanyDBEntity companyDBEntityAfterPatch = given()
+        CompanyEntity companyEntityAfterPatch = given()
                 .header("x-client-token", token)
                 .log().ifValidationFails()
                 .contentType("application/json; charset=utf-8")
@@ -228,25 +228,25 @@ public class CompanyContractTest {
                 .statusCode(200)
                 .contentType("application/json; charset=utf-8")
                 .extract()
-                .body().as(CompanyDBEntity.class);
+                .body().as(CompanyEntity.class);
 
         //Проверка тела ответа на команду PATCH
-        assertEquals(id, companyDBEntityAfterPatch.getId());
-        assertEquals(newName, companyDBEntityAfterPatch.getName());
-        assertEquals(newDescription, companyDBEntityAfterPatch.getDescription());
-        assertTrue(companyDBEntityAfterPatch.isActive());
-        assertNotEquals(companyDBEntityAfterPatch.getCreateDateTime(), companyDBEntityAfterPatch.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
-        assertNull(companyDBEntityAfterPatch.getDeletedAt());
+        assertEquals(id, companyEntityAfterPatch.getId());
+        assertEquals(newName, companyEntityAfterPatch.getName());
+        assertEquals(newDescription, companyEntityAfterPatch.getDescription());
+        assertTrue(companyEntityAfterPatch.isActive());
+        assertNotEquals(companyEntityAfterPatch.getCreateDateTime(), companyEntityAfterPatch.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
+        assertNull(companyEntityAfterPatch.getDeletedAt());
 
         //Проверка, что в БД по ID компания с изменёнными данными
-        CompanyDBEntity companyDBEntityById = repository.getById(id);
+        CompanyEntity companyEntityById = repository.getById(id);
 
-        assertEquals(id, companyDBEntityById.getId());
-        assertEquals(newName, companyDBEntityById.getName());
-        assertEquals(newDescription, companyDBEntityById.getDescription());
-        assertTrue(companyDBEntityById.isActive());
-        assertNotEquals(companyDBEntityById.getCreateDateTime(), companyDBEntityById.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
-        assertNull(companyDBEntityById.getDeletedAt());
+        assertEquals(id, companyEntityById.getId());
+        assertEquals(newName, companyEntityById.getName());
+        assertEquals(newDescription, companyEntityById.getDescription());
+        assertTrue(companyEntityById.isActive());
+        assertNotEquals(companyEntityById.getCreateDateTime(), companyEntityById.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
+        assertNull(companyEntityById.getDeletedAt());
     }
 
     @Test
@@ -263,8 +263,8 @@ public class CompanyContractTest {
         assertTrue(id > 0);
 
         //Проверка, что в БД у компании deletedAt нулевое
-        CompanyDBEntity companyDB = repository.getById(id);
-        assertNull(companyDB.getDeletedAt());
+        CompanyEntity companyEntityDB = repository.getById(id);
+        assertNull(companyEntityDB.getDeletedAt());
 
         //Удаление компании по ID
         deleteCompanyById(token, id);
@@ -291,8 +291,8 @@ public class CompanyContractTest {
                 .body(emptyOrNullString());                            //Проверка, что тело ответа пустое
 
         //Проверка, что в БД у компании deletedAt ненулевое
-        companyDB = repository.getById(id);
-        assertNotNull(companyDB.getDeletedAt());
+        companyEntityDB = repository.getById(id);
+        assertNotNull(companyEntityDB.getDeletedAt());
     }
 
     private static int createAndGetNewCompanyId(String token, String companyName, String companyDescription) {
@@ -316,8 +316,8 @@ public class CompanyContractTest {
                 .extract().response();
     }
 
-    private static List<CompanyDBEntity> getGetResponse(Response response) {
-        return response.then().extract().body().as(new TypeRef<List<CompanyDBEntity>>() {
+    private static List<CompanyEntity> getGetResponse(Response response) {
+        return response.then().extract().body().as(new TypeRef<List<CompanyEntity>>() {
         });
     }
 

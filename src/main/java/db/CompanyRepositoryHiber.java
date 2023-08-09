@@ -1,9 +1,14 @@
 package db;
 
-import Model.CompanyDBEntity;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import model.db.CompanyEntity;
+
+//import jakarta.persistence.EntityManager;
+//import jakarta.persistence.TypedQuery;
+//import jakarta.persistence.criteria.CriteriaBuilder;
+//import jakarta.persistence.criteria.CriteriaQuery;
+//import jakarta.persistence.criteria.Root;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -16,24 +21,32 @@ public class CompanyRepositoryHiber implements CompanyRepository{
     }
 
     @Override
-    public List<CompanyDBEntity> getAll() throws SQLException {
-//        TypedQuery<CompanyDBEntity> query = em.createQuery("SELECT c FROM company c WHERE c.deleted_at is not null", CompanyDBEntity.class);
-        TypedQuery<CompanyDBEntity> query = em.createQuery("SELECT c FROM company c", CompanyDBEntity.class);
+    public List<CompanyEntity> getAll() throws SQLException {
+        TypedQuery<CompanyEntity> query = em.createQuery("SELECT c FROM CompanyEntity c WHERE c.deletedAt is null", CompanyEntity.class);
         return query.getResultList();
+
+        //Тот же запрос, но через Hibenate API
+//        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+//        CriteriaQuery<CompanyDBEntity> criteriaQuery = criteriaBuilder.createQuery(CompanyDBEntity.class);
+//        Root<CompanyDBEntity> companyRoot = criteriaQuery.from(CompanyDBEntity.class);
+//        TypedQuery<CompanyDBEntity> queryResult = em.createQuery(criteriaQuery.select(companyRoot));
+////                        .where(criteriaBuilder.equal(companyRoot.get("id"), id)))
+////                .getSingleResult();
+//        return queryResult.getResultList();
     }
 
     @Override
-    public List<CompanyDBEntity> getAll(boolean isActive) throws SQLException {
+    public List<CompanyEntity> getAll(boolean isActive) throws SQLException {
         return null;
     }
 
     @Override
-    public CompanyDBEntity getLast() throws SQLException {
+    public CompanyEntity getLast() throws SQLException {
         return null;
     }
 
     @Override
-    public CompanyDBEntity getById(int id) throws SQLException {
+    public CompanyEntity getById(int id) throws SQLException {
         return null;
     }
 

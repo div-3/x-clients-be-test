@@ -1,6 +1,6 @@
 package api;
 
-import Model.Company;
+import model.api.Company;
 
 import java.io.IOException;
 import java.util.List;

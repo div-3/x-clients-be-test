@@ -1,8 +1,13 @@
-package JDBCTest;
+package jdbcTest;
+
+import jakarta.persistence.*;
 
 import java.util.Objects;
 
+@Table(name = "car")
+@Entity
 public class Car {
+    @Id
     private String id;
     private String model;
     private String owner;

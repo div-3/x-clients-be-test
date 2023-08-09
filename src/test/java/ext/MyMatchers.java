@@ -1,14 +1,13 @@
 package ext;
 
-import Model.Company;
-import Model.CompanyDBEntity;
+import model.db.CompanyEntity;
 
 public class MyMatchers {
-    public static boolean isCompaniesEqual(Company companyByAPI, CompanyDBEntity companyByDB){
-        if (companyByDB.getId() != companyByAPI.getId()) return false;
-        if (!companyByDB.getName().equals(companyByAPI.getName())) return false;
-        if (!companyByDB.getDescription().equals(companyByAPI.getDescription())) return false;
-        if (companyByDB.isActive() != companyByAPI.isActive()) return false;
+    public static boolean isCompaniesEqual(model.api.Company companyByAPI, CompanyEntity companyEntityByDB){
+        if (companyEntityByDB.getId() != companyByAPI.getId()) return false;
+        if (!companyEntityByDB.getName().equals(companyByAPI.getName())) return false;
+        if (!companyEntityByDB.getDescription().equals(companyByAPI.getDescription())) return false;
+        if (companyEntityByDB.isActive() != companyByAPI.isActive()) return false;
         return true;
     }
 }

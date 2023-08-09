@@ -1,6 +1,6 @@
 package db;
 
-import Model.CompanyDBEntity;
+import model.db.CompanyEntity;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 
 import jakarta.persistence.SharedCacheMode;
@@ -24,7 +24,8 @@ public class MyPersistenceUnitInfo implements PersistenceUnitInfo {
     @Override
     public List<String> getManagedClassNames() {
         return List.of(
-                CompanyDBEntity.class.getName()
+                CompanyEntity.class.getName()
+//                Car.class.getName()
         );
     }
 

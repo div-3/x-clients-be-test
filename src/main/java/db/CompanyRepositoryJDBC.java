@@ -1,6 +1,6 @@
 package db;
 
-import Model.CompanyDBEntity;
+import model.db.CompanyEntity;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,35 +14,31 @@ public class CompanyRepositoryJDBC implements CompanyRepository{
     }
 
     @Override
-    public List<CompanyDBEntity> getAll() throws SQLException {
+    public List<CompanyEntity> getAll() throws SQLException {
         String getAllQuery = "select * from company;";
         ResultSet resultSet = connection.createStatement().executeQuery(getAllQuery);
-//        return getCompanyDBEntitiesFromResultSet(resultSet);
-        return null;
+        return getCompanyDBEntitiesFromResultSet(resultSet);
     }
 
     @Override
-    public List<CompanyDBEntity> getAll(boolean isActive) throws SQLException {
+    public List<CompanyEntity> getAll(boolean isActive) throws SQLException {
         String getAllQuery = "select * from company where \"isActive\" = true;";
         ResultSet resultSet = connection.createStatement().executeQuery(getAllQuery);
-//        return getCompanyDBEntitiesFromResultSet(resultSet);
-        return null;
+        return getCompanyDBEntitiesFromResultSet(resultSet);
     }
 
     @Override
-    public CompanyDBEntity getLast() throws SQLException {
+    public CompanyEntity getLast() throws SQLException {
         String getAllQuery = "select * from company where \"isActive\" = true order by id desc limit 1;";
         ResultSet resultSet = connection.createStatement().executeQuery(getAllQuery);
-//        return getCompanyDBEntitiesFromResultSet(resultSet).get(0);
-        return null;
+        return getCompanyDBEntitiesFromResultSet(resultSet).get(0);
     }
 
     @Override
-    public CompanyDBEntity getById(int id) throws SQLException {
+    public CompanyEntity getById(int id) throws SQLException {
         String getAllQuery = "select * from company where \"id\" = " + id + ";";
         ResultSet resultSet = connection.createStatement().executeQuery(getAllQuery);
-//        return getCompanyDBEntitiesFromResultSet(resultSet).get(0);
-        return null;
+        return getCompanyDBEntitiesFromResultSet(resultSet).get(0);
     }
 
     @Override
@@ -73,19 +69,18 @@ public class CompanyRepositoryJDBC implements CompanyRepository{
 
     }
 
-//    private static List<CompanyDBEntity> getCompanyDBEntitiesFromResultSet(ResultSet resultSet) throws SQLException {
-//        List<CompanyDBEntity> companies = new ArrayList<>();
-//        while (resultSet.next()){
-//            companies.add( new CompanyDBEntity(
-//                    resultSet.getInt("id"),
-//                    resultSet.getBoolean("is_active"),
-////                    resultSet.getString("createDateTime"),
-//                    resultSet.getTimestamp("create_timestamp"),
-//                    resultSet.getTimestamp("change_timestamp"),
-//                    resultSet.getString("name"),
-//                    resultSet.getString("description"),
-//                    resultSet.getTimestamp("deleted_at")));
-//        }
-//        return companies;
-//    }
+    private static List<CompanyEntity> getCompanyDBEntitiesFromResultSet(ResultSet resultSet) throws SQLException {
+        List<CompanyEntity> companies = new ArrayList<>();
+        while (resultSet.next()){
+            companies.add( new CompanyEntity(
+                    resultSet.getInt("id"),
+                    resultSet.getBoolean("is_active"),
+                    resultSet.getTimestamp("create_timestamp"),
+                    resultSet.getTimestamp("change_timestamp"),
+                    resultSet.getString("name"),
+                    resultSet.getString("description"),
+                    resultSet.getTimestamp("deleted_at")));
+        }
+        return companies;
+    }
 }

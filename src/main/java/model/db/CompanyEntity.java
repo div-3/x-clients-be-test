@@ -1,10 +1,5 @@
-package Model;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+package model.db;
 import jakarta.persistence.*;
-import org.hibernate.type.descriptor.jdbc.TimestampWithTimeZoneJdbcType;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -21,18 +16,16 @@ import java.util.Objects;
  * 4.4. @Id - для первичного ключа
 * 4.5. @GeneratedValue(strategy = GenerationType.IDENTITY) - определяет способ создания ключа при заполнении таблицы
 * */
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "company")
-public class CompanyDBEntity implements Serializable {
+//@Entity(name = "company")
+@Table(name = "company", schema = "public", catalog = "x_clients_db_r06g")
+public class CompanyEntity implements Serializable {
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @JsonProperty("is_active")
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
-
     @Column(name = "create_timestamp", nullable = false)
     private Timestamp createDateTime;
     @Column(name = "change_timestamp", nullable = false)
@@ -44,10 +37,10 @@ public class CompanyDBEntity implements Serializable {
     @Column(name = "deleted_at", nullable = true)
     private Timestamp deletedAt;
 
-    public CompanyDBEntity() {
+    public CompanyEntity() {
     }
 
-    public CompanyDBEntity(int id, boolean isActive, Timestamp createDateTime, Timestamp lastChangedDateTime, String name, String description, Timestamp deletedAt) {
+    public CompanyEntity(int id, boolean isActive, Timestamp createDateTime, Timestamp lastChangedDateTime, String name, String description, Timestamp deletedAt) {
         this.id = id;
         this.isActive = isActive;
         this.createDateTime = createDateTime;
@@ -117,8 +110,8 @@ public class CompanyDBEntity implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CompanyDBEntity companyDBEntity = (CompanyDBEntity) o;
-        return id == companyDBEntity.id && isActive == companyDBEntity.isActive && Objects.equals(createDateTime, companyDBEntity.createDateTime) && Objects.equals(lastChangedDateTime, companyDBEntity.lastChangedDateTime) && Objects.equals(name, companyDBEntity.name) && Objects.equals(description, companyDBEntity.description) && Objects.equals(deletedAt, companyDBEntity.deletedAt);
+        CompanyEntity companyEntity = (CompanyEntity) o;
+        return id == companyEntity.id && isActive == companyEntity.isActive && Objects.equals(createDateTime, companyEntity.createDateTime) && Objects.equals(lastChangedDateTime, companyEntity.lastChangedDateTime) && Objects.equals(name, companyEntity.name) && Objects.equals(description, companyEntity.description) && Objects.equals(deletedAt, companyEntity.deletedAt);
     }
 
     @Override
@@ -128,7 +121,7 @@ public class CompanyDBEntity implements Serializable {
 
     @Override
     public String toString() {
-        return "Company{" +
+        return "CompanyEntity{" +
                 "id=" + id +
                 ", isActive=" + isActive +
                 ", createDateTime='" + createDateTime + '\'' +

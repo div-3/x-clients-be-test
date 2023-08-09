@@ -6,15 +6,17 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class commonHelper {
-    //Получить параметры подключения к DB из файла
+
+
+    //Получить параметры из файла
     public static Properties getProperties(String path) {
         File propFile = new File(path);
-        Properties JDBCProperties = new Properties();
+        Properties properties = new Properties();
         try {
-            JDBCProperties.load(new FileReader(propFile));
+            properties.load(new FileReader(propFile));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return JDBCProperties;
+        return properties;
     }
 }

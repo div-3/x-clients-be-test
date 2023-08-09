@@ -1,4 +1,4 @@
-package JDBCTest;
+package jdbcTest;
 
 import java.io.File;
 import java.io.FileReader;
