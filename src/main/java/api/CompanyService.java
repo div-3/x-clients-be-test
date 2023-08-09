@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface CompanyService {
+    void setURI(String uri);
     List<Company> getAll() throws IOException;
 
     List<Company> getAll(boolean isActive) throws IOException;
@@ -23,4 +24,8 @@ public interface CompanyService {
     Company edit(int id, String newName, String newDescription);
 
     Company changeStatus(int id, boolean isActive);
+
+    void logIn(String login, String password);
+
+    void logOut();
 }

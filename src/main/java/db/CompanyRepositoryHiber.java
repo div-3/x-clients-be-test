@@ -47,7 +47,9 @@ public class CompanyRepositoryHiber implements CompanyRepository{
 
     @Override
     public CompanyEntity getById(int id) throws SQLException {
-        return null;
+        TypedQuery<CompanyEntity> query = em.createQuery("SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and c.id =:id", CompanyEntity.class);
+        query.setParameter("id", id);
+        return query.getSingleResult();
     }
 
     @Override
