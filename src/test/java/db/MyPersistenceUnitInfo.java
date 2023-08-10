@@ -1,13 +1,14 @@
 package db;
 
-import model.db.CompanyEntity;
-import org.hibernate.jpa.HibernatePersistenceProvider;
-
 import jakarta.persistence.SharedCacheMode;
 import jakarta.persistence.ValidationMode;
 import jakarta.persistence.spi.ClassTransformer;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import jakarta.persistence.spi.PersistenceUnitTransactionType;
+import model.db.CompanyEntity;
+import model.db.EmployeeEntity;
+import org.hibernate.jpa.HibernatePersistenceProvider;
+
 import javax.sql.DataSource;
 import java.net.URL;
 import java.util.List;
@@ -24,7 +25,8 @@ public class MyPersistenceUnitInfo implements PersistenceUnitInfo {
     @Override
     public List<String> getManagedClassNames() {
         return List.of(
-                CompanyEntity.class.getName()
+                CompanyEntity.class.getName(),
+                EmployeeEntity.class.getName()
 //                Car.class.getName()
         );
     }

@@ -19,9 +19,13 @@ public class EmployeeEntity {
     private String phone;
     private String email;
     private String avatar_url;
-    private int company_id;
 
-    public EmployeeEntity(int id, boolean is_active, Timestamp create_timestamp, Timestamp change_timestamp, String first_name, String last_name, String middle_name, String phone, String email, String avatar_url, int company_id) {
+    //Связь с внешней таблицей
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private CompanyEntity company;
+
+    public EmployeeEntity(int id, boolean is_active, Timestamp create_timestamp, Timestamp change_timestamp, String first_name, String last_name, String middle_name, String phone, String email, String avatar_url, CompanyEntity company) {
         this.id = id;
         this.is_active = is_active;
         this.create_timestamp = create_timestamp;
@@ -32,7 +36,7 @@ public class EmployeeEntity {
         this.phone = phone;
         this.email = email;
         this.avatar_url = avatar_url;
-        this.company_id = company_id;
+        this.company = company;
     }
 
     public int getId() {
@@ -115,12 +119,12 @@ public class EmployeeEntity {
         this.avatar_url = avatar_url;
     }
 
-    public int getCompany_id() {
-        return company_id;
+    public CompanyEntity getCompany() {
+        return company;
     }
 
-    public void setCompany_id(int company_id) {
-        this.company_id = company_id;
+    public void setCompany(CompanyEntity company) {
+        this.company = company;
     }
 
     @Override
@@ -128,12 +132,12 @@ public class EmployeeEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EmployeeEntity that = (EmployeeEntity) o;
-        return id == that.id && is_active == that.is_active && company_id == that.company_id && Objects.equals(create_timestamp, that.create_timestamp) && Objects.equals(change_timestamp, that.change_timestamp) && Objects.equals(first_name, that.first_name) && Objects.equals(last_name, that.last_name) && Objects.equals(middle_name, that.middle_name) && Objects.equals(phone, that.phone) && Objects.equals(email, that.email) && Objects.equals(avatar_url, that.avatar_url);
+        return id == that.id && is_active == that.is_active && Objects.equals(create_timestamp, that.create_timestamp) && Objects.equals(change_timestamp, that.change_timestamp) && Objects.equals(first_name, that.first_name) && Objects.equals(last_name, that.last_name) && Objects.equals(middle_name, that.middle_name) && Objects.equals(phone, that.phone) && Objects.equals(email, that.email) && Objects.equals(avatar_url, that.avatar_url) && Objects.equals(company, that.company);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, is_active, create_timestamp, change_timestamp, first_name, last_name, middle_name, phone, email, avatar_url, company_id);
+        return Objects.hash(id, is_active, create_timestamp, change_timestamp, first_name, last_name, middle_name, phone, email, avatar_url, company);
     }
 
     @Override
@@ -149,7 +153,7 @@ public class EmployeeEntity {
                 ", phone='" + phone + '\'' +
                 ", email='" + email + '\'' +
                 ", avatar_url='" + avatar_url + '\'' +
-                ", company_id=" + company_id +
+                ", company=" + company +
                 '}';
     }
 }

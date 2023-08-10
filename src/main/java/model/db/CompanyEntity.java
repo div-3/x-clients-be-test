@@ -1,8 +1,11 @@
 package model.db;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 
 /*Для Hibernate надо:
@@ -36,6 +39,12 @@ public class CompanyEntity implements Serializable {
     private String description;
     @Column(name = "deleted_at", nullable = true)
     private Timestamp deletedAt;
+
+    //Связь с внешней таблицей
+    @JsonIgnore //чтобы не попасть на зацикливание при mapping в Jackson. Hibernate нормально переваривает
+    @OneToMany(mappedBy = "company")
+    private List<EmployeeEntity> employees;
+
 
     public CompanyEntity() {
     }
