@@ -49,7 +49,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import static ext.commonHelper.getProperties;
+import static ext.CommonHelper.getProperties;
 
 /*
  * Тесты:

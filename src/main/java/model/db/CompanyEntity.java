@@ -1,6 +1,6 @@
 package model.db;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -27,6 +27,7 @@ public class CompanyEntity implements Serializable {
     @Column(name = "id", nullable = false)
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @JsonProperty("isActive")
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
     @Column(name = "create_timestamp", nullable = false)
@@ -71,8 +72,8 @@ public class CompanyEntity implements Serializable {
         return isActive;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public Timestamp getCreateDateTime() {

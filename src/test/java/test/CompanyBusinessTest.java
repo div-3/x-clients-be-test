@@ -22,7 +22,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import static ext.IsCompanyEqual.isEqual;
-import static ext.commonHelper.getProperties;
+import static ext.CommonHelper.getProperties;
+
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

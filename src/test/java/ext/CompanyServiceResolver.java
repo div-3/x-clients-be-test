@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 import java.util.Properties;
 
-import static ext.commonHelper.getProperties;
+import static ext.CommonHelper.getProperties;
 
 public class CompanyServiceResolver implements ParameterResolver {
     private final static String propertiesFilePath = "src/main/resources/API_x_client.properties";
@@ -23,7 +23,6 @@ public class CompanyServiceResolver implements ParameterResolver {
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         Properties properties = getProperties(propertiesFilePath);
         String baseUri = properties.getProperty("baseURI");
-        CompanyService service = new CompanyServiceImpl(baseUri);
-        return service;
+        return new CompanyServiceImpl(baseUri);
     }
 }

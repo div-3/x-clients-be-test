@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 import java.util.Properties;
 
-import static ext.commonHelper.getProperties;
+import static ext.CommonHelper.getProperties;
 
 public class HiberSessionResolver implements ParameterResolver {
     private final String AuthPropFilePath = "src/main/resources/JDBC_x_client.properties";  //Путь к настройкам подключения к БД

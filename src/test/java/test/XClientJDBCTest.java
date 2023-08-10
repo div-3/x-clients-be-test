@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import static ext.commonHelper.getProperties;
+import static ext.CommonHelper.getProperties;
 
 public class XClientJDBCTest {
     private final String propFilePath = "src/main/resources/JDBC_x_client.properties";

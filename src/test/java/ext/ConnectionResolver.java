@@ -7,7 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import static ext.commonHelper.getProperties;
+import static ext.CommonHelper.getProperties;
 
 public class ConnectionResolver implements ParameterResolver, AfterAllCallback {
     private final String propFilePath = "src/main/resources/JDBC_x_client.properties";  //Путь к настройкам подключения к БД
