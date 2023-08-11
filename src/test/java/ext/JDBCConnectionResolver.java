@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import static ext.CommonHelper.getProperties;
 
-public class ConnectionResolver implements ParameterResolver, AfterAllCallback {
+public class JDBCConnectionResolver implements ParameterResolver, AfterAllCallback {
     private final String propFilePath = "src/main/resources/JDBC_x_client.properties";  //Путь к настройкам подключения к БД
     Connection connection;
     public static String KEY = "connection";    //KEY для глобального хранилища в extensionContext

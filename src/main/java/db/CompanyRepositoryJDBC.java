@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompanyRepositoryJDBC implements CompanyRepository{
+public class CompanyRepositoryJDBC implements CompanyRepository {
     Connection connection;
 
     public CompanyRepositoryJDBC(Connection connection) throws SQLException {
@@ -44,7 +44,8 @@ public class CompanyRepositoryJDBC implements CompanyRepository{
     @Override
     public int create(String name) throws SQLException {
         String insertQuery = "insert into company (\"name\") values (?);";
-        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
+        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery,
+                Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
         preparedStatement.setString(1, name);
         preparedStatement.executeUpdate();
         ResultSet createdId = preparedStatement.getGeneratedKeys();
@@ -55,7 +56,8 @@ public class CompanyRepositoryJDBC implements CompanyRepository{
     @Override
     public int create(String name, String description) throws SQLException {
         String insertQuery = "insert into company (\"name\", \"description\") values (?, ?);";
-        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
+        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery,
+                Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
         preparedStatement.setString(1, name);
         preparedStatement.setString(2, description);
         preparedStatement.executeUpdate();
@@ -66,13 +68,22 @@ public class CompanyRepositoryJDBC implements CompanyRepository{
 
     @Override
     public void deleteById(int id) {
-
+        try {
+            String insertQuery = "DELETE FROM company c WHERE c.id =?;";
+            PreparedStatement preparedStatement = connection.prepareStatement(insertQuery,
+                    Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
+            preparedStatement.setInt(1, id);
+            int count = preparedStatement.executeUpdate();
+            System.out.println("Удалена компания с id = " + id + " количество = " + count);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static List<CompanyEntity> getCompanyDBEntitiesFromResultSet(ResultSet resultSet) throws SQLException {
         List<CompanyEntity> companies = new ArrayList<>();
-        while (resultSet.next()){
-            companies.add( new CompanyEntity(
+        while (resultSet.next()) {
+            companies.add(new CompanyEntity(
                     resultSet.getInt("id"),
                     resultSet.getBoolean("is_active"),
                     resultSet.getTimestamp("create_timestamp"),

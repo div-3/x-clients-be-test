@@ -1,5 +1,6 @@
 package ext.hibernate;
 
+import db.CompanyRepository;
 import db.CompanyRepositoryHiber;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -13,7 +14,7 @@ public class HiberCompanyRepositoryResolver implements ParameterResolver {
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        if (parameterContext.getParameter().getType().equals(CompanyRepositoryHiber.class)) return true;
+        if (parameterContext.getParameter().getType().equals(CompanyRepository.class)) return true;
         return false;
     }
 

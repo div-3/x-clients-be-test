@@ -25,7 +25,8 @@ public class CompanyServiceImpl implements CompanyService{
     private String password = "";
     private String token = "";
     private boolean isAuth;
-    Map<String, String> headers = new HashMap<>();
+    private Map<String, String> headers = new HashMap<>();
+    private AuthService authService = AuthService.getInstance();
 
 
     public CompanyServiceImpl(String uri) {
@@ -42,8 +43,14 @@ public class CompanyServiceImpl implements CompanyService{
         return given()
                 .baseUri(uri + "/company")
                 .headers(headers)
-                .when().get()
-                .then().extract().response().then().extract().body().as(new TypeRef<List<Company>>() {});
+                .when()
+                .get()
+                .then()
+                .extract()
+                .response()
+                .then()
+                .extract()
+                .body().as(new TypeRef<List<Company>>() {});
     }
 
     @Override

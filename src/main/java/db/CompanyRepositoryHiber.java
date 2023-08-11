@@ -58,6 +58,9 @@ public class CompanyRepositoryHiber implements CompanyRepository{
 
     @Override
     public void deleteById(int id) {
-
+        TypedQuery<CompanyEntity> query = em.createQuery("DELETE c FROM CompanyEntity c WHERE c.id =:id", CompanyEntity.class);
+        query.setParameter("id", id);
+        int count = query.executeUpdate();
+        System.out.println("Удалена компания с id = " + id + " количество = " + count);
     }
 }

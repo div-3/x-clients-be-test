@@ -1,7 +1,7 @@
 package test;
 
 import api.CompanyService;
-import db.CompanyRepositoryHiber;
+import db.CompanyRepository;
 import ext.CompanyServiceResolver;
 import ext.hibernate.HiberCompanyRepositoryResolver;
 import ext.hibernate.HiberSessionResolver;
@@ -32,23 +32,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /*
 * Тесты:
 * 1. Позитивные:
-* 1.1 Добавление новой компании
-* 1.2 Получение списка компаний GET
-* 1.3 Получение компании по id
-* 1.4 Изменение информации по компании
-* 1.5 Деактивация компании
-* 1.6 Активация компании
-* 1.7 Удаление компании
-* 1.8 Добавление 50 компаний
+* 1.1 Добавление новой компании +
+* 1.2 Получение списка компаний GET +
+* 1.3 Получение компании по id (доделать)
+* 1.4 Изменение информации по компании (доделать)
+* 1.5 Деактивация компании (доделать)
+* 1.6 Активация компании (доделать)
+* 1.7 Удаление компании (доделать)
+* 1.8 Добавление 50 компаний (доделать)
 * 2. Негативные:
-* 2.1 Добавление компании без авторизации*/
+* 2.1 Добавление компании без авторизации (доделать)*/
 
-@DisplayName("CompanyEntity Business Test:")
+
+//В тестах используется для работы: с БД - Hibernate, с API - RestAssured.
+@DisplayName("Company business tests:")
 @ExtendWith({CompanyServiceResolver.class, HiberSessionResolver.class, HiberCompanyRepositoryResolver.class})
 public class CompanyBusinessTest {
-    private final static String propertiesFilePath = "src/main/resources/API_x_client.properties";
+    private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
     private static Properties properties = new Properties();
-    private static String baseUri;
+    private static String baseUriString;
     private static String login;
     private static String password;
 
@@ -56,8 +58,8 @@ public class CompanyBusinessTest {
     //Инициализация Hibernate (EntityManagerFactory)
     @BeforeAll
     public static void setUp(EntityManagerFactory emf){
-        properties = getProperties(propertiesFilePath);
-        baseUri = properties.getProperty("baseURI");
+        properties = getProperties(PROPERTIES_FILE_PATH);
+        baseUriString = properties.getProperty("baseURI");
         login = properties.getProperty("login");
         password = properties.getProperty("password");
     }
@@ -65,7 +67,7 @@ public class CompanyBusinessTest {
     @Test
     @Tag("Positive")
     @DisplayName("1.1 Добавление новой компании")
-    public void shouldAddCompany(CompanyService apiService, CompanyRepositoryHiber repository) throws SQLException, IOException {
+    public void shouldAddCompany(CompanyService apiService, CompanyRepository repository) throws SQLException, IOException {
         apiService.logIn(login, password);
         int id = apiService.create("TestCompany", "TestDescription");
         CompanyEntity newCompanyDb = repository.getById(id);
@@ -76,7 +78,7 @@ public class CompanyBusinessTest {
     @Test
     @Tag("Positive")
     @DisplayName("1.2 Получение списка компаний GET")
-    public void shouldGetCompanyList(CompanyService apiService, CompanyRepositoryHiber repository) throws SQLException, IOException {
+    public void shouldGetCompanyList(CompanyService apiService, CompanyRepository repository) throws SQLException, IOException {
         List<CompanyEntity> companiesDb = repository.getAll();
         List<Company> companiesApi = apiService.getAll();
 
@@ -94,53 +96,4 @@ public class CompanyBusinessTest {
             assertThat(c, isEqual(mapDb.get(c.getId())));
         }
     }
-//    @Test
-//    @DisplayName("Получение списка компаний GET")
-//    public void shouldGetCompanyList1(CompanyRepositoryHiber repository) throws SQLException {
-//        List<CompanyDBEntity> companies = repository.getAll();
-//        System.out.println(companies.toString());
-//    }
-//    @Test
-//    @DisplayName("Получение списка компаний GET")
-//    public void shouldGetCompanyList2(CompanyRepositoryHiber repository) throws SQLException {
-//        List<CompanyDBEntity> companies = repository.getAll();
-//        System.out.println(companies.toString());
-//    }
-//    @Test
-//    @DisplayName("Получение списка компаний GET")
-//    public void shouldGetCompanyList3(CompanyRepositoryHiber repository) throws SQLException {
-//        List<CompanyDBEntity> companies = repository.getAll();
-//        System.out.println(companies.toString());
-//    }
-//    @Test
-//    @DisplayName("Получение списка компаний GET")
-//    public void shouldGetCompanyList4(CompanyRepositoryHiber repository) throws SQLException {
-//        List<CompanyDBEntity> companies = repository.getAll();
-//        System.out.println(companies.toString());
-//    }    @Test
-//    @DisplayName("Получение списка компаний GET")
-//    public void shouldGetCompanyList5(CompanyRepositoryHiber repository) throws SQLException {
-//        List<CompanyDBEntity> companies = repository.getAll();
-//        System.out.println(companies.toString());
-//    }
-//    @Test
-//    @DisplayName("Получение списка компаний GET")
-//    public void shouldGetCompanyList6(CompanyRepositoryHiber repository) throws SQLException {
-//        List<CompanyDBEntity> companies = repository.getAll();
-//        System.out.println(companies.toString());
-//    }    @Test
-//    @DisplayName("Получение списка компаний GET")
-//    public void shouldGetCompanyList7(CompanyRepositoryHiber repository) throws SQLException {
-//        List<CompanyDBEntity> companies = repository.getAll();
-//        System.out.println(companies.toString());
-//    }
-//    @Test
-//    @DisplayName("Получение списка компаний GET")
-//    public void shouldGetCompanyList8(CompanyRepositoryHiber repository) throws SQLException {
-//        List<CompanyDBEntity> companies = repository.getAll();
-//        System.out.println(companies.toString());
-//    }
-
-
-
 }

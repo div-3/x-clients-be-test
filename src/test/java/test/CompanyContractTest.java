@@ -23,33 +23,33 @@ package test;/*
 * установленным стандартам и спецификациям, а также выполняет требования функциональности, безопасности,
 * производительности и других необходимых аспектов в соответствии с ожиданиями пользователей и бизнеса.*/
 
+import api.AuthService;
+import db.CompanyRepository;
+import ext.JDBCConnectionResolver;
+import ext.JDBCCompanyRepositoryResolver;
+import io.restassured.common.mapper.TypeRef;
+import io.restassured.response.Response;
 import model.api.Company;
 import model.db.CompanyEntity;
-import db.CompanyRepository;
-import ext.JDBCCompanyRepositoryResolver;
-import ext.ConnectionResolver;
-import io.restassured.common.mapper.TypeRef;
-import io.restassured.filter.log.LogDetail;
-import io.restassured.response.Response;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
-
-import static ext.MyMatchers.*;
-import static ext.IsCompanyEqual.*;
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import static ext.CommonHelper.getProperties;
+import static ext.IsCompanyEqual.isEqual;
+import static ext.MyMatchers.isCompaniesEqual;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.*;
 
 /*
  * Тесты:
@@ -60,40 +60,45 @@ import static ext.CommonHelper.getProperties;
  * 4. Получение компании по ID +
  * 5. Изменение компании по ID +
  * 6. Удаление компании по ID +
- * 7. Активировать компанию по ID
- * 8. Деактивировать компанию по ID*/
-@DisplayName("X-Clients-Be contract tests:")
-@ExtendWith({ConnectionResolver.class, JDBCCompanyRepositoryResolver.class})
+ * 7. Активировать компанию по ID (доделать)
+ * 8. Деактивировать компанию по ID (доделать)*/
+
+//В тестах используется для работы: с БД - JDBC, с API - RestAssured.
+//Тесты выполняются в параллельном режиме
+@DisplayName("Company contract tests:")
+@ExtendWith({JDBCConnectionResolver.class, JDBCCompanyRepositoryResolver.class})
 public class CompanyContractTest {
-    private final static String propertiesFilePath = "src/main/resources/API_x_client.properties";
+    private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
+    private static AuthService authService = AuthService.getInstance();
     private static Properties properties = new Properties();
+    private static String baseUriString = "";
+    private static String basePathString = "";
     private static String login = "";
     private static String password = "";
     private static String companyName = "ООО Рога и копыта";
     private static String companyDescription = "Все понемногу";
     private static String newName = "ООО РиК2";
     private static String newDescription = "То же самое";
+    private static List<Integer> companiesToDeleteId = new ArrayList<>();
+
 
     @BeforeAll
     public static void setUpBeforeAll(Connection connection) {
-        properties = getProperties(propertiesFilePath);
+        properties = getProperties(PROPERTIES_FILE_PATH);
     }
 
     @BeforeEach
     public void setUp() {
-        baseURI = properties.getProperty("baseURI");
-        basePath = "/company";
+        baseUriString = properties.getProperty("baseURI");
+        basePathString = "/company";
         login = properties.getProperty("login");
         password = properties.getProperty("password");
     }
 
     @AfterAll
-    public static void clearUp() {
-        List<CompanyEntity> listToDelete = getGetResponse(getGetResponse());
-        String token = getAuthToken(login, password);
-        for (CompanyEntity c : listToDelete) {
-            if (c.getName().equals(companyName) || c.getName().equals(newName))
-                deleteCompanyById(token, c.getId());
+    public static void clearUp(CompanyRepository companyRepository) {
+        for (Integer i : companiesToDeleteId) {
+            companyRepository.deleteById(i);
         }
     }
 
@@ -102,7 +107,6 @@ public class CompanyContractTest {
     @DisplayName("1. Получить список компаний")
     public void shouldGetCompaniesList() {
         Response response = getGetResponse();
-
         response
                 .then()
                 .log().ifValidationFails()
@@ -119,7 +123,8 @@ public class CompanyContractTest {
     @Tag("Positive")
     @DisplayName("2. Авторизация")
     public void shouldAuth() {
-        String token = getAuthToken(login, password);
+//        String token = getAuthToken(login, password);
+        String token = authService.logIn(login, password);
 
         //Проверка, что токен с нужной длиной
         assertEquals(148, token.length());
@@ -130,10 +135,11 @@ public class CompanyContractTest {
     @DisplayName("3. Добавление новой компании")
     public void shouldAddNewCompany(CompanyRepository companyRepository) throws SQLException {
         //Авторизация и получение токена
-        String token = getAuthToken(login, password);
+        String token = authService.logIn(login, password);
 
         //Создание новой компании с companyName, companyDescription
         int id = createAndGetNewCompanyId(token, companyName, companyDescription);
+        companiesToDeleteId.add(id);
 
         //Проверка, что номер новой компании больше 0
         assertTrue(id > 0);
@@ -159,17 +165,25 @@ public class CompanyContractTest {
 
         //Создание компании через БД
         int createdId = repository.create(companyName, companyDescription);
+        companiesToDeleteId.add(createdId);
 
         //Проверка, что номер новой компании больше 0
         assertTrue(createdId > 0);
 
         //Получение компании по API по ID
-        Company companyAPIResult = given().basePath("/company/" + createdId).when()
-                .get()
-                .then()
-                .statusCode(200)
-                .contentType("application/json; charset=utf-8")
-                .extract().body().as(Company.class);
+        Company companyAPIResult =
+                given()
+                    .log().ifValidationFails()
+                    .baseUri(baseUriString + basePathString + "/" + createdId)
+                    .when()
+                    .get()
+                    .then()
+                    .statusCode(200)
+                    .log().ifValidationFails()
+                    .contentType("application/json; charset=utf-8")
+                    .extract()
+                    .body()
+                    .as(Company.class);
 
         //Получение компании из DB по ID
         CompanyEntity companyEntityExpected = repository.getById(createdId);
@@ -181,61 +195,46 @@ public class CompanyContractTest {
         assertThat(companyAPIResult, isEqual(companyEntityExpected));
     }
 
-    // 3 теста для проверки работы Resolver'ов
-//    @Test
-//    public void testById(CompanyRepository repository) throws SQLException {
-//        CompanyDBEntity company = repository.getAll().get(0);
-//        System.out.println(company.toString());
-//    }
-//
-//    @Test
-//    public void testById2(CompanyRepository repository) throws SQLException {
-//        CompanyDBEntity company = repository.getAll().get(0);
-//        System.out.println(company.toString());
-//    }
-//
-//    @Test
-//    public void testById3(CompanyRepository repository) throws SQLException {
-//        CompanyDBEntity company = repository.getAll().get(0);
-//        System.out.println(company.toString());
-//    }
-
     @Test
     @Tag("Positive")
     @DisplayName("5. Изменение компании по ID")
     public void shouldPatchCompanyById(CompanyRepository repository) throws SQLException {
 
         //Аутентификация и получение токена
-        String token = getAuthToken(login, password);
+        String token = authService.logIn(login, password);
 
         //Создание новой компании с companyName, companyDescription
         int id = repository.create(companyName, companyDescription);
+        companiesToDeleteId.add(id);
 
         //Проверка, что номер новой компании больше 0
         assertTrue(id > 0);
 
         //Изменение компании по ID
-        CompanyEntity companyEntityAfterPatch = given()
-                .header("x-client-token", token)
-                .log().ifValidationFails()
-                .contentType("application/json; charset=utf-8")
-                .body("{\"name\": \"" + newName + "\",\"description\": \"" + newDescription + "\"}")
-                .when()
-                .basePath(basePath + "/" + id)
-                .patch()
-                .then()
-                .log().ifValidationFails()
-                .statusCode(200)
-                .contentType("application/json; charset=utf-8")
-                .extract()
-                .body().as(CompanyEntity.class);
+        CompanyEntity companyEntityAfterPatch =
+                given()
+                    .baseUri(baseUriString + basePathString + "/" + id)
+                    .header("x-client-token", token)
+                    .log().ifValidationFails()
+                    .contentType("application/json; charset=utf-8")
+                    .body("{\"name\": \"" + newName + "\",\"description\": \"" + newDescription + "\"}")
+                    .when()
+                    .patch()
+                    .then()
+                    .log().ifValidationFails()
+                    .statusCode(200)
+                    .contentType("application/json; charset=utf-8")
+                    .extract()
+                    .body()
+                    .as(CompanyEntity.class);
 
         //Проверка тела ответа на команду PATCH
         assertEquals(id, companyEntityAfterPatch.getId());
         assertEquals(newName, companyEntityAfterPatch.getName());
         assertEquals(newDescription, companyEntityAfterPatch.getDescription());
         assertTrue(companyEntityAfterPatch.isActive());
-        assertNotEquals(companyEntityAfterPatch.getCreateDateTime(), companyEntityAfterPatch.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
+        //Проверка, что дата изменения не равна дате создания
+        assertNotEquals(companyEntityAfterPatch.getCreateDateTime(), companyEntityAfterPatch.getLastChangedDateTime());
         assertNull(companyEntityAfterPatch.getDeletedAt());
 
         //Проверка, что в БД по ID компания с изменёнными данными
@@ -245,7 +244,8 @@ public class CompanyContractTest {
         assertEquals(newName, companyEntityById.getName());
         assertEquals(newDescription, companyEntityById.getDescription());
         assertTrue(companyEntityById.isActive());
-        assertNotEquals(companyEntityById.getCreateDateTime(), companyEntityById.getLastChangedDateTime());     //Проверка, что дата изменения не равна дате создания
+        //Проверка, что дата изменения не равна дате создания
+        assertNotEquals(companyEntityById.getCreateDateTime(), companyEntityById.getLastChangedDateTime());
         assertNull(companyEntityById.getDeletedAt());
     }
 
@@ -254,10 +254,11 @@ public class CompanyContractTest {
     @DisplayName("6. Удаление компании по ID")
     public void shouldDeleteCompanyById(CompanyRepository repository) throws SQLException {
         //Аутентификация и получение токена
-        String token = getAuthToken(login, password);
+        String token = authService.logIn(login, password);
 
         //Создание новой компании с companyName, companyDescription
         int id = repository.create(companyName, companyDescription);
+        companiesToDeleteId.add(id);
 
         //Проверка, что номер новой компании больше 0
         assertTrue(id > 0);
@@ -278,7 +279,7 @@ public class CompanyContractTest {
 
         //Проверка, что по ID компания больше недоступна (дополнительно, проверка ответа на запрос GET с невалидным ID)
         given()
-                .basePath("/company/" + id)
+                .baseUri(baseUriString + basePathString + "/" + id)
                 .log().ifValidationFails()
                 .when()
                 .get()
@@ -297,44 +298,38 @@ public class CompanyContractTest {
 
     private static int createAndGetNewCompanyId(String token, String companyName, String companyDescription) {
         return given()
+                .log().ifValidationFails()
+                .baseUri(baseUriString + basePathString)
                 .header("x-client-token", token)
                 .contentType("application/json; charset=utf-8")
                 .body("{\"name\": \"" + companyName + "\",\"description\": \"" + companyDescription + "\"}")
                 .when()
                 .post()
                 .then()
+                .log().ifValidationFails()
                 .statusCode(201)
                 .contentType("application/json; charset=utf-8")
-                .extract().path("id");
+                .extract()
+                .path("id");
     }
 
     private static Response getGetResponse() {
         return given()
+                .baseUri(baseUriString + basePathString)
                 .when()
                 .get()
                 .then()
-                .extract().response();
+                .extract()
+                .response();
     }
 
     private static List<CompanyEntity> getGetResponse(Response response) {
-        return response.then().extract().body().as(new TypeRef<List<CompanyEntity>>() {
-        });
-    }
-
-    private static String getAuthToken(String login, String password) {
-        return given()
-                .basePath("/auth/login")
-                .log().ifValidationFails(LogDetail.ALL)             //Логирование при ошибке
-                .contentType("application/json; charset=utf-8")
-                .body("{\"username\": \"" + login + "\", \"password\": \"" + password + "\"}")
-                .when()
-                .post()
+        return response
                 .then()
-                .log().ifValidationFails()
-                .statusCode(201)                                    //Проверка статус-кода
-                .contentType("application/json; charset=utf-8")     //Проверка content-type
                 .extract()
-                .path("userToken").toString();
+                .body()
+                .as(new TypeRef<List<CompanyEntity>>() {
+        });
     }
 
     private static void deleteCompanyById(String token, int id) {
@@ -343,7 +338,7 @@ public class CompanyContractTest {
                 .header("x-client-token", token)
                 .log().ifValidationFails()
                 .when()
-                .basePath(basePath + "/delete/" + id)
+                .baseUri(baseUriString + basePathString + "/delete/" + id)
                 .get()
                 .then()
                 .log().ifValidationFails()

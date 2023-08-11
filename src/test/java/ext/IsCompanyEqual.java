@@ -32,7 +32,8 @@ public class IsCompanyEqual extends TypeSafeMatcher<model.api.Company> {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("CompanyEntity from DB: " + companyEntityDB.toString() + " Errors in fields:" + errors.toString());
+        description.appendText("CompanyEntity from DB: " + companyEntityDB.toString()
+                + " Errors in fields:" + errors.toString());
     }
 
     public static Matcher<model.api.Company> isEqual(CompanyEntity companyEntityDB){
