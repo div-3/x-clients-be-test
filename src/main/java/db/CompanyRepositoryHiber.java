@@ -5,6 +5,8 @@ import jakarta.persistence.TypedQuery;
 import model.db.CompanyEntity;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class CompanyRepositoryHiber implements CompanyRepository{
@@ -16,7 +18,8 @@ public class CompanyRepositoryHiber implements CompanyRepository{
 
     @Override
     public List<CompanyEntity> getAll() throws SQLException {
-        TypedQuery<CompanyEntity> query = em.createQuery("SELECT c FROM CompanyEntity c WHERE c.deletedAt is null", CompanyEntity.class);
+        TypedQuery<CompanyEntity> query = em.createQuery(
+                "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null", CompanyEntity.class);
         return query.getResultList();
 
         //Тот же запрос, но через Hibenate API
@@ -31,7 +34,10 @@ public class CompanyRepositoryHiber implements CompanyRepository{
 
     @Override
     public List<CompanyEntity> getAll(boolean isActive) throws SQLException {
-        return null;
+        TypedQuery<CompanyEntity> query = em.createQuery(
+                "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and isActive = :isActive", CompanyEntity.class);
+        query.setParameter("isActive", isActive);
+        return query.getResultList();
     }
 
     @Override
@@ -41,14 +47,23 @@ public class CompanyRepositoryHiber implements CompanyRepository{
 
     @Override
     public CompanyEntity getById(int id) throws SQLException {
-        TypedQuery<CompanyEntity> query = em.createQuery("SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and c.id =:id", CompanyEntity.class);
+        TypedQuery<CompanyEntity> query = em.createQuery(
+                "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and c.id =:id", CompanyEntity.class);
         query.setParameter("id", id);
         return query.getSingleResult();
     }
 
     @Override
     public int create(String name) throws SQLException {
-        return 0;
+        CompanyEntity company = new CompanyEntity();
+        company.setName(name);
+        Timestamp tmp = Timestamp.valueOf(LocalDateTime.now());
+        company.setCreateDateTime(tmp);
+        company.setChangedTimestamp(tmp);
+        em.getTransaction().begin();
+        em.persist(company);
+        em.getTransaction().commit();
+        return company.getId();
     }
 
     @Override
@@ -58,9 +73,10 @@ public class CompanyRepositoryHiber implements CompanyRepository{
 
     @Override
     public void deleteById(int id) {
-        TypedQuery<CompanyEntity> query = em.createQuery("DELETE c FROM CompanyEntity c WHERE c.id =:id", CompanyEntity.class);
+        TypedQuery<CompanyEntity> query = em.createQuery(
+                "DELETE c FROM CompanyEntity c WHERE c.id =:id", CompanyEntity.class);
         query.setParameter("id", id);
         int count = query.executeUpdate();
-        System.out.println("Удалена компания с id = " + id + " количество = " + count);
+        System.out.println("Удалена компания с id = " + id + ", количество = " + count);
     }
 }

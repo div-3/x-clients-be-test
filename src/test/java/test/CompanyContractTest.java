@@ -234,7 +234,7 @@ public class CompanyContractTest {
         assertEquals(newDescription, companyEntityAfterPatch.getDescription());
         assertTrue(companyEntityAfterPatch.isActive());
         //Проверка, что дата изменения не равна дате создания
-        assertNotEquals(companyEntityAfterPatch.getCreateDateTime(), companyEntityAfterPatch.getLastChangedDateTime());
+        assertNotEquals(companyEntityAfterPatch.getCreateDateTime(), companyEntityAfterPatch.getChangedTimestamp());
         assertNull(companyEntityAfterPatch.getDeletedAt());
 
         //Проверка, что в БД по ID компания с изменёнными данными
@@ -245,7 +245,7 @@ public class CompanyContractTest {
         assertEquals(newDescription, companyEntityById.getDescription());
         assertTrue(companyEntityById.isActive());
         //Проверка, что дата изменения не равна дате создания
-        assertNotEquals(companyEntityById.getCreateDateTime(), companyEntityById.getLastChangedDateTime());
+        assertNotEquals(companyEntityById.getCreateDateTime(), companyEntityById.getChangedTimestamp());
         assertNull(companyEntityById.getDeletedAt());
     }
 

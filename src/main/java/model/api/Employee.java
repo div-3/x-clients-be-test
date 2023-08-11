@@ -6,33 +6,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = false)
-public class EmployeeToCreate {
+public class Employee {
+
     private int id;
     private String firstName;
     private String lastName;
     private String middleName;
+    private int companyId;
     private String email;
-    private String phone;
     private String url;
+    private String phone;
     private String birthdate;
     @JsonProperty("isActive")
     private boolean isActive;
-    private int companyId;
 
-    public EmployeeToCreate(int id, String firstName, String lastName, String middleName, String email, String phone, String url, String birthdate, boolean isActive, int companyId) {
+    public Employee() {
+    }
+
+    public Employee(int id, String firstName, String lastName, String middleName, int companyId, String email, String url, String phone, String birthdate, boolean isActive) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.middleName = middleName;
+        this.companyId = companyId;
         this.email = email;
-        this.phone = phone;
         this.url = url;
+        this.phone = phone;
         this.birthdate = birthdate;
         this.isActive = isActive;
-        this.companyId = companyId;
-    }
-
-    public EmployeeToCreate() {
     }
 
     public int getId() {
@@ -67,6 +68,14 @@ public class EmployeeToCreate {
         this.middleName = middleName;
     }
 
+    public int getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(int companyId) {
+        this.companyId = companyId;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -75,20 +84,20 @@ public class EmployeeToCreate {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public String getUrl() {
         return url;
     }
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getBirthdate() {
@@ -107,40 +116,32 @@ public class EmployeeToCreate {
         isActive = active;
     }
 
-    public int getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(int companyId) {
-        this.companyId = companyId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        EmployeeToCreate that = (EmployeeToCreate) o;
-        return id == that.id && isActive == that.isActive && companyId == that.companyId && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(middleName, that.middleName) && Objects.equals(email, that.email) && Objects.equals(phone, that.phone) && Objects.equals(url, that.url) && Objects.equals(birthdate, that.birthdate);
+        Employee employee = (Employee) o;
+        return id == employee.id && companyId == employee.companyId && isActive == employee.isActive && Objects.equals(firstName, employee.firstName) && Objects.equals(lastName, employee.lastName) && Objects.equals(middleName, employee.middleName) && Objects.equals(email, employee.email) && Objects.equals(url, employee.url) && Objects.equals(phone, employee.phone) && Objects.equals(birthdate, employee.birthdate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, middleName, email, phone, url, birthdate, isActive, companyId);
+        return Objects.hash(id, firstName, lastName, middleName, companyId, email, url, phone, birthdate, isActive);
     }
 
     @Override
     public String toString() {
-        return "EmployeeToCreate{" +
+        return "Employee{" +
                 "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", middleName='" + middleName + '\'' +
+                ", companyId=" + companyId +
                 ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
                 ", url='" + url + '\'' +
+                ", phone='" + phone + '\'' +
                 ", birthdate='" + birthdate + '\'' +
                 ", isActive=" + isActive +
-                ", companyId=" + companyId +
                 '}';
     }
 }

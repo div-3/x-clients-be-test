@@ -33,7 +33,7 @@ public class CompanyEntity implements Serializable {
     @Column(name = "create_timestamp", nullable = false)
     private Timestamp createDateTime;
     @Column(name = "change_timestamp", nullable = false)
-    private Timestamp lastChangedDateTime;
+    private Timestamp changedTimestamp;
     @Column(name = "name", nullable = false, length = 100)
     private String name;
     @Column(name = "description", nullable = true, length = 300)
@@ -50,11 +50,11 @@ public class CompanyEntity implements Serializable {
     public CompanyEntity() {
     }
 
-    public CompanyEntity(int id, boolean isActive, Timestamp createDateTime, Timestamp lastChangedDateTime, String name, String description, Timestamp deletedAt) {
+    public CompanyEntity(int id, boolean isActive, Timestamp createDateTime, Timestamp changedTimestamp, String name, String description, Timestamp deletedAt) {
         this.id = id;
         this.isActive = isActive;
         this.createDateTime = createDateTime;
-        this.lastChangedDateTime = lastChangedDateTime;
+        this.changedTimestamp = changedTimestamp;
         this.name = name;
         this.description = description;
         this.deletedAt = deletedAt;
@@ -84,12 +84,12 @@ public class CompanyEntity implements Serializable {
         this.createDateTime = createDateTime;
     }
 
-    public Timestamp getLastChangedDateTime() {
-        return lastChangedDateTime;
+    public Timestamp getChangedTimestamp() {
+        return changedTimestamp;
     }
 
-    public void setLastChangedDateTime(Timestamp lastChangedDateTime) {
-        this.lastChangedDateTime = lastChangedDateTime;
+    public void setChangedTimestamp(Timestamp changedTimestamp) {
+        this.changedTimestamp = changedTimestamp;
     }
 
     public String getName() {
@@ -121,12 +121,12 @@ public class CompanyEntity implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CompanyEntity companyEntity = (CompanyEntity) o;
-        return id == companyEntity.id && isActive == companyEntity.isActive && Objects.equals(createDateTime, companyEntity.createDateTime) && Objects.equals(lastChangedDateTime, companyEntity.lastChangedDateTime) && Objects.equals(name, companyEntity.name) && Objects.equals(description, companyEntity.description) && Objects.equals(deletedAt, companyEntity.deletedAt);
+        return id == companyEntity.id && isActive == companyEntity.isActive && Objects.equals(createDateTime, companyEntity.createDateTime) && Objects.equals(changedTimestamp, companyEntity.changedTimestamp) && Objects.equals(name, companyEntity.name) && Objects.equals(description, companyEntity.description) && Objects.equals(deletedAt, companyEntity.deletedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, isActive, createDateTime, lastChangedDateTime, name, description, deletedAt);
+        return Objects.hash(id, isActive, createDateTime, changedTimestamp, name, description, deletedAt);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class CompanyEntity implements Serializable {
                 "id=" + id +
                 ", isActive=" + isActive +
                 ", createDateTime='" + createDateTime + '\'' +
-                ", lastChangedDateTime='" + lastChangedDateTime + '\'' +
+                ", lastChangedDateTime='" + changedTimestamp + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", deletedAt='" + deletedAt + '\'' +

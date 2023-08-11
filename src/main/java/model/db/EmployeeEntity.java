@@ -1,41 +1,62 @@
 package model.db;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "employee")
+@Table(name = "employee", schema = "public", catalog = "x_clients_db_r06g")
 public class EmployeeEntity {
     @Id
+    @Column(name = "id", nullable = false)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private boolean is_active;
-    private Timestamp create_timestamp;
-    private Timestamp change_timestamp;
-    private String first_name;
-    private String last_name;
-    private String middle_name;
+    @JsonProperty("isActive")
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive;
+    @Column(name = "create_timestamp", nullable = false)
+    private Timestamp createTimestamp;
+    @Column(name = "change_timestamp", nullable = false)
+    private Timestamp changeTimestamp;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
+    @Column(name = "middle_name", nullable = true)
+    private String middleName;
+    @Column(name = "phone", nullable = false)
     private String phone;
+    @Column(name = "email", nullable = true)
     private String email;
-    private String avatar_url;
+    @Column(name = "avatar_url", nullable = true)
+    private String avatarUrl;
+    @Column(name = "birthdate", nullable = true)
+    private Date birthdate;
+
 
     //Связь с внешней таблицей
     @ManyToOne
     @JoinColumn(name = "company_id")
     private CompanyEntity company;
 
-    public EmployeeEntity(int id, boolean is_active, Timestamp create_timestamp, Timestamp change_timestamp, String first_name, String last_name, String middle_name, String phone, String email, String avatar_url, CompanyEntity company) {
+    public EmployeeEntity() {
+    }
+
+    public EmployeeEntity(int id, boolean isActive, Timestamp createTimestamp, Timestamp changeTimestamp, String firstName, String lastName, String middleName, String phone, String email, String avatarUrl, Date birthdate, CompanyEntity company) {
         this.id = id;
-        this.is_active = is_active;
-        this.create_timestamp = create_timestamp;
-        this.change_timestamp = change_timestamp;
-        this.first_name = first_name;
-        this.last_name = last_name;
-        this.middle_name = middle_name;
+        this.isActive = isActive;
+        this.createTimestamp = createTimestamp;
+        this.changeTimestamp = changeTimestamp;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.middleName = middleName;
         this.phone = phone;
         this.email = email;
-        this.avatar_url = avatar_url;
+        this.avatarUrl = avatarUrl;
+        this.birthdate = birthdate;
         this.company = company;
     }
 
@@ -47,52 +68,52 @@ public class EmployeeEntity {
         this.id = id;
     }
 
-    public boolean isIs_active() {
-        return is_active;
+    public boolean isActive() {
+        return isActive;
     }
 
-    public void setIs_active(boolean is_active) {
-        this.is_active = is_active;
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
-    public Timestamp getCreate_timestamp() {
-        return create_timestamp;
+    public Timestamp getCreateTimestamp() {
+        return createTimestamp;
     }
 
-    public void setCreate_timestamp(Timestamp create_timestamp) {
-        this.create_timestamp = create_timestamp;
+    public void setCreateTimestamp(Timestamp createTimestamp) {
+        this.createTimestamp = createTimestamp;
     }
 
-    public Timestamp getChange_timestamp() {
-        return change_timestamp;
+    public Timestamp getChangeTimestamp() {
+        return changeTimestamp;
     }
 
-    public void setChange_timestamp(Timestamp change_timestamp) {
-        this.change_timestamp = change_timestamp;
+    public void setChangeTimestamp(Timestamp changeTimestamp) {
+        this.changeTimestamp = changeTimestamp;
     }
 
-    public String getFirst_name() {
-        return first_name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getLast_name() {
-        return last_name;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    public String getMiddle_name() {
-        return middle_name;
+    public String getMiddleName() {
+        return middleName;
     }
 
-    public void setMiddle_name(String middle_name) {
-        this.middle_name = middle_name;
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
     }
 
     public String getPhone() {
@@ -111,12 +132,20 @@ public class EmployeeEntity {
         this.email = email;
     }
 
-    public String getAvatar_url() {
-        return avatar_url;
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 
-    public void setAvatar_url(String avatar_url) {
-        this.avatar_url = avatar_url;
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public Date getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(Date birthdate) {
+        this.birthdate = birthdate;
     }
 
     public CompanyEntity getCompany() {
@@ -132,27 +161,28 @@ public class EmployeeEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EmployeeEntity that = (EmployeeEntity) o;
-        return id == that.id && is_active == that.is_active && Objects.equals(create_timestamp, that.create_timestamp) && Objects.equals(change_timestamp, that.change_timestamp) && Objects.equals(first_name, that.first_name) && Objects.equals(last_name, that.last_name) && Objects.equals(middle_name, that.middle_name) && Objects.equals(phone, that.phone) && Objects.equals(email, that.email) && Objects.equals(avatar_url, that.avatar_url) && Objects.equals(company, that.company);
+        return id == that.id && isActive == that.isActive && Objects.equals(createTimestamp, that.createTimestamp) && Objects.equals(changeTimestamp, that.changeTimestamp) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(middleName, that.middleName) && Objects.equals(phone, that.phone) && Objects.equals(email, that.email) && Objects.equals(avatarUrl, that.avatarUrl) && Objects.equals(birthdate, that.birthdate) && Objects.equals(company, that.company);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, is_active, create_timestamp, change_timestamp, first_name, last_name, middle_name, phone, email, avatar_url, company);
+        return Objects.hash(id, isActive, createTimestamp, changeTimestamp, firstName, lastName, middleName, phone, email, avatarUrl, birthdate, company);
     }
 
     @Override
     public String toString() {
         return "EmployeeEntity{" +
                 "id=" + id +
-                ", is_active=" + is_active +
-                ", create_timestamp=" + create_timestamp +
-                ", change_timestamp=" + change_timestamp +
-                ", first_name='" + first_name + '\'' +
-                ", last_name='" + last_name + '\'' +
-                ", middle_name='" + middle_name + '\'' +
+                ", isActive=" + isActive +
+                ", createTimestamp=" + createTimestamp +
+                ", changeTimestamp=" + changeTimestamp +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", middleName='" + middleName + '\'' +
                 ", phone='" + phone + '\'' +
                 ", email='" + email + '\'' +
-                ", avatar_url='" + avatar_url + '\'' +
+                ", avatarUrl='" + avatarUrl + '\'' +
+                ", birthdate=" + birthdate +
                 ", company=" + company +
                 '}';
     }
