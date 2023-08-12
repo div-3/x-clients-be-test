@@ -3,21 +3,19 @@ package api;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.filter.log.LogDetail;
 import model.api.Company;
+import model.api.Employee;
+import net.datafaker.Faker;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
 
-public class CompanyServiceImpl implements CompanyService{
+public class EmployeeServiceImpl implements EmployeeService{
+    private final static String propertiesFilePath = "src/main/resources/API_x_client.properties";
+    private Properties properties;
     private String uri;
     private String login = "";
     private String password = "";
@@ -25,9 +23,10 @@ public class CompanyServiceImpl implements CompanyService{
     private boolean isAuth;
     private Map<String, String> headers = new HashMap<>();
     private AuthService authService = AuthService.getInstance();
+    private Faker faker = new Faker(new Locale("ru"));
 
 
-    public CompanyServiceImpl(String uri) {
+    public EmployeeServiceImpl(String uri) {
         this.uri = uri;
     }
 
@@ -37,42 +36,85 @@ public class CompanyServiceImpl implements CompanyService{
     }
 
     @Override
-    public List<Company> getAll() throws IOException {
+    public List<Employee> getAllByCompanyId(int companyId) throws IOException {
         return given()
-                .baseUri(uri + "/company")
+                .baseUri(uri + "/employee")
+                .log().ifValidationFails()
+                .param("company", companyId)
                 .headers(headers)
+                .header("accept", "application/json")
                 .when()
                 .get()
                 .then()
+                .log().ifValidationFails()
                 .extract()
                 .response()
                 .then()
                 .extract()
-                .body().as(new TypeRef<List<Company>>() {});
+                .body().as(new TypeRef<List<Employee>>() {});
     }
 
     @Override
-    public List<Company> getAll(boolean isActive) throws IOException {
-        return null;
+    public Employee generateEmployee() {
+        Employee employee = new Employee();
+        employee.setId(0);
+        String[] name = faker.name().nameWithMiddle().split(" ");
+        employee.setFirstName(name[0]);
+        employee.setLastName(name[2]);
+        employee.setMiddleName(name[1]);
+        employee.setCompanyId(0);
+        employee.setEmail(faker.internet().emailAddress("a" + faker.number().digits(5)));
+        employee.setUrl(faker.internet().url());
+//        employee.setPhone(faker.phoneNumber().phoneNumber()); //Не проходит по формату
+        //TODO: Написать BUG-репорт - при создании с неправильным телефоном возвращается ошибка 500 вместо 400
+        employee.setPhone(faker.number().digits(10));
+        employee.setBirthdate(faker.date().birthday("YYYY-MM-dd"));
+        employee.setIsActive(true);
+        return employee;
     }
 
     @Override
-    public Company getById(int id) throws IOException {
-        return null;
+    public Employee getById(int id) throws IOException {
+        return given()
+                .baseUri(uri + "/employee" + "/" + id)
+                .log().ifValidationFails()
+                .headers(headers)
+                .when()
+                .get()
+                .then()
+                .log().ifValidationFails()
+                .extract()
+                .response()
+                .then()
+                .extract()
+                .body().as(new TypeRef<Employee>() {});
     }
 
     @Override
-    public int create(String name) throws IOException {
-
-        return 0;
+    public int create(Employee employee) throws IOException {
+        int id = given()
+                .log().all()
+                .headers(headers)
+                .baseUri(uri + "/employee")
+                .contentType("application/json; charset=utf-8")
+                .body(employee)
+                .when()
+                .post()
+                .then()
+                .log().all()
+                .statusCode(201)
+                .contentType("application/json; charset=utf-8")
+                .extract().path("id");
+        return id;
     }
 
-    @Override
+
+//    @Override
     public int create(String name, String description) throws IOException {
         return given()
                 .log().ifValidationFails()
                 .headers(headers)
-                .baseUri(uri + "/company")
+                .baseUri(uri + "/employee")
                 .contentType("application/json; charset=utf-8")
                 .body("{\"name\": \"" + name + "\",\"description\": \"" + description + "\"}")
                 .when()
@@ -90,17 +132,12 @@ public class CompanyServiceImpl implements CompanyService{
     }
 
     @Override
-    public Company edit(int id, String newName) {
-        return null;
+    public void deleteByCompanyId(int companyId) {
+
     }
 
     @Override
-    public Company edit(int id, String newName, String newDescription) {
-        return null;
-    }
-
-    @Override
-    public Company changeStatus(int id, boolean isActive) {
+    public Employee edit(Employee employee) {
         return null;
     }
 
@@ -119,7 +156,6 @@ public class CompanyServiceImpl implements CompanyService{
 //                .contentType("application/json; charset=utf-8")     //Проверка content-type
 //                .extract()
 //                .path("userToken").toString();
-
         this.token = authService.logIn(login, password);
         if (!token.equals("")) {
 //            isAuth = true;

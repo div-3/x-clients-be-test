@@ -1,8 +1,10 @@
 package db;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import model.db.CompanyEntity;
+import model.db.EmployeeEntity;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -42,24 +44,33 @@ public class CompanyRepositoryHiber implements CompanyRepository{
 
     @Override
     public CompanyEntity getLast() throws SQLException {
-        return null;
+        TypedQuery<CompanyEntity> query = em.createQuery(
+                "SELECT c FROM CompanyEntity c ORDER BY c.id DESC LIMIT 1", CompanyEntity.class);
+        return query.getSingleResult();
     }
 
     @Override
     public CompanyEntity getById(int id) throws SQLException {
-        TypedQuery<CompanyEntity> query = em.createQuery(
-                "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and c.id =:id", CompanyEntity.class);
-        query.setParameter("id", id);
-        return query.getSingleResult();
+//        TypedQuery<CompanyEntity> query = em.createQuery(
+//                "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and c.id =:id", CompanyEntity.class);
+//        query.setParameter("id", id);
+//        return query.getSingleResult();
+
+        //Или через Hibernate API
+        return em.find(CompanyEntity.class, id);
     }
 
     @Override
     public int create(String name) throws SQLException {
         CompanyEntity company = new CompanyEntity();
+        int lastId = getLast().getId();
         company.setName(name);
+        company.setId(++lastId);
         Timestamp tmp = Timestamp.valueOf(LocalDateTime.now());
         company.setCreateDateTime(tmp);
         company.setChangedTimestamp(tmp);
+
+        //Сохранение компании в БД
         em.getTransaction().begin();
         em.persist(company);
         em.getTransaction().commit();
@@ -68,15 +79,28 @@ public class CompanyRepositoryHiber implements CompanyRepository{
 
     @Override
     public int create(String name, String description) throws SQLException {
-        return 0;
+        CompanyEntity company = new CompanyEntity();
+        int lastId = getLast().getId();
+        company.setName(name);
+        company.setDescription(description);
+        company.setId(++lastId);
+        Timestamp tmp = Timestamp.valueOf(LocalDateTime.now());
+        company.setCreateDateTime(tmp);
+        company.setChangedTimestamp(tmp);
+
+        //Сохранение компании в БД
+        em.getTransaction().begin();
+        em.persist(company);
+        em.getTransaction().commit();
+        return company.getId();
     }
 
     @Override
     public void deleteById(int id) {
-        TypedQuery<CompanyEntity> query = em.createQuery(
-                "DELETE c FROM CompanyEntity c WHERE c.id =:id", CompanyEntity.class);
-        query.setParameter("id", id);
-        int count = query.executeUpdate();
-        System.out.println("Удалена компания с id = " + id + ", количество = " + count);
+        CompanyEntity company = em.find(CompanyEntity.class, id);
+        em.getTransaction().begin();
+        em.remove(company);
+        em.getTransaction().commit();
+        System.out.println("Удалена компания с id = " + id);
     }
 }

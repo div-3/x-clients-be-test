@@ -1,6 +1,7 @@
 package db;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import model.db.CompanyEntity;
 import model.db.EmployeeEntity;
@@ -10,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Queue;
 
 public class EmployeeRepositoryHiber implements EmployeeRepository{
     private EntityManager em;
@@ -43,6 +45,10 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
 //        Timestamp tmp = Timestamp.valueOf(LocalDateTime.now());
 //        e.setCreateTimestamp(tmp);
 //        e.setChangeTimestamp(tmp);
+        int lastId = getLast().getId();
+        e.setId(++lastId);
+
+        //Сохранение сотрудника в БД
         em.getTransaction().begin();
         em.persist(e);
         em.getTransaction().commit();
@@ -54,16 +60,23 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
         e.setChangeTimestamp(Timestamp.valueOf(LocalDateTime.now()));
         em.getTransaction().begin();
         em.persist(e);
-        em.getTransaction().commit();
+//        em.getTransaction().commit();
         return 0;
     }
 
     @Override
     public void deleteById(int id) {
+        EmployeeEntity employee = em.find(EmployeeEntity.class, id);
+        em.getTransaction().begin();
+        em.remove(employee);
+        em.getTransaction().commit();
+        System.out.println("Удален сотрудник с id = " + id);
+    }
+
+    @Override
+    public EmployeeEntity getLast() {
         TypedQuery<EmployeeEntity> query = em.createQuery(
-                "DELETE e FROM EmployeeEntity e WHERE e.id =:id", EmployeeEntity.class);
-        query.setParameter("id", id);
-        int count = query.executeUpdate();
-        System.out.println("Удален сотрудник с id = " + id + ", количество = " + count);
+                "SELECT e FROM EmployeeEntity e ORDER BY e.id DESC LIMIT 1", EmployeeEntity.class);
+        return query.getSingleResult();
     }
 }

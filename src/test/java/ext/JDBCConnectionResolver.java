@@ -21,11 +21,13 @@ public class JDBCConnectionResolver implements ParameterResolver, AfterAllCallba
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        Properties properties = getProperties(propFilePath);
-        String connectionString = properties.getProperty("connectionString");
-        String user = properties.getProperty("user");
-        String password = properties.getProperty("password");
+        connection = (Connection) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(KEY);
         try {
+            if (connection != null) return connection;
+            Properties properties = getProperties(propFilePath);
+            String connectionString = properties.getProperty("connectionString");
+            String user = properties.getProperty("user");
+            String password = properties.getProperty("password");
             connection = DriverManager.getConnection(connectionString, user, password);
             if (!connection.isClosed()) System.out.println("Соединение открыто");
         } catch (SQLException e) {

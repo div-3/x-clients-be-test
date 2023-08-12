@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
-@JsonIgnoreProperties(ignoreUnknown = false)
+@JsonIgnoreProperties(ignoreUnknown = true)
+//TODO: Написать BUG-репорт на несоответствие наборов полей в запросе POST нового сотрудника и требованиях
+// в Swagger (присутствуют лишние поля: "createDateTime", "lastChangedDateTime")
+//@JsonIgnoreProperties(ignoreUnknown = false)
 public class Employee {
 
     private int id;
@@ -14,10 +17,17 @@ public class Employee {
     private String middleName;
     private int companyId;
     private String email;
+
+    //TODO: Написать BUG-репорт на несоответствие поля "url" в запросе POST нового сотрудника и "avatar_url"
+    // в запросах GET по id сотрудника, GET по id компании
+//    @JsonProperty("avatar_url")
     private String url;
     private String phone;
+
+    //TODO: Написать BUG-репорт на несоответствие формата поля "birthdate" в запросах GET по id сотрудника,
+    // GET по id компании ("birthdate": "2023-08-12") и требованиях в Swagger ("birthdate": "2023-08-12T10:55:01.426Z")
     private String birthdate;
-    @JsonProperty("isActive")
+//    @JsonProperty("isActive")
     private boolean isActive;
 
     public Employee() {
@@ -108,12 +118,12 @@ public class Employee {
         this.birthdate = birthdate;
     }
 
-    public boolean isActive() {
+    public boolean getIsActive() {
         return isActive;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     @Override

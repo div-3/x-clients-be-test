@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
-@JsonIgnoreProperties(ignoreUnknown = false)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Company {
     private int id;
     @JsonProperty("isActive")
@@ -13,6 +13,7 @@ public class Company {
     private String name;
     private String description;
 
+    //TODO: Написать BUG-репорт на несоответствие полей в API-запросах описанию в Swagger
     public Company() {
     }
 

@@ -1,7 +1,7 @@
 package ext;
 
-import api.CompanyService;
-import api.CompanyServiceImpl;
+import api.EmployeeService;
+import api.EmployeeServiceImpl;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -11,11 +11,11 @@ import java.util.Properties;
 
 import static ext.CommonHelper.getProperties;
 
-public class CompanyServiceResolver implements ParameterResolver {
+public class EmployeeServiceResolver implements ParameterResolver {
     private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        if (parameterContext.getParameter().getType().equals(CompanyService.class)) return true;
+        if (parameterContext.getParameter().getType().equals(EmployeeService.class)) return true;
         return false;
     }
 
@@ -23,6 +23,6 @@ public class CompanyServiceResolver implements ParameterResolver {
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         Properties properties = getProperties(PROPERTIES_FILE_PATH);
         String baseUri = properties.getProperty("baseURI");
-        return new CompanyServiceImpl(baseUri);
+        return new EmployeeServiceImpl(baseUri);
     }
 }
