@@ -13,7 +13,7 @@ import java.util.*;
 
 import static io.restassured.RestAssured.given;
 
-public class EmployeeServiceImpl implements EmployeeService{
+public class EmployeeServiceImpl implements EmployeeService {
     private final static String propertiesFilePath = "src/main/resources/API_x_client.properties";
     private Properties properties;
     private String uri;
@@ -51,7 +51,8 @@ public class EmployeeServiceImpl implements EmployeeService{
                 .response()
                 .then()
                 .extract()
-                .body().as(new TypeRef<List<Employee>>() {});
+                .body().as(new TypeRef<List<Employee>>() {
+                });
     }
 
     @Override
@@ -87,12 +88,13 @@ public class EmployeeServiceImpl implements EmployeeService{
                 .response()
                 .then()
                 .extract()
-                .body().as(new TypeRef<Employee>() {});
+                .body().as(new TypeRef<Employee>() {
+                });
     }
 
     @Override
     public int create(Employee employee) throws IOException {
-        int id = given()
+        return given()
                 .log().all()
                 .headers(headers)
                 .baseUri(uri + "/employee")
@@ -105,11 +107,31 @@ public class EmployeeServiceImpl implements EmployeeService{
                 .statusCode(201)
                 .contentType("application/json; charset=utf-8")
                 .extract().path("id");
-        return id;
+    }
+
+    @Override
+    public int update(Employee employee) {
+        return given()
+                .log().all()
+                .headers(headers)
+                .baseUri(uri + "/employee" + "/" + employee.getId())
+                .contentType("application/json; charset=utf-8")
+                .body("{\"lastName\": \"" + employee.getLastName() + "\"," +
+                        "\"email\": \"" + employee.getEmail() + "\"," +
+                        "\"url\": \"" + employee.getUrl() + "\"," +
+                        "\"phone\": \"" + employee.getPhone() + "\"," +
+                        "\"isActive\": " + employee.getIsActive() + "}")
+                .when()
+                .patch()
+                .then()
+                .log().all()
+//                .statusCode(201)
+                .contentType("application/json; charset=utf-8")
+                .extract().path("id");
     }
 
 
-//    @Override
+    //    @Override
     public int create(String name, String description) throws IOException {
         return given()
                 .log().ifValidationFails()

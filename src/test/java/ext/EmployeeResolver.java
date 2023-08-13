@@ -30,9 +30,11 @@ public class EmployeeResolver implements ParameterResolver, AfterAllCallback {
 
         employeeRepository = new EmployeeRepositoryHiber(em);
         try {
-            int testNum = parameterContext.findAnnotation(TestNum.class).get().testNum();
-            int companyId = (int) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(TEST_NUM_COMPANY_GLOBAL_KEY + testNum);
-            if (companyId == 0) return null;
+            int companyId = 0;
+            if (parameterContext.isAnnotated(TestNum.class)){
+                int testNum = parameterContext.findAnnotation(TestNum.class).get().testNum();
+                companyId = (int) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(TEST_NUM_COMPANY_GLOBAL_KEY + testNum);
+            }
             EmployeeEntity employee= employeeRepository.create(companyId);
             employeeId = employee.getId();
             return employee;

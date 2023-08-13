@@ -28,6 +28,7 @@ import static ext.IsCompanyEqual.isEqual;
 import static ext.IsEmployeeEqual.isEqual;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /*
@@ -35,14 +36,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * 1. Позитивные:
  * 1.1 Добавление нового сотрудника к компании +
  * 1.2 Получение списка сотрудников компании +
- * 1.3 Получение сотрудника по id
- * 1.4 Изменение информации о сотруднике (lastName)
- * 1.5 Изменение информации о сотруднике (email)
- * 1.6 Изменение информации о сотруднике (url)
- * 1.7 Изменение информации о сотруднике (phone)
- * 1.8 Изменение информации о сотруднике (isActive)
- * 1.9 Добавление 10 новых сотрудников к компании
- * 1.10 Удаление сотрудников при удалении компании
+ * 1.3 Получение сотрудника по id +
+ * 1.4 Изменение информации о сотруднике +
+ * 1.5 Добавление 10 новых сотрудников к компании
+ * 1.6 Удаление сотрудников при удалении компании
  *
  * 2. Негативные:
  * 2.1 Добавление нового сотрудника без авторизации
@@ -68,8 +65,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 //В тестах используется для работы: с БД - Hibernate, с API - RestAssured.
 @DisplayName("Employee business tests:")
-@ExtendWith({CompanyResolver.class, EmployeeResolver.class, CompanyServiceResolver.class, EmployeeServiceResolver.class,
-        HiberSessionResolver.class, HiberEmployeeRepositoryResolver.class, HiberCompanyRepositoryResolver.class})
+@ExtendWith({CompanyResolver.class,
+        EmployeeResolver.class,
+        CompanyServiceResolver.class,
+        EmployeeServiceResolver.class,
+        HiberSessionResolver.class,
+        HiberEmployeeRepositoryResolver.class,
+        HiberCompanyRepositoryResolver.class})
 public class EmployeeBusinessTest {
     private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
     private static Properties properties = new Properties();
@@ -79,6 +81,8 @@ public class EmployeeBusinessTest {
     private static Faker faker = new Faker(new Locale("ru"));
     private static List<Integer> companyToDelete = new ArrayList<>();
     private static List<Integer> employeeToDelete = new ArrayList<>();
+
+    private static int testNumCount = 0;
 
 
     //Инициализация Hibernate (EntityManagerFactory)
@@ -169,50 +173,73 @@ public class EmployeeBusinessTest {
                                       EmployeeRepository employeeRepository,
                                       @TestNum(testNum = 1) CompanyEntity company,
                                       @TestNum(testNum = 1) EmployeeEntity employee) throws SQLException, IOException {
-        System.out.println("---------------------------------------------------------------------------------");
-        System.out.println(company);
-        System.out.println(employee);
 
+        Employee employeeApi = employeeApiService.getById(employee.getId());
+
+        assertThat(employeeApi, isEqual(employee));
     }
 
-
     @Test
-    public void createTest(EmployeeRepository employeeRepository, CompanyRepository companyRepository) throws SQLException {
-        System.out.println(employeeRepository.getLast());
-        String name = faker.company().name();
-        int compId = companyRepository.create(name);
-        System.out.println("CompId = " + compId);
-        CompanyEntity company = companyRepository.getById(compId);
-        EmployeeEntity employeeEntity = new EmployeeEntity
-                (1, true, Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now()),
-                        "Иван", "Д", "В", "89246010000",
-                        "div@mail.ru", null, null, company);
-        int empId = employeeRepository.create(employeeEntity);
-        System.out.println("Создан сотрудник: empId = " + empId + "Данные: " + employeeEntity.toString());
-        employeeRepository.deleteById(empId);
-        companyRepository.deleteById(compId);
+    @Tag("Positive")
+    @DisplayName("1.4 Изменение информации о сотруднике")
+    public void shouldUpdateEmployeeLastName(EmployeeService employeeApiService,
+                                      CompanyRepository companyRepository,
+                                      EmployeeRepository employeeRepository,
+                                      @TestNum(testNum = 2) CompanyEntity company,
+                                      @TestNum(testNum = 2) EmployeeEntity employee) throws SQLException, IOException {
+
+        Employee employeeApi = employeeApiService.getById(employee.getId());
+
+        employeeApi.setLastName(faker.name().lastName());
+        employeeApi.setEmail(faker.internet().emailAddress("b" + faker.number().digits(6)));
+        employeeApi.setUrl(faker.internet().url());
+        employeeApi.setPhone(faker.number().digits(10));
+        employeeApi.setIsActive(!employeeApi.getIsActive());
+
+        employeeApiService.logIn(login, password);
+        int id = employeeApiService.update(employeeApi);
+        //TODO: Написать BUG-репорт, что при успешном обновлении информации о сотруднике
+        // возвращается SC 201 вместо SC 200, как указано в Swagger
+
+        //TODO: Написать BUG-репорт, что при успешном обновлении информации о сотруднике
+        // возвращается тело не с полями, отличающимися от Swagger
+
+        assertThat(employeeApi, isEqual(employeeRepository.getById(id)));
+        //TODO: Написать BUG-репорт, что при обновлении employee не обновляется поле phone.
     }
 
 
     @Test
     @Tag("Positive")
-    @DisplayName("1.2 Получение списка компаний GET")
-    public void shouldGetCompanyList(CompanyService apiService, CompanyRepository repository) throws SQLException, IOException {
-        List<CompanyEntity> companiesDb = repository.getAll();
-        List<Company> companiesApi = apiService.getAll();
+    @DisplayName("1.5 Добавление 5 новых сотрудников к компании")
+    public void shouldAdd5Employee(EmployeeService employeeApiService,
+                                             CompanyRepository companyRepository,
+                                             EmployeeRepository employeeRepository,
+                                             @TestNum(testNum = 3) CompanyEntity company) throws SQLException, IOException {
 
-        //Сравнение листов компаний
-        assertEquals(companiesDb.size(), companiesApi.size());
+        //Генерируем и создаём через API Employee для определённой Company
+        List<Integer> employeeToCreateId = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Employee empl = employeeApiService.generateEmployee();  //Генерируем Employee без id и companyId
+            empl.setCompanyId(company.getId());     //Устанавливаем companyId
 
-        //Перекладываем в Map для быстрого поиска
-        Map<Integer, CompanyEntity> mapDb = new HashMap<>();
-        for (CompanyEntity c : companiesDb) {
-            mapDb.put(c.getId(), c);
+            employeeApiService.logIn(login, password);
+            int id = employeeApiService.create(empl);
+            empl.setId(id);                         //Устанавливаем Id
+            employeeToCreateId.add(id);
+            employeeToDelete.add(id);
         }
 
-//        companiesApi.get(0).setActive(false);     //Проверка работы теста
-        for (Company c : companiesApi) {
-            assertThat(c, isEqual(mapDb.get(c.getId())));
+        List<EmployeeEntity> employeeEntityCreated = employeeRepository.getAllByCompanyId(company.getId());
+        List<Integer> employeeCreatedId = new ArrayList<>();
+        for (EmployeeEntity e : employeeEntityCreated) {
+            employeeCreatedId.add(e.getId());
         }
+
+        assertEquals(employeeToCreateId.size(), employeeCreatedId.size());
+        assertTrue(employeeToCreateId.containsAll(employeeCreatedId));
+
+
     }
+
 }

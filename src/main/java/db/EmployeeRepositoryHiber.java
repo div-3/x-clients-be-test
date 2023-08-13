@@ -28,9 +28,11 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
     @Override
     public List<EmployeeEntity> getAllByCompanyId(int companyId) throws SQLException {
         TypedQuery<EmployeeEntity> query = em.createQuery(
-                "SELECT e FROM EmployeeEntity e WHERE e.companyId = :id", EmployeeEntity.class);
+                "SELECT e FROM EmployeeEntity e WHERE companyId = :id", EmployeeEntity.class);
         query.setParameter("id", companyId);
         return query.getResultList();
+
+
     }
 
     @Override
@@ -69,7 +71,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
         employee.setLastName(name[2]);
         employee.setMiddleName(name[1]);
 
-        employee.setCompany(em.find(CompanyEntity.class, companyId));
+        employee.setCompanyId(companyId);
 
         employee.setEmail(faker.internet().emailAddress("a" + faker.number().digits(5)));
 

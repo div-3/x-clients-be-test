@@ -60,7 +60,7 @@ public class CompanyRepositoryJDBC implements CompanyRepository {
                 Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
         preparedStatement.setString(1, name);
         preparedStatement.setString(2, description);
-        preparedStatement.executeUpdate();
+        preparedStatement.execute();
         ResultSet createdId = preparedStatement.getGeneratedKeys();
         createdId.next();
         return createdId.getInt(1);

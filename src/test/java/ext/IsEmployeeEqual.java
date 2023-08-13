@@ -25,7 +25,7 @@ public class IsEmployeeEqual extends TypeSafeMatcher<Employee> {
         if (!isStringsEqual(employeeEntityDB.getFirstName(),    employee.getFirstName())) errors.add("firstName");
         if (!isStringsEqual(employeeEntityDB.getLastName(),     employee.getLastName())) errors.add("lastName");
         if (!isStringsEqual(employeeEntityDB.getMiddleName(),   employee.getMiddleName())) errors.add("middleName");
-        if (employeeEntityDB.getCompany().getId() !=            employee.getCompanyId()) errors.add("companyId");
+        if (employeeEntityDB.getCompanyId() !=                  employee.getCompanyId()) errors.add("companyId");
         if (!isStringsEqual(employeeEntityDB.getEmail(),        employee.getEmail())) errors.add("email");
         if (!isStringsEqual(employeeEntityDB.getAvatarUrl(),    employee.getUrl())) errors.add("url");
         if (!isStringsEqual(employeeEntityDB.getPhone(),        employee.getPhone())) errors.add("phone");

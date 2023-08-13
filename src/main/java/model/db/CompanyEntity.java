@@ -42,9 +42,9 @@ public class CompanyEntity implements Serializable {
     private Timestamp deletedAt;
 
     //Связь с внешней таблицей
-    @JsonIgnore //чтобы не попасть на зацикливание при mapping в Jackson. Hibernate нормально переваривает
-    @OneToMany(mappedBy = "company")
-    private List<EmployeeEntity> employees;
+//    @JsonIgnore //чтобы не попасть на зацикливание при mapping в Jackson. Hibernate нормально переваривает
+//    @OneToMany(mappedBy = "company")
+//    private List<EmployeeEntity> employees;
 
 
     public CompanyEntity() {

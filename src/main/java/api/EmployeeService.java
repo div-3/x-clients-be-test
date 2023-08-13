@@ -16,7 +16,10 @@ public interface EmployeeService {
 
     int create(Employee employee) throws IOException;
 
+    int update(Employee employee);
+
     void deleteById(int id);
+
     void deleteByCompanyId(int companyId);
 
     Employee edit(Employee employee);
