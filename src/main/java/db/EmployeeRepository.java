@@ -12,6 +12,7 @@ public interface EmployeeRepository {
         EmployeeEntity getById(int id) throws SQLException;
 
         int create(EmployeeEntity e) throws SQLException;
+        EmployeeEntity create(int companyId) throws SQLException;
 
         int update(EmployeeEntity e) throws SQLException;
 

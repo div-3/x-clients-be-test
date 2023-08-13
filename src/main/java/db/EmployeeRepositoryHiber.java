@@ -3,18 +3,23 @@ package db;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
+import model.api.Employee;
 import model.db.CompanyEntity;
 import model.db.EmployeeEntity;
+import net.datafaker.Faker;
 import org.hamcrest.core.AllOf;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 
 public class EmployeeRepositoryHiber implements EmployeeRepository{
     private EntityManager em;
+    private Faker faker = new Faker(new Locale("RU"));
 
     public EmployeeRepositoryHiber(EntityManager em) {
         this.em = em;
@@ -42,9 +47,6 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
 
     @Override
     public int create(EmployeeEntity e) throws SQLException {
-//        Timestamp tmp = Timestamp.valueOf(LocalDateTime.now());
-//        e.setCreateTimestamp(tmp);
-//        e.setChangeTimestamp(tmp);
         int lastId = getLast().getId();
         e.setId(++lastId);
 
@@ -56,11 +58,48 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
     }
 
     @Override
+    public EmployeeEntity create(int companyId) throws SQLException {
+
+        EmployeeEntity employee = new EmployeeEntity();
+        int lastId = getLast().getId();
+        employee.setId(lastId + 1);
+
+        String[] name = faker.name().nameWithMiddle().split(" ");
+        employee.setFirstName(name[0]);
+        employee.setLastName(name[2]);
+        employee.setMiddleName(name[1]);
+
+        employee.setCompany(em.find(CompanyEntity.class, companyId));
+
+        employee.setEmail(faker.internet().emailAddress("a" + faker.number().digits(5)));
+
+        employee.setAvatarUrl(faker.internet().url());
+//        employee.setPhone(faker.phoneNumber().phoneNumber()); //Не проходит по формату
+
+        //TODO: Написать BUG-репорт - при создании с неправильным телефоном возвращается ошибка 500 вместо 400
+        employee.setPhone(faker.number().digits(10));
+
+        Timestamp tmp = Timestamp.valueOf(LocalDateTime.now());
+        employee.setCreateTimestamp(tmp);
+        employee.setChangeTimestamp(tmp);
+
+        employee.setBirthdate(Date.valueOf(faker.date().birthday("YYYY-MM-dd")));
+
+        employee.setActive(true);
+
+        //Сохранение сотрудника в БД
+        em.getTransaction().begin();
+        em.persist(employee);
+        em.getTransaction().commit();
+        return employee;
+    }
+
+    @Override
     public int update(EmployeeEntity e) throws SQLException {
         e.setChangeTimestamp(Timestamp.valueOf(LocalDateTime.now()));
         em.getTransaction().begin();
         em.persist(e);
-//        em.getTransaction().commit();
+        em.getTransaction().commit();
         return 0;
     }
 

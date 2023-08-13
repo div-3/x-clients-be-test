@@ -44,8 +44,8 @@ public class IsEmployeeEqual extends TypeSafeMatcher<Employee> {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("EmployeeEntity from DB: " + employeeEntityDB.toString()
-                + " Errors in fields:" + errors.toString());
+        description.appendText("Errors in fields:" + errors.toString() +
+                ". Expected EmployeeEntity from DB: " + employeeEntityDB.toString());
     }
 
     public static Matcher<Employee> isEqual(EmployeeEntity employeeEntityDB){
