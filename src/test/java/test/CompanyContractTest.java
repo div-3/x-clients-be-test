@@ -233,9 +233,6 @@ public class CompanyContractTest {
         assertEquals(newName, companyEntityAfterPatch.getName());
         assertEquals(newDescription, companyEntityAfterPatch.getDescription());
         assertTrue(companyEntityAfterPatch.isActive());
-        //Проверка, что дата изменения не равна дате создания
-//        assertNotEquals(companyEntityAfterPatch.getCreateDateTime(), companyEntityAfterPatch.getChangedTimestamp());
-//        assertNull(companyEntityAfterPatch.getDeletedAt());
 
         //Проверка, что в БД по ID компания с изменёнными данными
         CompanyEntity companyEntityById = repository.getById(id);
@@ -244,6 +241,7 @@ public class CompanyContractTest {
         assertEquals(newName, companyEntityById.getName());
         assertEquals(newDescription, companyEntityById.getDescription());
         assertTrue(companyEntityById.isActive());
+
         //Проверка, что дата изменения не равна дате создания
         assertNotEquals(companyEntityById.getCreateDateTime(), companyEntityById.getChangedTimestamp());
         assertNull(companyEntityById.getDeletedAt());
@@ -298,15 +296,16 @@ public class CompanyContractTest {
 
     private static int createAndGetNewCompanyId(String token, String companyName, String companyDescription) {
         return given()
-                .log().ifValidationFails()
+                .log().all()
                 .baseUri(baseUriString + basePathString)
                 .header("x-client-token", token)
                 .contentType("application/json; charset=utf-8")
-                .body("{\"name\": \"" + companyName + "\",\"description\": \"" + companyDescription + "\"}")
+//                .body("{\"name\": \"" + companyName + "\",\"description\": \"" + companyDescription + "\"}")
+                .body("{\"name\": \"" + "Test17" + "\",\"description\": \"" + companyDescription + "\"}")
                 .when()
                 .post()
                 .then()
-                .log().ifValidationFails()
+                .log().all()
                 .statusCode(201)
                 .contentType("application/json; charset=utf-8")
                 .extract()

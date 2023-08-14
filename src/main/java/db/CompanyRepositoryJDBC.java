@@ -1,6 +1,7 @@
 package db;
 
 import model.db.CompanyEntity;
+import org.postgresql.util.PSQLException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -22,14 +23,14 @@ public class CompanyRepositoryJDBC implements CompanyRepository {
 
     @Override
     public List<CompanyEntity> getAll(boolean isActive) throws SQLException {
-        String getAllQuery = "select * from company where \"isActive\" = true;";
+        String getAllQuery = "select * from company where \"is_active\" = true;";
         ResultSet resultSet = connection.createStatement().executeQuery(getAllQuery);
         return getCompanyDBEntitiesFromResultSet(resultSet);
     }
 
     @Override
     public CompanyEntity getLast() throws SQLException {
-        String getAllQuery = "select * from company where \"isActive\" = true order by id desc limit 1;";
+        String getAllQuery = "select * from company order by id desc limit 1;";
         ResultSet resultSet = connection.createStatement().executeQuery(getAllQuery);
         return getCompanyDBEntitiesFromResultSet(resultSet).get(0);
     }
@@ -55,15 +56,26 @@ public class CompanyRepositoryJDBC implements CompanyRepository {
 
     @Override
     public int create(String name, String description) throws SQLException {
-        String insertQuery = "insert into company (\"name\", \"description\") values (?, ?);";
-        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery,
-                Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
-        preparedStatement.setString(1, name);
-        preparedStatement.setString(2, description);
-        preparedStatement.execute();
-        ResultSet createdId = preparedStatement.getGeneratedKeys();
-        createdId.next();
-        return createdId.getInt(1);
+        int count = 0;
+        while (count < 10){
+            String insertQuery = "insert into company (\"name\", \"description\", \"id\") values (?, ?, ?);";
+            PreparedStatement preparedStatement = connection.prepareStatement(insertQuery,
+                    Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, description);
+            int id = getLast().getId() + 1;     //Получение id последне компании, чтобы создать после неё
+            preparedStatement.setInt(3, id);
+            try{
+                preparedStatement.executeUpdate();
+                ResultSet createdId = preparedStatement.getGeneratedKeys();
+                createdId.next();
+                return createdId.getInt(1);
+            }
+            catch (PSQLException e){
+                count++;
+            }
+        }
+        return 0;
     }
 
     @Override

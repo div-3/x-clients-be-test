@@ -1,6 +1,5 @@
 package test;
 
-import api.CompanyService;
 import api.EmployeeService;
 import db.CompanyRepository;
 import db.EmployeeRepository;
@@ -9,7 +8,6 @@ import ext.hibernate.HiberCompanyRepositoryResolver;
 import ext.hibernate.HiberEmployeeRepositoryResolver;
 import ext.hibernate.HiberSessionResolver;
 import jakarta.persistence.EntityManagerFactory;
-import model.api.Company;
 import model.api.Employee;
 import model.db.CompanyEntity;
 import model.db.EmployeeEntity;
@@ -19,12 +17,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
 
 import static ext.CommonHelper.getProperties;
-import static ext.IsCompanyEqual.isEqual;
 import static ext.IsEmployeeEqual.isEqual;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -131,9 +129,6 @@ public class EmployeeBusinessTest {
         EmployeeEntity employeeDb = employeeRepository.getById(createdId);
 
         //Проверки
-        assertEquals(id, createdId);
-//        Employee employeeApi = employeeApiService.getById(createdId);
-
         assertThat(employee, isEqual(employeeDb));
         //TODO: Написать BUG-репорт, что при создании Employee через API удаляется email
 

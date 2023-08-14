@@ -1,11 +1,10 @@
 package model.db;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Objects;
 
 /*Для Hibernate надо:
