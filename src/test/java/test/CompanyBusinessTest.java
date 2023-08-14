@@ -8,23 +8,16 @@ import ext.hibernate.HiberSessionResolver;
 import jakarta.persistence.EntityManagerFactory;
 import model.api.Company;
 import model.db.CompanyEntity;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import net.datafaker.Faker;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
-import static ext.IsCompanyEqual.isEqual;
 import static ext.CommonHelper.getProperties;
-
-
+import static ext.IsCompanyEqual.isEqual;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -49,10 +42,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith({CompanyServiceResolver.class, HiberSessionResolver.class, HiberCompanyRepositoryResolver.class})
 public class CompanyBusinessTest {
     private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
+    Faker faker = new Faker(new Locale("RU"));
     private static Properties properties = new Properties();
     private static String baseUriString;
     private static String login;
     private static String password;
+    private static List<Integer> companyToDelete = new ArrayList<>();
 
 
     //Инициализация Hibernate (EntityManagerFactory)
@@ -64,15 +59,28 @@ public class CompanyBusinessTest {
         password = properties.getProperty("password");
     }
 
+    //Очистка тестовых данных
+    @AfterAll
+    public static void cleanTD(CompanyRepository companyRepository) {
+        for (int i : companyToDelete) {
+            companyRepository.deleteById(i);
+        }
+    }
+
     @Test
     @Tag("Positive")
     @DisplayName("1.1 Добавление новой компании")
     public void shouldAddCompany(CompanyService apiService, CompanyRepository repository) throws SQLException, IOException {
         apiService.logIn(login, password);
-        int id = apiService.create("TestCompany", "TestDescription");
+        String name = faker.company().name();
+        String description = faker.company().profession();
+
+        int id = apiService.create(name, description);
+        companyToDelete.add(id);
+
         CompanyEntity newCompanyDb = repository.getById(id);
-        assertEquals("TestCompany", newCompanyDb.getName());
-        assertEquals("TestDescription", newCompanyDb.getDescription());
+        assertEquals(name, newCompanyDb.getName());
+        assertEquals(description, newCompanyDb.getDescription());
     }
 
     @Test

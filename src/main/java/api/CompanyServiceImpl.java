@@ -1,21 +1,17 @@
 package api;
 
 import io.restassured.common.mapper.TypeRef;
-import io.restassured.filter.log.LogDetail;
 import model.api.Company;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
 
 public class CompanyServiceImpl implements CompanyService{
     private String uri;
@@ -72,8 +68,10 @@ public class CompanyServiceImpl implements CompanyService{
         return given()
                 .log().ifValidationFails()
                 .headers(headers)
+                .header("accept","application/json")
                 .baseUri(uri + "/company")
-                .contentType("application/json; charset=utf-8")
+//                .contentType("application/json; charset=utf-8")
+                .contentType("application/json")
                 .body("{\"name\": \"" + name + "\",\"description\": \"" + description + "\"}")
                 .when()
                 .post()

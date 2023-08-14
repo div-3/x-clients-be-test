@@ -19,4 +19,6 @@ public interface EmployeeRepository {
         void deleteById(int id);
         EmployeeEntity getLast();
 
+        List<EmployeeEntity> getAll();
+
 }

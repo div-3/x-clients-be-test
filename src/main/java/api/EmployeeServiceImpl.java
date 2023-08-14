@@ -1,8 +1,6 @@
 package api;
 
 import io.restassured.common.mapper.TypeRef;
-import io.restassured.filter.log.LogDetail;
-import model.api.Company;
 import model.api.Employee;
 import net.datafaker.Faker;
 
@@ -60,7 +58,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee();
         employee.setId(0);
         String[] name = faker.name().nameWithMiddle().split(" ");
-        employee.setFirstName(name[0]);
+        employee.setFirstName("TS" + name[0]);
         employee.setLastName(name[2]);
         employee.setMiddleName(name[1]);
         employee.setCompanyId(0);
@@ -125,7 +123,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .patch()
                 .then()
                 .log().all()
-//                .statusCode(201)
+                .statusCode(201)
                 .contentType("application/json; charset=utf-8")
                 .extract().path("id");
     }
@@ -165,24 +163,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void logIn(String login, String password) {
-//        this.token = given()
-//                .baseUri(uri + "/auth/login")
-//                .log().ifValidationFails(LogDetail.ALL)             //Логирование при ошибке
-//                .contentType("application/json; charset=utf-8")
-//                .body("{\"username\": \"" + login + "\", \"password\": \"" + password + "\"}")
-//                .when()
-//                .post()
-//                .then()
-//                .log().ifValidationFails()
-//                .statusCode(201)                                    //Проверка статус-кода
-//                .contentType("application/json; charset=utf-8")     //Проверка content-type
-//                .extract()
-//                .path("userToken").toString();
         this.token = authService.logIn(login, password);
         if (!token.equals("")) {
-//            isAuth = true;
             //Если залогинены, то добавляем токен в headers
             headers.put("x-client-token", token);
+            this.login = login;
         }
     }
 
@@ -190,9 +175,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void logOut() {
         authService.logOut(login);
         token = "";
-//        isAuth = false;
         //Если разлогинены, то убираем токен из headers
         headers.remove("x-client-token");
+        login = "";
     }
 
 

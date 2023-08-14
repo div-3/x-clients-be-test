@@ -1,13 +1,9 @@
 package db;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
-import model.api.Employee;
-import model.db.CompanyEntity;
 import model.db.EmployeeEntity;
 import net.datafaker.Faker;
-import org.hamcrest.core.AllOf;
 
 import java.sql.Date;
 import java.sql.SQLException;
@@ -15,7 +11,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
-import java.util.Queue;
 
 public class EmployeeRepositoryHiber implements EmployeeRepository{
     private EntityManager em;
@@ -31,8 +26,6 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
                 "SELECT e FROM EmployeeEntity e WHERE companyId = :id", EmployeeEntity.class);
         query.setParameter("id", companyId);
         return query.getResultList();
-
-
     }
 
     @Override
@@ -119,5 +112,11 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
         TypedQuery<EmployeeEntity> query = em.createQuery(
                 "SELECT e FROM EmployeeEntity e ORDER BY e.id DESC LIMIT 1", EmployeeEntity.class);
         return query.getSingleResult();
+    }
+
+    @Override
+    public List<EmployeeEntity> getAll() {
+        TypedQuery<EmployeeEntity> query = em.createQuery("SELECT e FROM EmployeeEntity e", EmployeeEntity.class);
+        return query.getResultList();
     }
 }
