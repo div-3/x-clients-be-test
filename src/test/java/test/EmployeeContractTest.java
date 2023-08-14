@@ -1,5 +1,6 @@
 package test;
 
+import api.AuthService;
 import api.EmployeeService;
 import db.CompanyRepository;
 import db.EmployeeRepository;
@@ -7,6 +8,7 @@ import ext.*;
 import ext.hibernate.HiberCompanyRepositoryResolver;
 import ext.hibernate.HiberEmployeeRepositoryResolver;
 import ext.hibernate.HiberSessionResolver;
+import io.restassured.common.mapper.TypeRef;
 import jakarta.persistence.EntityManagerFactory;
 import model.api.Employee;
 import model.db.CompanyEntity;
@@ -17,13 +19,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
 
 import static ext.CommonHelper.getProperties;
 import static ext.IsEmployeeEqual.isEqual;
+import static io.restassured.RestAssured.given;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,28 +35,27 @@ import static org.junit.jupiter.api.Assertions.*;
  * 1.1 Добавление нового сотрудника к компании +
  * 1.2 Получение списка сотрудников компании +
  * 1.3 Получение сотрудника по id +
- * 1.4 Изменение информации о сотруднике +
- * 1.5 Добавление 5 новых сотрудников к компании +
+ * 1.4 Изменение информации о сотруднике+
  *
  * 2. Негативные:
- * 2.1 Добавление нового сотрудника без авторизации (добавить в контрактные) +
- * 2.2 Добавление нового сотрудника к отсутствующей компании (добавить в контрактные) +
- * 2.3 Добавление уже существующего сотрудника (все поля) +
- * 2.4 Добавление сотрудника на уже существующий id +
- * 2.5 Изменение информации о сотруднике без авторизации +
- * 2.6 Изменение информации о сотруднике по несуществующему id +
- * 2.7 Получение списка сотрудников несуществующей компании +
- * 2.8 Получение списка сотрудников компании в которой нет сотрудников +
- * 2.9 Получение сотрудника по несуществующему id +
- * 2.10 Добавление сотрудника без обязательного поля (id) +
- * 2.11 Добавление сотрудника без обязательного поля (firstName) +
- * 2.12 Добавление сотрудника без обязательного поля (lastName) +
- * 2.13 Добавление сотрудника без обязательного поля (companyId) +
- * 2.14 Добавление сотрудника без необязательного поля (middleName) +
- * 2.15 Добавление сотрудника без необязательного поля (email) +
- * 2.16 Добавление сотрудника без необязательного поля (url) +
- * 2.17 Добавление сотрудника без необязательного поля (phone) +
- * 2.18 Добавление сотрудника без необязательного поля (birthdate) +
+ * 2.1 Добавление нового сотрудника без авторизации (добавить в контрактные)
+ * 2.2 Добавление нового сотрудника к отсутствующей компании (добавить в контрактные)
+ * 2.3 Добавление уже существующего сотрудника (все поля)
+ * 2.4 Добавление сотрудника на уже существующий id
+ * 2.5 Изменение информации о сотруднике без авторизации
+ * 2.6 Изменение информации о сотруднике по несуществующему id
+ * 2.7 Получение списка сотрудников несуществующей компании
+ * 2.8 Получение списка сотрудников компании в которой нет сотрудников
+ * 2.9 Получение сотрудника по несуществующему id
+ * 2.10 Добавление сотрудника без обязательного поля (id)
+ * 2.11 Добавление сотрудника без обязательного поля (firstName)
+ * 2.12 Добавление сотрудника без обязательного поля (lastName)
+ * 2.13 Добавление сотрудника без обязательного поля (companyId)
+ * 2.14 Добавление сотрудника без необязательного поля (middleName)
+ * 2.15 Добавление сотрудника без необязательного поля (email)
+ * 2.16 Добавление сотрудника без необязательного поля (url)
+ * 2.17 Добавление сотрудника без необязательного поля (phone)
+ * 2.18 Добавление сотрудника без необязательного поля (birthdate)
  * */
 
 
@@ -68,12 +68,15 @@ import static org.junit.jupiter.api.Assertions.*;
         HiberSessionResolver.class,
         HiberEmployeeRepositoryResolver.class,
         HiberCompanyRepositoryResolver.class})
-public class EmployeeBusinessTest {
+public class EmployeeContractTest {
     private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
+    private final static String ERROR_RESPONSE_BODY_SCHEMA = "{\n\"$schema\": \"http://json-schema.org/draft-04/schema#\",\n\"type\": \"object\",\n\"properties\": {\n\"statusCode\": {\n\"type\": \"integer\"\n},\n\"message\": {\n\"type\": \"string\"\n}\n},\n\"required\": [\n\"statusCode\",\n\"message\"\n]\n}";
     private static Properties properties = new Properties();
-    private static String baseUriString;
+    private static String baseUriString = "";
+    private static String basePathString = "";
     private static String login;
     private static String password;
+    private AuthService authService = AuthService.getInstance();
     private static Faker faker = new Faker(new Locale("ru"));
     private static List<Integer> companyToDelete = new ArrayList<>();
     private static List<Integer> employeeToDelete = new ArrayList<>();
@@ -86,6 +89,7 @@ public class EmployeeBusinessTest {
     public static void setUp(EntityManagerFactory emf) {
         properties = getProperties(PROPERTIES_FILE_PATH);
         baseUriString = properties.getProperty("baseURI");
+        basePathString = "/employee";
         login = properties.getProperty("login");
         password = properties.getProperty("password");
     }
@@ -114,14 +118,29 @@ public class EmployeeBusinessTest {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
-        final int id = employeeRepository.getLast().getId() + 1;
+        int id = employeeRepository.getLast().getId() + 1;
         Employee employee = employeeApiService.generateEmployee();
         employee.setId(id);
         employee.setCompanyId(companyId);
 
+        String token = authService.logIn(login, password);
+
         //Добавление Employee через API
-        employeeApiService.logIn(login, password);
-        int createdId = employeeApiService.create(employee);
+        int createdId = given()
+                .log().ifValidationFails()
+                .baseUri(baseUriString + basePathString)
+                .header("x-client-token", token)
+                .contentType("application/json; charset=utf-8")
+                .body(employee)
+                .when()
+                .post()
+                .then()
+                .log().ifValidationFails()
+                .statusCode(201)
+                .contentType("application/json; charset=utf-8")
+                .extract()
+                .path("id");
+
         employeeToDelete.add(createdId);
 
         EmployeeEntity employeeDb = employeeRepository.getById(createdId);
@@ -142,34 +161,72 @@ public class EmployeeBusinessTest {
     @DisplayName("1.2 Получение списка сотрудников компании")
     public void shouldGetEmployeeByCompanyId(EmployeeService employeeApiService,
                                              EmployeeRepository employeeRepository,
-                                             CompanyEntity company) throws SQLException, IOException {
+                                             @TestProperties(testNum = 1) CompanyEntity company,
+                                             @TestProperties(testNum = 1, itemCount = 3) List<EmployeeEntity> employeesBd) throws SQLException, IOException {
 
         int companyId = company.getId();
 
-        List<Employee> listBefore = employeeApiService.getAllByCompanyId(companyId);
+        List<Employee> employeesApi =
+                given()
+                        .log().ifValidationFails()
+                        .baseUri(baseUriString + basePathString)
+                        .param("company", companyId)
+                        .when()
+                        .get()
+                        .then()
+                        .statusCode(200)
+                        .log().ifValidationFails()
+                        .contentType("application/json; charset=utf-8")
+                        .extract()
+                        .body().as(new TypeRef<List<Employee>>() {
+                        });
+        assertEquals(employeesBd.size(), employeesApi.size());
 
-        assertEquals(0, listBefore.size());
-
-        //Создание объекта Employee с тестовыми данными для компании
-        EmployeeEntity employeeCreated = employeeRepository.create(companyId);
-        employeeToDelete.add(employeeCreated.getId());
-
-        List<Employee> listAfter = employeeApiService.getAllByCompanyId(companyId);
-
-        //Проверки:
-        assertEquals(1, listAfter.size());
-        assertThat(listAfter.get(0), isEqual(employeeCreated));
-        //TODO: Написать BUG-репорт, что при запросе Employee через API поле "url" меняется на "avatar_url"
+        //Т.к. это тесты контракта, то проверка ограничивается только проверкой
+        // формата ответа и сравнением длин массивов
+//
+//        //Сеты id из БД и API
+//        Set<Integer> empIdDb = new HashSet<>();
+//        for (EmployeeEntity e: employeesBd) {
+//            empIdDb.add(e.getId());
+//        }
+//        Set<Integer> empIdApi = new HashSet<>();
+//        for (Employee e: employeesApi) {
+//            empIdApi.add(e.getId());
+//        }
+//
+//        //Проверки:
+//        assertAll(
+//                () -> assertEquals(employeesBd.size(), employeesApi.size()),
+//                () -> assertTrue(empIdDb.containsAll(empIdApi))
+//        );
     }
 
     @Test
     @Tag("Positive")
     @DisplayName("1.3 Получение сотрудника по id")
     public void shouldGetEmployeeById(EmployeeService employeeApiService,
-                                      @TestProperties(testNum = 1) CompanyEntity company,
-                                      @TestProperties(testNum = 1) EmployeeEntity employee) throws SQLException, IOException {
+                                      @TestProperties(testNum = 2) CompanyEntity company,
+                                      @TestProperties(testNum = 2) EmployeeEntity employee) throws SQLException, IOException {
 
-        Employee employeeApi = employeeApiService.getById(employee.getId());
+        int id = employee.getId();
+        Employee employeeApi = given()
+                .baseUri(baseUriString + basePathString + "/" + id)
+                .log().ifValidationFails()
+                .header("accept", "application/json")
+                .when()
+                .get()
+                .then()
+                .log().ifValidationFails()
+                .extract()
+                .response()
+                .then()
+                .statusCode(200)
+                .contentType("application/json; charset=utf-8")
+                .extract()
+                .body().as(new TypeRef<Employee>() {
+                           }
+                );
 
         assertThat(employeeApi, isEqual(employee));
     }
@@ -179,58 +236,69 @@ public class EmployeeBusinessTest {
     @DisplayName("1.4 Изменение информации о сотруднике")
     public void shouldUpdateEmployeeLastName(EmployeeService employeeApiService,
                                              EmployeeRepository employeeRepository,
-                                             @TestProperties(testNum = 2) CompanyEntity company,
-                                             @TestProperties(testNum = 2) EmployeeEntity employee) throws SQLException, IOException {
+                                             @TestProperties(testNum = 3) CompanyEntity company,
+                                             @TestProperties(testNum = 3) EmployeeEntity employee) throws SQLException, IOException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
+        String lastName = faker.name().lastName();
+        String email = faker.internet().emailAddress("b" + faker.number().digits(6));
+        String url = faker.internet().url();
+        String phone = faker.number().digits(10);
+        boolean isActive = !employee.isActive();
 
-        employeeApi.setLastName(faker.name().lastName());
-        employeeApi.setEmail(faker.internet().emailAddress("b" + faker.number().digits(6)));
-        employeeApi.setUrl(faker.internet().url());
-        employeeApi.setPhone(faker.number().digits(10));
-        employeeApi.setIsActive(!employeeApi.getIsActive());
+        String token = authService.logIn(login, password);
 
-        employeeApiService.logIn(login, password);
-        int id = employeeApiService.update(employeeApi);
-        //TODO: Написать BUG-репорт, что при успешном обновлении информации о сотруднике
-        // возвращается SC 201 вместо SC 200, как указано в Swagger
+        int id = given()
+                .log().all()
+                .header("x-client-token", token)
+                .baseUri(baseUriString + basePathString + "/" + employeeApi.getId())
+                .contentType("application/json; charset=utf-8")
+                .body("{\"lastName\": \"" + lastName + "\"," +
+                        "\"email\": \"" + email + "\"," +
+                        "\"url\": \"" + url + "\"," +
+                        "\"phone\": \"" + phone + "\"," +
+                        "\"isActive\": " + isActive + "}")
+                .when()
+                .patch()
+                .then()
+                .log().all()
+                .statusCode(200)
+                .contentType("application/json; charset=utf-8")
+                .assertThat()
+                //Валидация схемы JSON:
+                //https://www.tutorialspoint.com/validate-json-schema-in-rest-assured
+                //Генератор схемы на основе JSON https://www.liquid-technologies.com/online-json-to-schema-converter
+                //1. Вариант со схемой в файле
+//                .body(matchesJsonSchemaInClasspath("employee_update_response.json"))
+                //2. Вариант со схемой в строке
+                .body(matchesJsonSchema("{\n" +
+                        "  \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n" +
+                        "  \"type\": \"object\",\n" +
+                        "  \"properties\": {\n" +
+                        "    \"id\": {\n" +
+//                        "      \"type\": \"string\"\n" +      //Проверка верификации схемы при неправильном формате
+                        "      \"type\": \"integer\"\n" +
+                        "    },\n" +
+                        "    \"isActive\": {\n" +
+                        "      \"type\": \"boolean\"\n" +
+                        "    },\n" +
+                        "    \"email\": {\n" +
+                        "      \"type\": \"string\"\n" +
+                        "    },\n" +
+                        "    \"url\": {\n" +
+                        "      \"type\": \"string\"\n" +
+                        "    }\n" +
+                        "  },\n" +
+                        "  \"required\": [\n" +
+                        "    \"id\",\n" +
+                        "    \"isActive\",\n" +
+                        "    \"email\",\n" +
+                        "    \"url\"\n" +
+                        "  ]\n" +
+                        "}"))
+                .extract().path("id");
 
-        //TODO: Написать BUG-репорт, что при успешном обновлении информации о сотруднике
-        // возвращается тело не с полями, отличающимися от Swagger
-
-        assertThat(employeeApi, isEqual(employeeRepository.getById(id)));
-        //TODO: Написать BUG-репорт, что при обновлении employee не обновляется поле phone.
-    }
-
-
-    @Test
-    @Tag("Positive")
-    @DisplayName("1.5 Добавление 5 новых сотрудников к компании")
-    public void shouldAdd5Employee(EmployeeService employeeApiService,
-                                   EmployeeRepository employeeRepository,
-                                   CompanyEntity company) throws SQLException, IOException {
-
-        //Генерируем и создаём через API Employee для определённой Company
-        List<Integer> employeeToCreateId = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            Employee empl = employeeApiService.generateEmployee();  //Генерируем Employee без id и companyId
-            empl.setCompanyId(company.getId());     //Устанавливаем companyId
-
-            employeeApiService.logIn(login, password);
-            int id = employeeApiService.create(empl);
-            empl.setId(id);                         //Устанавливаем Id
-            employeeToCreateId.add(id);
-            employeeToDelete.add(id);
-        }
-
-        List<EmployeeEntity> employeeEntityCreated = employeeRepository.getAllByCompanyId(company.getId());
-        List<Integer> employeeCreatedId = new ArrayList<>();
-        for (EmployeeEntity e : employeeEntityCreated) {
-            employeeCreatedId.add(e.getId());
-        }
-
-        assertEquals(employeeToCreateId.size(), employeeCreatedId.size());
-        assertTrue(employeeToCreateId.containsAll(employeeCreatedId));
+        assertEquals(employee.getId(), id);
     }
 
     @Test
@@ -248,19 +316,24 @@ public class EmployeeBusinessTest {
         employee.setCompanyId(companyId);
 
         //Добавление Employee через API
-        List<EmployeeEntity> listBefore = employeeRepository.getAllByCompanyId(companyId);
-        employeeApiService.logOut();    //Разлогиниваемся
+        String message =
+                given()
+                        .log().ifValidationFails()
+                        .baseUri(baseUriString + basePathString)
+//                .header("x-client-token", token)
+                        .contentType("application/json; charset=utf-8")
+                        .body(employee)
+                        .when()
+                        .post()
+                        .then()
+                        .log().ifValidationFails()
+                        .statusCode(401)
+                        .contentType("application/json; charset=utf-8")
+                        .body(matchesJsonSchema(ERROR_RESPONSE_BODY_SCHEMA))
+                        .extract()
+                        .path("message");
 
-        //Проверка, что при попытке создания Employee неавторизованным пользователем, появляется ошибка в employeeApiService
-        assertThrows(AssertionError.class, () -> {
-            employeeApiService.create(employee);
-        });
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAllByCompanyId(companyId);
-
-        //Проверка, что количество Employee для Company не увеличилось
-        assertTrue(listBefore.containsAll(listAfter));
-        assertEquals(listBefore.size(), listAfter.size());
+        assertEquals("Unauthorized", message);
     }
 
     @Test
@@ -271,25 +344,34 @@ public class EmployeeBusinessTest {
                                                     CompanyRepository companyRepository) throws SQLException, IOException {
 
         //Создание объекта Employee с тестовыми данными
-        int companyId = companyRepository.getLast().getId();
-        int id = employeeRepository.getLast().getId();
+        int companyId = companyRepository.getLast().getId() + 100;  //Установка id несуществующей компании
+        int id = employeeRepository.getLast().getId() + 1;
         Employee employee = employeeApiService.generateEmployee();
-        employee.setId(++id);
-        employee.setCompanyId(++companyId);
+        employee.setId(id);
+        employee.setCompanyId(companyId);
+
+        String token = authService.logIn(login, password);
 
         //Добавление Employee через API
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
+        String message =
+                given()
+                        .log().ifValidationFails()
+                        .baseUri(baseUriString + basePathString)
+                        .header("x-client-token", token)
+                        .contentType("application/json; charset=utf-8")
+                        .body(employee)
+                        .when()
+                        .post()
+                        .then()
+                        .log().ifValidationFails()
+                        .statusCode(500)
+                        .contentType("application/json; charset=utf-8")
+                        .body(matchesJsonSchema(ERROR_RESPONSE_BODY_SCHEMA))
+                        .extract()
+                        .path("message");
 
-        //Проверка, что при попытке создания Employee для отсутствующей компании, появляется ошибка в employeeApiService
-        assertThrows(AssertionError.class, () -> {
-            employeeApiService.create(employee);
-        });
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        //Проверка, что количество Employee не увеличилось
-        assertTrue(listBefore.containsAll(listAfter));
-        assertEquals(listBefore.size(), listAfter.size());
+        assertEquals("Internal server error", message);
+        //TODO: Написать BUG-репорт, что при ошибке в запросе на создание Employee выдаётся SC 500 вместо SC4XX
     }
 
     @Test
@@ -398,8 +480,8 @@ public class EmployeeBusinessTest {
     @DisplayName("2.6 Изменение информации о сотруднике по несуществующему id")
     public void shouldNotUpdateEmployeeWithWrongId(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
-                                                   @TestProperties(testNum = 4) CompanyEntity company,
-                                                   @TestProperties(testNum = 4) EmployeeEntity employee) throws SQLException, IOException {
+                                                   @TestProperties(testNum = 2) CompanyEntity company,
+                                                   @TestProperties(testNum = 2) EmployeeEntity employee) throws SQLException, IOException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
         employeeApi.setLastName(faker.name().lastName());
@@ -465,8 +547,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.10 Добавление сотрудника без обязательного поля (id)")
     public void shouldNotAddEmployeeWithoutId(EmployeeService employeeApiService,
-                                                   EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) throws SQLException, IOException {
+                                              EmployeeRepository employeeRepository,
+                                              CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -492,8 +574,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.11 Добавление сотрудника без обязательного поля (firstName)")
     public void shouldNotAddEmployeeWithoutFirstName(EmployeeService employeeApiService,
-                                              EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
+                                                     EmployeeRepository employeeRepository,
+                                                     CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -519,8 +601,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.12 Добавление сотрудника без обязательного поля (lastName)")
     public void shouldNotAddEmployeeWithoutLastName(EmployeeService employeeApiService,
-                                                     EmployeeRepository employeeRepository,
-                                                     CompanyEntity company) throws SQLException, IOException {
+                                                    EmployeeRepository employeeRepository,
+                                                    CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -572,8 +654,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.14 Добавление сотрудника без необязательного поля (middleName)")
     public void shouldAddEmployeeWithoutMiddleName(EmployeeService employeeApiService,
-                                                    EmployeeRepository employeeRepository,
-                                                    CompanyEntity company) throws SQLException, IOException {
+                                                   EmployeeRepository employeeRepository,
+                                                   CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -603,8 +685,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.15 Добавление сотрудника без необязательного поля (email)")
     public void shouldAddEmployeeWithoutEmail(EmployeeService employeeApiService,
-                                                   EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) throws SQLException, IOException {
+                                              EmployeeRepository employeeRepository,
+                                              CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -634,8 +716,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.16 Добавление сотрудника без необязательного поля (url)")
     public void shouldAddEmployeeWithoutUrl(EmployeeService employeeApiService,
-                                              EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
+                                            EmployeeRepository employeeRepository,
+                                            CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -665,8 +747,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.17 Добавление сотрудника без необязательного поля (phone)")
     public void shouldAddEmployeeWithoutPhone(EmployeeService employeeApiService,
-                                            EmployeeRepository employeeRepository,
-                                            CompanyEntity company) throws SQLException, IOException {
+                                              EmployeeRepository employeeRepository,
+                                              CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -699,8 +781,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.18 Добавление сотрудника без необязательного поля (birthdate)")
     public void shouldAddEmployeeWithoutBirthdate(EmployeeService employeeApiService,
-                                            EmployeeRepository employeeRepository,
-                                            CompanyEntity company) throws SQLException, IOException {
+                                                  EmployeeRepository employeeRepository,
+                                                  CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());

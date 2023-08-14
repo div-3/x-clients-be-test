@@ -86,14 +86,14 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .response()
                 .then()
                 .extract()
-                .body().as(new TypeRef<Employee>() {
-                });
+                .body().as(new TypeRef<Employee>() {}
+                );
     }
 
     @Override
     public int create(Employee employee) throws IOException {
         return given()
-                .log().all()
+                .log().ifValidationFails()
                 .headers(headers)
                 .baseUri(uri + "/employee")
                 .contentType("application/json; charset=utf-8")
@@ -101,7 +101,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .when()
                 .post()
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .statusCode(201)
                 .contentType("application/json; charset=utf-8")
                 .extract().path("id");
@@ -110,7 +110,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public int update(Employee employee) {
         return given()
-                .log().all()
+                .log().ifValidationFails()
                 .headers(headers)
                 .baseUri(uri + "/employee" + "/" + employee.getId())
                 .contentType("application/json; charset=utf-8")
@@ -122,7 +122,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .when()
                 .patch()
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .statusCode(201)
                 .contentType("application/json; charset=utf-8")
                 .extract().path("id");

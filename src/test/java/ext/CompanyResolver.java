@@ -5,12 +5,9 @@ import db.CompanyRepositoryHiber;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import model.db.CompanyEntity;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.*;
 
-import java.lang.annotation.Annotation;
 import java.sql.SQLException;
-import java.util.NoSuchElementException;
 
 public class CompanyResolver implements ParameterResolver, AfterAllCallback {
     private CompanyRepository companyRepository;
@@ -34,9 +31,9 @@ public class CompanyResolver implements ParameterResolver, AfterAllCallback {
         companyRepository = new CompanyRepositoryHiber(em);
         try {
             companyId = companyRepository.create(TEST_COMPANY_NAME);
-            if (parameterContext.isAnnotated(TestNum.class)){
+            if (parameterContext.isAnnotated(TestProperties.class)){
                 int testNum = 0;
-                testNum = parameterContext.findAnnotation(TestNum.class).get().testNum();   //Если есть аннотация, то достаём из неё данные
+                testNum = parameterContext.findAnnotation(TestProperties.class).get().testNum();   //Если есть аннотация, то достаём из неё данные
                 extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).put(TEST_NUM_COMPANY_GLOBAL_KEY + testNum, companyId); //Сохраняем номер Company для создания Employee
             }
             return companyRepository.getById(companyId);
