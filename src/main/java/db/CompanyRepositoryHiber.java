@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class CompanyRepositoryHiber implements CompanyRepository{
+public class CompanyRepositoryHiber implements CompanyRepository {
     private EntityManager em;
 
     public CompanyRepositoryHiber(EntityManager em) {
@@ -35,7 +35,9 @@ public class CompanyRepositoryHiber implements CompanyRepository{
     @Override
     public List<CompanyEntity> getAll(boolean isActive) throws SQLException {
         TypedQuery<CompanyEntity> query = em.createQuery(
-                "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and isActive = :isActive", CompanyEntity.class);
+                "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and isActive = :isActive",
+                CompanyEntity.class);
+
         query.setParameter("isActive", isActive);
         return query.getResultList();
     }
@@ -102,4 +104,20 @@ public class CompanyRepositoryHiber implements CompanyRepository{
         em.getTransaction().commit();
         System.out.println("Удалена компания с id = " + id);
     }
+
+    @Override
+    public boolean clean(String prefix) {
+        if (prefix.equals("")) prefix = "TS_";
+        TypedQuery<CompanyEntity> query = em.createQuery(
+                "SELECT c FROM CompanyEntity c WHERE name like 'TS_%'", CompanyEntity.class);
+//        query.setParameter("prefix", prefix);
+        List<CompanyEntity> list = query.getResultList();
+//        System.out.println("----------------------\n Список компаний на удаление\n-----------------------");
+//        System.out.println(list);
+        for (CompanyEntity c : list) {
+            deleteById(c.getId());
+        }
+        return true;
+    }
+
 }

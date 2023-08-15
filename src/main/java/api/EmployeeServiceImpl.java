@@ -12,13 +12,11 @@ import java.util.*;
 import static io.restassured.RestAssured.given;
 
 public class EmployeeServiceImpl implements EmployeeService {
-    private final static String propertiesFilePath = "src/main/resources/API_x_client.properties";
-    private Properties properties;
+    private final static String PREFIX = "TS_";
     private String uri;
     private String login = "";
     private String password = "";
     private String token = "";
-    private boolean isAuth;
     private Map<String, String> headers = new HashMap<>();
     private AuthService authService = AuthService.getInstance();
     private Faker faker = new Faker(new Locale("ru"));
@@ -58,7 +56,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee();
         employee.setId(0);
         String[] name = faker.name().nameWithMiddle().split(" ");
-        employee.setFirstName("TS" + name[0]);
+        employee.setFirstName(PREFIX + name[0]);
         employee.setLastName(name[2]);
         employee.setMiddleName(name[1]);
         employee.setCompanyId(0);

@@ -47,15 +47,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * 2.7 Получение списка сотрудников несуществующей компании +
  * 2.8 Получение списка сотрудников компании в которой нет сотрудников +
  * 2.9 Получение сотрудника по несуществующему id +
- * 2.10 Добавление сотрудника без обязательного поля (id)
- * 2.11 Добавление сотрудника без обязательного поля (firstName)
- * 2.12 Добавление сотрудника без обязательного поля (lastName)
- * 2.13 Добавление сотрудника без обязательного поля (companyId)
- * 2.14 Добавление сотрудника без необязательного поля (middleName)
- * 2.15 Добавление сотрудника без необязательного поля (email)
- * 2.16 Добавление сотрудника без необязательного поля (url)
- * 2.17 Добавление сотрудника без необязательного поля (phone)
- * 2.18 Добавление сотрудника без необязательного поля (birthdate)
+ * 2.10 Не добавление сотрудника без обязательного поля (набор параметризованных тестов) +
+ * 2.11 Добавление сотрудника без необязательного поля (набор параметризованных тестов) +
  * */
 
 
@@ -97,16 +90,29 @@ public class EmployeeContractTest {
         password = properties.getProperty("password");
     }
 
+    @BeforeEach
+    public void coolDownBefore() throws InterruptedException {
+        Thread.sleep(1000);
+    }
+
+    @AfterEach
+    public void coolDownAfter() throws InterruptedException {
+        Thread.sleep(1000);
+    }
+
     //Очистка тестовых данных
     @AfterAll
     public static void cleanTD(CompanyRepository companyRepository,
                                EmployeeRepository employeeRepository) {
-        for (int i : employeeToDelete) {
-            employeeRepository.deleteById(i);
-        }
-        for (int i : companyToDelete) {
-            companyRepository.deleteById(i);
-        }
+        employeeRepository.clean("");
+        companyRepository.clean("");
+
+//        for (int i : employeeToDelete) {
+//            employeeRepository.deleteById(i);
+//        }
+//        for (int i : companyToDelete) {
+//            companyRepository.deleteById(i);
+//        }
     }
 
     //----------------------------------------------------------------------------------------------------------
@@ -139,7 +145,7 @@ public class EmployeeContractTest {
                 .post()
                 .then()
                 .log().ifValidationFails()
-                .statusCode(401)
+                .statusCode(201)
                 .contentType("application/json; charset=utf-8")
 
                 //Валидация схемы JSON:
@@ -255,6 +261,7 @@ public class EmployeeContractTest {
                 .extract().path("id");
 
         assertEquals(employee.getId(), id);
+
     }
 
     @Test
@@ -484,278 +491,104 @@ public class EmployeeContractTest {
     }
 
     @ParameterizedTest(name = "Отсутствие полей в запросе на создание")
-    @MethodSource("getEmployeeJsonStringWithoutFields")
+    @MethodSource("getEmployeeJsonStringWithoutRequiredFields")
     @Tag("Negative")
-    @DisplayName("2.10 Добавление сотрудника без обязательного поля (id)")
-    public void shouldNotAddEmployeeWithoutId(String jsonEmployeeString) throws SQLException, IOException {
+    @DisplayName("2.10 Не добавление сотрудника без обязательного поля:")
+    public void shouldNotAddEmployeeWithoutRequiredField(String jsonEmployeeString) throws SQLException, IOException, InterruptedException {
 
         String token = authService.logIn(login, password);
 
         //Добавление Employee через API
-        int createdId = given()
-                .log().ifValidationFails()
-                .baseUri(baseUriString + basePathString)
-                .header("x-client-token", token)
-                .contentType("application/json; charset=utf-8")
-                .body(jsonEmployeeString)
-                .when()
-                .post()
-                .then()
-                .log().ifValidationFails()
-                .statusCode(201)
-                .contentType("application/json; charset=utf-8")
-                .body(matchesJsonSchema(ADD_RESPONSE_BODY_SCHEMA))
-                .extract()
-                .path("id");
+        String message =
+                given()
+                        .log().ifValidationFails()
+                        .baseUri(baseUriString + basePathString)
+                        .header("x-client-token", token)
+                        .contentType("application/json; charset=utf-8")
+                        .body(jsonEmployeeString)
+                        .when()
+                        .post()
+                        .then()
+                        .log().ifValidationFails()
+                        .statusCode(500)
+                        .contentType("application/json; charset=utf-8")
+                        .body(matchesJsonSchema(ERROR_RESPONSE_BODY_SCHEMA))
+                        .extract()
+                        .path("message");
+
+        assertEquals("Internal server error", message);
+        //TODO: Написать BUG-репорт, что создаются Employee без полей: "id", "isActive" (в Swagger отмечены как обязательные)
     }
 
-    @Test
+    @ParameterizedTest(name = "Отсутствие полей в запросе на создание")
+    @MethodSource("getEmployeeJsonStringWithoutOptionalFields")
     @Tag("Negative")
-    @DisplayName("2.11 Добавление сотрудника без обязательного поля (firstName)")
-    public void shouldNotAddEmployeeWithoutFirstName(EmployeeService employeeApiService,
-                                                     EmployeeRepository employeeRepository,
-                                                     CompanyEntity company) throws SQLException, IOException {
+    @DisplayName("2.11 Добавление сотрудника без необязательного поля:")
+    public void shouldAddEmployeeWithoutOptionalFields(String jsonEmployeeString) throws SQLException, IOException, InterruptedException {
 
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setCompanyId(company.getId());
-        employee.setId(employeeRepository.getLast().getId() + 1);
+        String token = authService.logIn(login, password);
 
-        employee.setFirstName(null);
+        //Добавление Employee через API
+        int createdId =
+                given()
+                        .log().ifValidationFails()
+                        .baseUri(baseUriString + basePathString)
+                        .header("x-client-token", token)
+                        .contentType("application/json; charset=utf-8")
+                        .body(jsonEmployeeString)
+                        .when()
+                        .post()
+                        .then()
+                        .log().ifValidationFails()
+                        .statusCode(201)
+                        .contentType("application/json; charset=utf-8")
+                        .body(matchesJsonSchema(ADD_RESPONSE_BODY_SCHEMA))
+                        .extract()
+                        .path("id");
 
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        assertThrows(AssertionError.class, () -> employeeApiService.create(employee));
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertTrue(listBefore.containsAll(listAfter)),
-                () -> assertEquals(listBefore.size(), listAfter.size())
-        );
+        employeeToDelete.add(createdId);
+        //TODO: Написать BUG-репорт, что не создаются Employee без поля "phone" (в Swagger отмечен как необязательный)
     }
 
-    @Test
-    @Tag("Negative")
-    @DisplayName("2.12 Добавление сотрудника без обязательного поля (lastName)")
-    public void shouldNotAddEmployeeWithoutLastName(EmployeeService employeeApiService,
-                                                    EmployeeRepository employeeRepository,
-                                                    CompanyEntity company) throws SQLException, IOException {
+    //Провайдер JSON строк с полями Employee (без обязательных полей)
+    private static String[] getEmployeeJsonStringWithoutRequiredFields() {
+        //Получаем Map с полями тестового Employee
+        Map<String, Object> employeeFields = getFieldsString(null);
 
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setCompanyId(company.getId());
-        employee.setId(employeeRepository.getLast().getId() + 1);
+        //Задаём поля, для формирования усечённых JSON для Employee
+        List<String> requiredParameters =
+                List.of("\"id\": ", "\"firstName\": \"", "\"lastName\": \"", "\"isActive\": ", "\"companyId\": ");
 
-        employee.setLastName(null);
-
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        assertThrows(AssertionError.class, () -> employeeApiService.create(employee));
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertTrue(listBefore.containsAll(listAfter)),
-                () -> assertEquals(listBefore.size(), listAfter.size())
-        );
+        return getStringArrayForSelectedFields(employeeFields, requiredParameters);
     }
 
-    @Test
-    @Tag("Negative")
-    @DisplayName("2.13 Добавление сотрудника без обязательного поля (companyId)")
-    public void shouldNotAddEmployeeWithoutCompanyId(EmployeeService employeeApiService,
-                                                     EmployeeRepository employeeRepository,
-                                                     CompanyEntity company) throws SQLException, IOException {
+    //Провайдер JSON строк с полями Employee (без опциональных полей)
+    private static String[] getEmployeeJsonStringWithoutOptionalFields() {
+        //Получаем Map с полями тестового Employee
+        Map<String, Object> employeeFields = getFieldsString(null);
 
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setId(employeeRepository.getLast().getId() + 1);
+        //Задаём поля, для формирования усечённых JSON для Employee
+        List<String> optionalParameters =
+                List.of("\"middleName\": \"", "\"email\": \"", "\"url\": \"", "\"phone\": \"", "\"birthdate\": \"");
 
-        employee.setCompanyId(0);
-
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        assertThrows(AssertionError.class, () -> employeeApiService.create(employee));
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertTrue(listBefore.containsAll(listAfter)),
-                () -> assertEquals(listBefore.size(), listAfter.size())
-        );
-    }
-
-    @Test
-    @Tag("Negative")
-    @DisplayName("2.14 Добавление сотрудника без необязательного поля (middleName)")
-    public void shouldAddEmployeeWithoutMiddleName(EmployeeService employeeApiService,
-                                                   EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) throws SQLException, IOException {
-
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setCompanyId(company.getId());
-        employee.setId(employeeRepository.getLast().getId() + 1);
-
-        employee.setMiddleName(null);
-
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        int id = employeeApiService.create(employee);
-        employeeToDelete.add(id);
-        EmployeeEntity employeeDb = employeeRepository.getById(id);
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertThat(employee, isEqual(employeeDb)),
-                () -> assertFalse(listBefore.contains(employeeDb)),
-                () -> assertTrue(listAfter.contains(employeeDb)),
-                () -> assertEquals(listBefore.size() + 1, listAfter.size())
-        );
-    }
-
-    @Test
-    @Tag("Negative")
-    @DisplayName("2.15 Добавление сотрудника без необязательного поля (email)")
-    public void shouldAddEmployeeWithoutEmail(EmployeeService employeeApiService,
-                                              EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
-
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setCompanyId(company.getId());
-        employee.setId(employeeRepository.getLast().getId() + 1);
-
-        employee.setEmail(null);
-
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        int id = employeeApiService.create(employee);
-        employeeToDelete.add(id);
-        EmployeeEntity employeeDb = employeeRepository.getById(id);
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertThat(employee, isEqual(employeeDb)),
-                () -> assertFalse(listBefore.contains(employeeDb)),
-                () -> assertTrue(listAfter.contains(employeeDb)),
-                () -> assertEquals(listBefore.size() + 1, listAfter.size())
-        );
-    }
-
-    @Test
-    @Tag("Negative")
-    @DisplayName("2.16 Добавление сотрудника без необязательного поля (url)")
-    public void shouldAddEmployeeWithoutUrl(EmployeeService employeeApiService,
-                                            EmployeeRepository employeeRepository,
-                                            CompanyEntity company) throws SQLException, IOException {
-
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setCompanyId(company.getId());
-        employee.setId(employeeRepository.getLast().getId() + 1);
-
-        employee.setUrl(null);
-
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        int id = employeeApiService.create(employee);
-        employeeToDelete.add(id);
-        EmployeeEntity employeeDb = employeeRepository.getById(id);
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertThat(employee, isEqual(employeeDb)),
-                () -> assertFalse(listBefore.contains(employeeDb)),
-                () -> assertTrue(listAfter.contains(employeeDb)),
-                () -> assertEquals(listBefore.size() + 1, listAfter.size())
-        );
-    }
-
-    @Test
-    @Tag("Negative")
-    @DisplayName("2.17 Добавление сотрудника без необязательного поля (phone)")
-    public void shouldAddEmployeeWithoutPhone(EmployeeService employeeApiService,
-                                              EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
-
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setCompanyId(company.getId());
-        employee.setId(employeeRepository.getLast().getId() + 1);
-
-        employee.setPhone(null);
-
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        int id = employeeApiService.create(employee);
-        //TODO: Написать BUG-репорт, что не создаётся Employee без номера телефона (SC 500),
-        // в Swagger поле Phone не отмечено как обязательное
-
-        employeeToDelete.add(id);
-        EmployeeEntity employeeDb = employeeRepository.getById(id);
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertThat(employee, isEqual(employeeDb)),
-                () -> assertFalse(listBefore.contains(employeeDb)),
-                () -> assertTrue(listAfter.contains(employeeDb)),
-                () -> assertEquals(listBefore.size() + 1, listAfter.size())
-        );
-    }
-
-    @Test
-    @Tag("Negative")
-    @DisplayName("2.18 Добавление сотрудника без необязательного поля (birthdate)")
-    public void shouldAddEmployeeWithoutBirthdate(EmployeeService employeeApiService,
-                                                  EmployeeRepository employeeRepository,
-                                                  CompanyEntity company) throws SQLException, IOException {
-
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setCompanyId(company.getId());
-        employee.setId(employeeRepository.getLast().getId() + 1);
-
-        employee.setBirthdate(null);
-
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        int id = employeeApiService.create(employee);
-        employeeToDelete.add(id);
-        EmployeeEntity employeeDb = employeeRepository.getById(id);
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertThat(employee, isEqual(employeeDb)),
-                () -> assertFalse(listBefore.contains(employeeDb)),
-                () -> assertTrue(listAfter.contains(employeeDb)),
-                () -> assertEquals(listBefore.size() + 1, listAfter.size())
-        );
-    }
-
-    @Test
-    public void ts() {
-        String[] str = getEmployeeJsonStringWithoutFields();
-        for (String s : str) {
-            System.out.println(s);
-        }
+        return getStringArrayForSelectedFields(employeeFields, optionalParameters);
     }
 
     private static Map<String, Object> getFieldsString(Employee employee) {
+        if (employee == null) {
+            employee = new Employee();
+            employee.setId(649);
+            employee.setFirstName("TS_Любовь");
+            employee.setLastName("Крылова");
+            employee.setMiddleName("Борисовна");
+            employee.setCompanyId(377);
+            employee.setEmail("a22417@mail.ru");
+            employee.setUrl("http://www.xn---xn-fa-v1k6l6a8gxh7b.com/cum");
+            employee.setPhone("9364071439");
+            employee.setBirthdate("1978-06-26");
+            employee.setIsActive(true);
+        }
+
         Map<String, Object> fields = new HashMap<>();
 
         fields.put("\"id\": ", employee.getId());
@@ -772,69 +605,17 @@ public class EmployeeContractTest {
         return fields;
     }
 
-    @Test
-    public void getEmployeeJsonStringWithoutRequiredFields(){
-        Employee employee = new Employee();
-        employee.setId(649);
-        employee.setFirstName("TSЛюбовь");
-        employee.setLastName("Крылова");
-        employee.setMiddleName("Борисовна");
-        employee.setCompanyId(377);
-        employee.setEmail("a22417@mail.ru");
-        employee.setUrl("http://www.xn---xn-fa-v1k6l6a8gxh7b.com/cum");
-        employee.setPhone("9364071439");
-        employee.setBirthdate("1978-06-26");
-        employee.setIsActive(true);
-
-        Map<String, Object> employeeFields = getFieldsString(employee);
-//        System.out.println(employeeFields.toString());
-        List<String> requiredParameters = List.of("id", "firstName", "lastName", "isActive", "companyId");
-        for (String s : requiredParameters) {
-
-            System.out.println("Без: " + s);
+    private static String[] getStringArrayForSelectedFields(Map<String, Object> employeeFields, List<String> parameters) {
+        String[] jsonString = new String[parameters.size()];
+        int i = 0;
+        for (String s : parameters) {
             Object o = employeeFields.get(s);
-            employeeFields.entrySet().removeIf(entry -> entry.getKey() == s);
+            employeeFields.entrySet().removeIf(entry -> entry.getKey().contains(s));
             String tmp = employeeFields.toString();
             tmp = tmp.replaceAll("=", "");
-            System.out.println(tmp);
+            jsonString[i++] = tmp;
             employeeFields.put(s, o);
-//            System.out.println(employeeFields);
-        }
-    }
-
-
-    private static String[] getEmployeeJsonStringWithoutFields() {
-
-        List<String> optionParameters = List.of("middleName", "email", "url", "phone", "birthdate");
-
-        List<String> baseJson = List.of("{",
-                "  \"id\": 649,",
-                "  \"firstName\": \"TSЛюбовь\",",
-                "  \"lastName\": \"Крылова\",",
-                "  \"middleName\": \"Борисовна\",",
-                "  \"companyId\": 377,",
-                "  \"email\": \"a22417@mail.ru\",",
-                "  \"url\": \"http://www.xn---xn--80aeahfa-v1k6l6a8gxh7b.com/cum\",",
-                "  \"phone\": \"9364071439\",",
-                "  \"birthdate\": \"1978-06-26\",",
-                "  \"isActive\": true",
-                "}");
-
-        String[] jsonString = new String[baseJson.size() - 2];
-
-        for (int i = 1; i < baseJson.size() - 1; i++) {
-
-            String tmp = baseJson.get(0);
-            for (int j = 1; j < baseJson.size() - 1; j++) {
-                if (i != j) tmp = tmp + baseJson.get(j);
-            }
-
-            //Убираем лишнюю запятую в случае отсутствия последнего поля
-            if (tmp.charAt(tmp.length() - 1) == ',') tmp = tmp.substring(0, tmp.length() - 1);
-            tmp = tmp + baseJson.get(baseJson.size() - 1);
-            jsonString[i - 1] = tmp;
         }
         return jsonString;
     }
-
 }

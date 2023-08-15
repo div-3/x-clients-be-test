@@ -6,61 +6,54 @@ import db.EmployeeRepositoryHiber;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import model.db.CompanyEntity;
+import net.datafaker.Faker;
 import org.junit.jupiter.api.extension.*;
 
 import java.sql.SQLException;
+import java.util.Locale;
 
-public class CompanyResolver implements ParameterResolver, AfterAllCallback {
+public class CompanyResolver implements ParameterResolver {
     private CompanyRepository companyRepository;
     private final String EMF_GLOBAL_KEY = "EntityManagerFactory";  //Название ключа EntityManagerFactory в хранилище
     private final String TEST_NUM_COMPANY_GLOBAL_KEY = "COMPANY";  //Название ключа EntityManagerFactory в хранилище
-    private final String TEST_COMPANY_NAME = "TEST COMPANY";
+    private final String PREFIX = "TS_";
     private EntityManagerFactory entityManagerFactory;
     private EntityManager em;
     private int companyId = 0;
 
     @Override
-    public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+    public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+            throws ParameterResolutionException {
         if (parameterContext.getParameter().getType().equals(CompanyEntity.class)) return true;
         return false;
     }
 
     @Override
-    public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+    public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+            throws ParameterResolutionException {
         //Вытаскиваем сохранённый EntityManager из extensionContext
-        entityManagerFactory = (EntityManagerFactory) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(EMF_GLOBAL_KEY);
+        entityManagerFactory = (EntityManagerFactory) extensionContext
+                .getStore(ExtensionContext.Namespace.GLOBAL).get(EMF_GLOBAL_KEY);
         em = entityManagerFactory.createEntityManager();
 
         companyRepository = new CompanyRepositoryHiber(em);
         try {
-            companyId = companyRepository.create(TEST_COMPANY_NAME);
-            if (parameterContext.isAnnotated(TestProperties.class)){
+            Faker faker = new Faker(new Locale("RU"));
+            companyId = companyRepository
+                    .create(PREFIX + faker.company().name(), PREFIX + faker.company().industry());
+            if (parameterContext.isAnnotated(TestProperties.class)) {
                 int testNum = 0;
-                testNum = parameterContext.findAnnotation(TestProperties.class).get().testNum();   //Если есть аннотация, то достаём из неё данные
-                extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).put(TEST_NUM_COMPANY_GLOBAL_KEY + testNum, companyId); //Сохраняем номер Company для создания Employee
+
+                //Если есть аннотация, то достаём из неё данные
+                testNum = parameterContext.findAnnotation(TestProperties.class).get().testNum();
+
+                //Сохраняем номер Company для создания Employee
+                extensionContext.getStore(ExtensionContext.Namespace.GLOBAL)
+                        .put(TEST_NUM_COMPANY_GLOBAL_KEY + testNum, companyId);
             }
             return companyRepository.getById(companyId);
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void afterAll(ExtensionContext extensionContext) throws Exception {
-        if (companyId > 0){
-            //Вытаскиваем сохранённый EntityManager из extensionContext
-            EmployeeRepositoryHiber employeeRepository = new EmployeeRepositoryHiber(em);
-            employeeRepository.deleteAllByCompanyId(companyId);
-//            List<EmployeeEntity> employees = new ArrayList<>();
-//            try {
-//                employees = employeeRepository.getAllByCompanyId(companyId);
-//            }catch (Exception e){}
-//            if (employees.size() > 0 ){
-//                for (EmployeeEntity e: employees) {
-//                    employeeRepository.deleteById();
-//                }
-//            }
-            companyRepository.deleteById(companyId);
         }
     }
 }

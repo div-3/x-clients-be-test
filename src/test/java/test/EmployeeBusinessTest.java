@@ -89,16 +89,28 @@ public class EmployeeBusinessTest {
         password = properties.getProperty("password");
     }
 
+    @BeforeEach
+    public void coolDownBefore() throws InterruptedException {
+        Thread.sleep(1000);
+    }
+
+    @AfterEach
+    public void coolDownAfter() throws InterruptedException {
+        Thread.sleep(1000);
+    }
+
     //Очистка тестовых данных
     @AfterAll
     public static void cleanTD(CompanyRepository companyRepository,
                                EmployeeRepository employeeRepository) {
-        for (int i : employeeToDelete) {
-            employeeRepository.deleteById(i);
-        }
-        for (int i : companyToDelete) {
-            companyRepository.deleteById(i);
-        }
+        employeeRepository.clean("");
+        companyRepository.clean("");
+//        for (int i : employeeToDelete) {
+//            employeeRepository.deleteById(i);
+//        }
+//        for (int i : companyToDelete) {
+//            companyRepository.deleteById(i);
+//        }
     }
 
     //----------------------------------------------------------------------------------------------------------
@@ -240,7 +252,7 @@ public class EmployeeBusinessTest {
     public void shouldNotAddEmployeeWithoutAuth(EmployeeService employeeApiService,
                                                 EmployeeRepository employeeRepository,
                                                 @TestProperties(testNum = 3) CompanyEntity company,
-                                                @TestProperties(testNum = 3, itemCount = 3)  List<EmployeeEntity> employee) throws SQLException, IOException {
+                                                @TestProperties(testNum = 3, itemCount = 3) List<EmployeeEntity> employee) throws SQLException, IOException {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
@@ -375,8 +387,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.5 Изменение информации о сотруднике без авторизации")
     public void shouldNotUpdateEmployeeWithoutAuth(EmployeeService employeeApiService,
-                                                @TestProperties(testNum = 4) CompanyEntity company,
-                                                @TestProperties(testNum = 4) EmployeeEntity employee) throws SQLException, IOException {
+                                                   @TestProperties(testNum = 4) CompanyEntity company,
+                                                   @TestProperties(testNum = 4) EmployeeEntity employee) throws SQLException, IOException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
 
@@ -467,8 +479,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.10 Добавление сотрудника без обязательного поля (id)")
     public void shouldNotAddEmployeeWithoutId(EmployeeService employeeApiService,
-                                                   EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) throws SQLException, IOException {
+                                              EmployeeRepository employeeRepository,
+                                              CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -494,8 +506,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.11 Добавление сотрудника без обязательного поля (firstName)")
     public void shouldNotAddEmployeeWithoutFirstName(EmployeeService employeeApiService,
-                                              EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
+                                                     EmployeeRepository employeeRepository,
+                                                     CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -521,8 +533,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.12 Добавление сотрудника без обязательного поля (lastName)")
     public void shouldNotAddEmployeeWithoutLastName(EmployeeService employeeApiService,
-                                                     EmployeeRepository employeeRepository,
-                                                     CompanyEntity company) throws SQLException, IOException {
+                                                    EmployeeRepository employeeRepository,
+                                                    CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -574,8 +586,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.14 Добавление сотрудника без необязательного поля (middleName)")
     public void shouldAddEmployeeWithoutMiddleName(EmployeeService employeeApiService,
-                                                    EmployeeRepository employeeRepository,
-                                                    CompanyEntity company) throws SQLException, IOException {
+                                                   EmployeeRepository employeeRepository,
+                                                   CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -605,8 +617,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.15 Добавление сотрудника без необязательного поля (email)")
     public void shouldAddEmployeeWithoutEmail(EmployeeService employeeApiService,
-                                                   EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) throws SQLException, IOException {
+                                              EmployeeRepository employeeRepository,
+                                              CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -636,8 +648,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.16 Добавление сотрудника без необязательного поля (url)")
     public void shouldAddEmployeeWithoutUrl(EmployeeService employeeApiService,
-                                              EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
+                                            EmployeeRepository employeeRepository,
+                                            CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -667,8 +679,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.17 Добавление сотрудника без необязательного поля (phone)")
     public void shouldAddEmployeeWithoutPhone(EmployeeService employeeApiService,
-                                            EmployeeRepository employeeRepository,
-                                            CompanyEntity company) throws SQLException, IOException {
+                                              EmployeeRepository employeeRepository,
+                                              CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -701,8 +713,8 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.18 Добавление сотрудника без необязательного поля (birthdate)")
     public void shouldAddEmployeeWithoutBirthdate(EmployeeService employeeApiService,
-                                            EmployeeRepository employeeRepository,
-                                            CompanyEntity company) throws SQLException, IOException {
+                                                  EmployeeRepository employeeRepository,
+                                                  CompanyEntity company) throws SQLException, IOException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());

@@ -19,4 +19,6 @@ public interface CompanyRepository {
 
     void deleteById(int id);
 
+    boolean clean(String prefix);
+
 }

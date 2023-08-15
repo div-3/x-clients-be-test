@@ -13,8 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class EmployeeRepositoryHiber implements EmployeeRepository{
+public class EmployeeRepositoryHiber implements EmployeeRepository {
     private EntityManager em;
+    private final static String PREFIX = "TS_";
     private Faker faker = new Faker(new Locale("RU"));
 
     public EmployeeRepositoryHiber(EntityManager em) {
@@ -61,7 +62,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
         employee.setId(lastId + 1);
 
         String[] name = faker.name().nameWithMiddle().split(" ");
-        employee.setFirstName("TS_" + name[0]);
+        employee.setFirstName(PREFIX + name[0]);
         employee.setLastName(name[2]);
         employee.setMiddleName(name[1]);
 
@@ -130,8 +131,8 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
             TypedQuery<EmployeeEntity> query = em.createQuery(
                     "SELECT e FROM EmployeeEntity e WHERE companyId = :id", EmployeeEntity.class);
             query.setParameter("id", companyId);
-            employees  = query.getResultList();
-        } catch (Exception e){
+            employees = query.getResultList();
+        } catch (Exception e) {
             return true;    //Если ничего не нашли и при парсинге результата выпало исключение
         }
 
@@ -141,6 +142,21 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
         }
         em.getTransaction().commit();
 
+        return true;
+    }
+
+    @Override
+    public boolean clean(String prefix) {
+        if (prefix.equals("")) prefix = "TS_";
+        TypedQuery<EmployeeEntity> query = em.createQuery(
+                "SELECT e FROM EmployeeEntity e WHERE firstName like 'TS_%'", EmployeeEntity.class);
+//        query.setParameter("prefix", prefix);
+        List<EmployeeEntity> list = query.getResultList();
+//        System.out.println("----------------------\n Список на удаление\n-----------------------");
+//        System.out.println(list);
+        for (EmployeeEntity e : list) {
+            deleteById(e.getId());
+        }
         return true;
     }
 }

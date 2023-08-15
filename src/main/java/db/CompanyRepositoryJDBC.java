@@ -92,6 +92,11 @@ public class CompanyRepositoryJDBC implements CompanyRepository {
         }
     }
 
+    @Override
+    public boolean clean(String prefix) {
+        return false;
+    }
+
     private static List<CompanyEntity> getCompanyDBEntitiesFromResultSet(ResultSet resultSet) throws SQLException {
         List<CompanyEntity> companies = new ArrayList<>();
         while (resultSet.next()) {

@@ -15,8 +15,6 @@ public class EmployeeResolver implements ParameterResolver {
     private EmployeeRepository employeeRepository;
     private final String EMF_GLOBAL_KEY = "EntityManagerFactory";  //Название ключа EntityManagerFactory в хранилище
     private final String TEST_NUM_COMPANY_GLOBAL_KEY = "COMPANY";  //Название ключа EntityManagerFactory в хранилище
-//    private final String TEST_COMPANY_NAME = "TEST COMPANY";
-//    private List<Integer> employeeId = new ArrayList<>();
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
@@ -29,11 +27,13 @@ public class EmployeeResolver implements ParameterResolver {
     }
 
     @Override
-    public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+    public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+            throws ParameterResolutionException {
+
         //Вытаскиваем сохранённый EntityManager из extensionContext
-        EntityManagerFactory entityManagerFactory = (EntityManagerFactory) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(EMF_GLOBAL_KEY);
+        EntityManagerFactory entityManagerFactory = (EntityManagerFactory) extensionContext
+                .getStore(ExtensionContext.Namespace.GLOBAL).get(EMF_GLOBAL_KEY);
         EntityManager em = entityManagerFactory.createEntityManager();
-//        System.out.println("\n---------------------------------------\nEmployeeResolver Implements\n---------------------------------------\n");
 
         employeeRepository = new EmployeeRepositoryHiber(em);
         try {
@@ -42,7 +42,8 @@ public class EmployeeResolver implements ParameterResolver {
             //Должен быть указан номер теста, чтобы получить соответствующий номер компании из хранилища
             if (parameterContext.isAnnotated(TestProperties.class)) {
                 int testNum = parameterContext.findAnnotation(TestProperties.class).get().testNum();
-                companyId = (int) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(TEST_NUM_COMPANY_GLOBAL_KEY + testNum);
+                companyId = (int) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL)
+                        .get(TEST_NUM_COMPANY_GLOBAL_KEY + testNum);
             }
 
             //Если задано количество Employee
@@ -53,7 +54,6 @@ public class EmployeeResolver implements ParameterResolver {
                     List<EmployeeEntity> employeeEntities = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         employeeEntities.add(i, employeeRepository.create(companyId));
-//                        employeeId.add(i, employeeEntities.get(i).getId());
                     }
                     return employeeEntities;
                 }
@@ -61,20 +61,9 @@ public class EmployeeResolver implements ParameterResolver {
 
             //Если количество не указано, или указано неправильно
             EmployeeEntity employee = employeeRepository.create(companyId);
-//            employeeId.add(0, employee.getId());
             return employee;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
-//    @Override
-//    public void afterEach(ExtensionContext extensionContext) throws Exception {
-//        System.out.println("\n---------------------------------------\nEmployeeResolver AfterEachCallBack\n---------------------------------------\n");
-//        if (employeeId.size() > 0)
-//            for (Integer i : employeeId) {
-//                System.out.println("\n---------------------------------------\nEmployeeResolver DELETE!\n---------------------------------------\n");
-//                employeeRepository.deleteById(i);
-//            }
-//    }
 }

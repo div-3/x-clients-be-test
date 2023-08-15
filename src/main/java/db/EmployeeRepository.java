@@ -23,4 +23,6 @@ public interface EmployeeRepository {
 
         boolean deleteAllByCompanyId(int companyId);
 
+        boolean clean(String prefix);
+
 }
