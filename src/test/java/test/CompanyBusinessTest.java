@@ -4,7 +4,7 @@ import api.CompanyService;
 import db.CompanyRepository;
 import ext.CompanyServiceResolver;
 import ext.hibernate.HiberCompanyRepositoryResolver;
-import ext.hibernate.HiberSessionResolver;
+import ext.hibernate.HiberEMFResolver;
 import jakarta.persistence.EntityManagerFactory;
 import model.api.Company;
 import model.db.CompanyEntity;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 //В тестах используется для работы: с БД - Hibernate, с API - RestAssured.
 @DisplayName("Company business tests:")
-@ExtendWith({CompanyServiceResolver.class, HiberSessionResolver.class, HiberCompanyRepositoryResolver.class})
+@ExtendWith({CompanyServiceResolver.class, HiberEMFResolver.class, HiberCompanyRepositoryResolver.class})
 public class CompanyBusinessTest {
     private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
     Faker faker = new Faker(new Locale("RU"));

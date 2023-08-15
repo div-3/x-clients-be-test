@@ -21,4 +21,6 @@ public interface EmployeeRepository {
 
         List<EmployeeEntity> getAll();
 
+        boolean deleteAllByCompanyId(int companyId);
+
 }

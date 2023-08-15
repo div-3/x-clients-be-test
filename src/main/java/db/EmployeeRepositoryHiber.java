@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,7 +47,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
         e.setId(++lastId);
 
         //Сохранение сотрудника в БД
-        em.getTransaction().begin();
+        if (!em.getTransaction().isActive()) em.getTransaction().begin();
         em.persist(e);
         em.getTransaction().commit();
         return e.getId();
@@ -83,7 +84,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
         employee.setActive(true);
 
         //Сохранение сотрудника в БД
-        em.getTransaction().begin();
+        if (!em.getTransaction().isActive()) em.getTransaction().begin();
         em.persist(employee);
         em.getTransaction().commit();
         return employee;
@@ -92,7 +93,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
     @Override
     public int update(EmployeeEntity e) throws SQLException {
         e.setChangeTimestamp(Timestamp.valueOf(LocalDateTime.now()));
-        em.getTransaction().begin();
+        if (!em.getTransaction().isActive()) em.getTransaction().begin();
         em.persist(e);
         em.getTransaction().commit();
         return 0;
@@ -101,7 +102,8 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
     @Override
     public void deleteById(int id) {
         EmployeeEntity employee = em.find(EmployeeEntity.class, id);
-        em.getTransaction().begin();
+        if (!em.getTransaction().isActive()) em.getTransaction().begin();
+        if (employee == null) return;
         em.remove(employee);
         em.getTransaction().commit();
         System.out.println("Удален сотрудник с id = " + id);
@@ -118,5 +120,27 @@ public class EmployeeRepositoryHiber implements EmployeeRepository{
     public List<EmployeeEntity> getAll() {
         TypedQuery<EmployeeEntity> query = em.createQuery("SELECT e FROM EmployeeEntity e", EmployeeEntity.class);
         return query.getResultList();
+    }
+
+    @Override
+    public boolean deleteAllByCompanyId(int companyId) {
+        if (companyId < 0) return false;
+        List<EmployeeEntity> employees = new ArrayList<>();
+        try {
+            TypedQuery<EmployeeEntity> query = em.createQuery(
+                    "SELECT e FROM EmployeeEntity e WHERE companyId = :id", EmployeeEntity.class);
+            query.setParameter("id", companyId);
+            employees  = query.getResultList();
+        } catch (Exception e){
+            return true;    //Если ничего не нашли и при парсинге результата выпало исключение
+        }
+
+        if (!em.getTransaction().isActive()) em.getTransaction().begin();
+        for (EmployeeEntity empl : employees) {
+            em.remove(empl);
+        }
+        em.getTransaction().commit();
+
+        return true;
     }
 }

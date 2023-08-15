@@ -14,7 +14,7 @@ import java.util.Properties;
 
 import static ext.CommonHelper.getProperties;
 
-public class HiberSessionResolver implements ParameterResolver {
+public class HiberEMFResolver implements ParameterResolver {
     private final String AuthPropFilePath = "src/main/resources/JDBC_x_client.properties";  //Путь к настройкам подключения к БД
     private final String HiberPropFilePath = "src/main/resources/hibernate.properties";  //Путь к настройкам Hibernate
     private final String EMF_GLOBAL_KEY = "EntityManagerFactory";  //Название ключа EntityManagerFactory в хранилище

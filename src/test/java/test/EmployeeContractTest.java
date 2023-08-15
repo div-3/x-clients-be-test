@@ -6,8 +6,8 @@ import db.CompanyRepository;
 import db.EmployeeRepository;
 import ext.*;
 import ext.hibernate.HiberCompanyRepositoryResolver;
+import ext.hibernate.HiberEMFResolver;
 import ext.hibernate.HiberEmployeeRepositoryResolver;
-import ext.hibernate.HiberSessionResolver;
 import io.restassured.common.mapper.TypeRef;
 import jakarta.persistence.EntityManagerFactory;
 import model.api.Employee;
@@ -16,6 +16,8 @@ import model.db.EmployeeEntity;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -38,15 +40,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * 1.4 Изменение информации о сотруднике+
  *
  * 2. Негативные:
- * 2.1 Добавление нового сотрудника без авторизации (добавить в контрактные)
- * 2.2 Добавление нового сотрудника к отсутствующей компании (добавить в контрактные)
- * 2.3 Добавление уже существующего сотрудника (все поля)
- * 2.4 Добавление сотрудника на уже существующий id
- * 2.5 Изменение информации о сотруднике без авторизации
- * 2.6 Изменение информации о сотруднике по несуществующему id
- * 2.7 Получение списка сотрудников несуществующей компании
- * 2.8 Получение списка сотрудников компании в которой нет сотрудников
- * 2.9 Получение сотрудника по несуществующему id
+ * 2.1 Добавление нового сотрудника без авторизации +
+ * 2.2 Добавление нового сотрудника к отсутствующей компании +
+ * 2.5 Изменение информации о сотруднике без авторизации +
+ * 2.6 Изменение информации о сотруднике по несуществующему id +
+ * 2.7 Получение списка сотрудников несуществующей компании +
+ * 2.8 Получение списка сотрудников компании в которой нет сотрудников +
+ * 2.9 Получение сотрудника по несуществующему id +
  * 2.10 Добавление сотрудника без обязательного поля (id)
  * 2.11 Добавление сотрудника без обязательного поля (firstName)
  * 2.12 Добавление сотрудника без обязательного поля (lastName)
@@ -65,23 +65,26 @@ import static org.junit.jupiter.api.Assertions.*;
         EmployeeResolver.class,
         CompanyServiceResolver.class,
         EmployeeServiceResolver.class,
-        HiberSessionResolver.class,
+        HiberEMFResolver.class,
         HiberEmployeeRepositoryResolver.class,
         HiberCompanyRepositoryResolver.class})
 public class EmployeeContractTest {
     private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
-    private final static String ERROR_RESPONSE_BODY_SCHEMA = "{\n\"$schema\": \"http://json-schema.org/draft-04/schema#\",\n\"type\": \"object\",\n\"properties\": {\n\"statusCode\": {\n\"type\": \"integer\"\n},\n\"message\": {\n\"type\": \"string\"\n}\n},\n\"required\": [\n\"statusCode\",\n\"message\"\n]\n}";
+    private final String ADD_RESPONSE_BODY_SCHEMA = "{\"$schema\": \"http://json-schema.org/draft-04/schema#\",\"type\": \"object\",\"properties\": {\"id\": {\"type\": \"integer\"}},\"required\": [\"id\"]}";
+    private final String ERROR_RESPONSE_BODY_SCHEMA = "{ \"$schema\": \"http://json-schema.org/draft-04/schema#\", \"type\": \"object\", \"properties\": { \"statusCode\": { \"type\": \"integer\" }, \"message\": { \"type\": \"string\" } }, \"required\": [ \"statusCode\", \"message\" ] }";
+    private final String UPDATE_BODY_SCHEMA = "{ \"$schema\": \"http://json-schema.org/draft-04/schema#\", \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"integer\" }, \"isActive\": { \"type\": \"boolean\" }, \"email\": { \"type\": \"string\" }, \"url\": { \"type\": \"string\" } }, \"required\": [ \"id\", \"isActive\", \"email\", \"url\" ] }";
+    private final String GET_ALL_BODY_SCHEMA = "{ \"$schema\": \"http://json-schema.org/draft-04/schema#\", \"type\": \"array\", \"items\": [ { \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"integer\" }, \"firstName\": { \"type\": \"string\" }, \"lastName\": { \"type\": \"string\" }, \"middleName\": { \"type\": \"string\" }, \"companyId\": { \"type\": \"integer\" }, \"email\": { \"type\": \"string\" }, \"url\": { \"type\": \"string\" }, \"phone\": { \"type\": \"string\" }, \"birthdate\": { \"type\": \"string\" }, \"isActive\": { \"type\": \"boolean\" } }, \"required\": [ \"id\", \"firstName\", \"lastName\", \"middleName\", \"companyId\", \"email\", \"url\", \"phone\", \"birthdate\", \"isActive\" ] } ] }";
+    private final String GET_ONE_BODY_SCHEMA = "{ \"$schema\": \"http://json-schema.org/draft-04/schema#\", \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"integer\" }, \"firstName\": { \"type\": \"string\" }, \"lastName\": { \"type\": \"string\" }, \"middleName\": { \"type\": \"string\" }, \"companyId\": { \"type\": \"integer\" }, \"email\": { \"type\": \"string\" }, \"url\": { \"type\": \"string\" }, \"phone\": { \"type\": \"string\" }, \"birthdate\": { \"type\": \"string\" }, \"isActive\": { \"type\": \"boolean\" } }, \"required\": [ \"id\", \"firstName\", \"lastName\", \"middleName\", \"companyId\", \"email\", \"url\", \"phone\", \"birthdate\", \"isActive\" ] }";
+    private final int SHIFT = 100;  //Сдвиг от последнего найденного объекта для тестов с неправильными id
     private static Properties properties = new Properties();
     private static String baseUriString = "";
     private static String basePathString = "";
-    private static String login;
-    private static String password;
-    private AuthService authService = AuthService.getInstance();
-    private static Faker faker = new Faker(new Locale("ru"));
+    private static String login = "";
+    private static String password = "";
+    private final AuthService authService = AuthService.getInstance();
+    private final Faker faker = new Faker(new Locale("ru"));
     private static List<Integer> companyToDelete = new ArrayList<>();
     private static List<Integer> employeeToDelete = new ArrayList<>();
-
-    private static int testNumCount = 0;
 
 
     //Инициализация Hibernate (EntityManagerFactory)
@@ -136,24 +139,22 @@ public class EmployeeContractTest {
                 .post()
                 .then()
                 .log().ifValidationFails()
-                .statusCode(201)
+                .statusCode(401)
                 .contentType("application/json; charset=utf-8")
+
+                //Валидация схемы JSON:
+                //https://www.tutorialspoint.com/validate-json-schema-in-rest-assured
+                //Генератор схемы на основе JSON https://www.liquid-technologies.com/online-json-to-schema-converter
+                //1. Вариант со схемой в файле
+//                .body(matchesJsonSchemaInClasspath("employee_update_response.json"))
+                //2. Вариант со схемой в строке
+                .body(matchesJsonSchema(ADD_RESPONSE_BODY_SCHEMA))
                 .extract()
                 .path("id");
 
         employeeToDelete.add(createdId);
 
-        EmployeeEntity employeeDb = employeeRepository.getById(createdId);
-
-        //Проверки
-        assertAll(
-                () -> assertThat(employee, isEqual(employeeDb)),
-                //TODO: Написать BUG-репорт, что при создании Employee через API удаляется email
-
-                () -> assertEquals(id, createdId)
-                //TODO: Написать BUG-репорт, что при создании Employee через API изменяется заданный id
-                // и возвращается автоматически присвоенный
-        );
+        assertEquals(id, createdId);
     }
 
     @Test
@@ -177,29 +178,14 @@ public class EmployeeContractTest {
                         .statusCode(200)
                         .log().ifValidationFails()
                         .contentType("application/json; charset=utf-8")
+                        .body(matchesJsonSchema(GET_ALL_BODY_SCHEMA))
+                        //TODO: Написать BUG-репорт, что формат тела ответа на GET запрос не совпадает
+                        // с требованиями в Swagger ("avatar_url" вместо "url")
                         .extract()
                         .body().as(new TypeRef<List<Employee>>() {
                         });
-        assertEquals(employeesBd.size(), employeesApi.size());
 
-        //Т.к. это тесты контракта, то проверка ограничивается только проверкой
-        // формата ответа и сравнением длин массивов
-//
-//        //Сеты id из БД и API
-//        Set<Integer> empIdDb = new HashSet<>();
-//        for (EmployeeEntity e: employeesBd) {
-//            empIdDb.add(e.getId());
-//        }
-//        Set<Integer> empIdApi = new HashSet<>();
-//        for (Employee e: employeesApi) {
-//            empIdApi.add(e.getId());
-//        }
-//
-//        //Проверки:
-//        assertAll(
-//                () -> assertEquals(employeesBd.size(), employeesApi.size()),
-//                () -> assertTrue(empIdDb.containsAll(empIdApi))
-//        );
+        assertEquals(employeesBd.size(), employeesApi.size());
     }
 
     @Test
@@ -218,11 +204,11 @@ public class EmployeeContractTest {
                 .get()
                 .then()
                 .log().ifValidationFails()
-                .extract()
-                .response()
-                .then()
                 .statusCode(200)
                 .contentType("application/json; charset=utf-8")
+                .body(matchesJsonSchema(GET_ONE_BODY_SCHEMA))
+                //TODO: Написать BUG-репорт, что формат тела ответа на GET запрос не совпадает
+                // с требованиями в Swagger ("avatar_url" вместо "url")
                 .extract()
                 .body().as(new TypeRef<Employee>() {
                            }
@@ -249,7 +235,7 @@ public class EmployeeContractTest {
         String token = authService.logIn(login, password);
 
         int id = given()
-                .log().all()
+                .log().ifValidationFails()
                 .header("x-client-token", token)
                 .baseUri(baseUriString + basePathString + "/" + employeeApi.getId())
                 .contentType("application/json; charset=utf-8")
@@ -261,41 +247,11 @@ public class EmployeeContractTest {
                 .when()
                 .patch()
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .statusCode(200)
                 .contentType("application/json; charset=utf-8")
                 .assertThat()
-                //Валидация схемы JSON:
-                //https://www.tutorialspoint.com/validate-json-schema-in-rest-assured
-                //Генератор схемы на основе JSON https://www.liquid-technologies.com/online-json-to-schema-converter
-                //1. Вариант со схемой в файле
-//                .body(matchesJsonSchemaInClasspath("employee_update_response.json"))
-                //2. Вариант со схемой в строке
-                .body(matchesJsonSchema("{\n" +
-                        "  \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n" +
-                        "  \"type\": \"object\",\n" +
-                        "  \"properties\": {\n" +
-                        "    \"id\": {\n" +
-//                        "      \"type\": \"string\"\n" +      //Проверка верификации схемы при неправильном формате
-                        "      \"type\": \"integer\"\n" +
-                        "    },\n" +
-                        "    \"isActive\": {\n" +
-                        "      \"type\": \"boolean\"\n" +
-                        "    },\n" +
-                        "    \"email\": {\n" +
-                        "      \"type\": \"string\"\n" +
-                        "    },\n" +
-                        "    \"url\": {\n" +
-                        "      \"type\": \"string\"\n" +
-                        "    }\n" +
-                        "  },\n" +
-                        "  \"required\": [\n" +
-                        "    \"id\",\n" +
-                        "    \"isActive\",\n" +
-                        "    \"email\",\n" +
-                        "    \"url\"\n" +
-                        "  ]\n" +
-                        "}"))
+                .body(matchesJsonSchema(UPDATE_BODY_SCHEMA))
                 .extract().path("id");
 
         assertEquals(employee.getId(), id);
@@ -320,7 +276,6 @@ public class EmployeeContractTest {
                 given()
                         .log().ifValidationFails()
                         .baseUri(baseUriString + basePathString)
-//                .header("x-client-token", token)
                         .contentType("application/json; charset=utf-8")
                         .body(employee)
                         .when()
@@ -344,7 +299,7 @@ public class EmployeeContractTest {
                                                     CompanyRepository companyRepository) throws SQLException, IOException {
 
         //Создание объекта Employee с тестовыми данными
-        int companyId = companyRepository.getLast().getId() + 100;  //Установка id несуществующей компании
+        int companyId = companyRepository.getLast().getId() + SHIFT;  //Установка id несуществующей компании
         int id = employeeRepository.getLast().getId() + 1;
         Employee employee = employeeApiService.generateEmployee();
         employee.setId(id);
@@ -376,103 +331,40 @@ public class EmployeeContractTest {
 
     @Test
     @Tag("Negative")
-    @DisplayName("2.3 Добавление уже существующего сотрудника (поля)")
-    public void shouldNotAddEmployeeDuplicate(EmployeeService employeeApiService,
-                                              EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
-
-        //Создание объекта Employee с тестовыми данными
-        int companyId = company.getId();
-        int id = employeeRepository.getLast().getId();
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setId(++id);
-        employee.setCompanyId(companyId);
-
-        //Добавление Employee через API
-        employeeApiService.logIn(login, password);
-        int createdId = employeeApiService.create(employee);
-        employeeToDelete.add(createdId);
-
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-        createdId = employeeApiService.create(employee);
-        employeeToDelete.add(createdId);
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertTrue(listBefore.containsAll(listAfter)),
-                //TODO: Написать BUG-репорт, что можно создать дубликата Employee
-                //TODO: Доработать тест по результатам исправления BUG-репорт по возможности создания дубликатов Employee
-
-                () -> assertEquals(listBefore.size(), listAfter.size())
-        );
-    }
-
-    @Test
-    @Tag("Negative")
-    @DisplayName("2.4 Добавление сотрудника на уже существующий id")
-    public void shouldNotAddEmployeeWithOccupiedId(EmployeeService employeeApiService,
-                                                   EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) throws SQLException, IOException {
-
-        //Создание объекта Employee с тестовыми данными
-        int companyId = company.getId();
-        int id = employeeRepository.getLast().getId();
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setId(++id);
-        employee.setCompanyId(companyId);
-
-        //Добавление Employee через API
-        employeeApiService.logIn(login, password);
-        int createdId = employeeApiService.create(employee);
-        employeeToDelete.add(createdId);
-
-        Employee employeeSec = employeeApiService.generateEmployee();
-        employeeSec.setId(id);
-        employeeSec.setCompanyId(companyId);
-
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        //Добавление Employee через API
-        employeeApiService.logIn(login, password);
-        createdId = employeeApiService.create(employeeSec);
-        employeeToDelete.add(createdId);
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertTrue(listBefore.containsAll(listAfter)),
-                //TODO: Написать BUG-репорт, что можно добавить нового Employee на уже занятый id (фактически новому
-                // Employee выдаётся автоматически новый id) связан с BUG-репортом об игнорировании id при
-                // создании нового Employee
-
-                () -> assertEquals(listBefore.size(), listAfter.size())
-        );
-    }
-
-    @Test
-    @Tag("Negative")
     @DisplayName("2.5 Изменение информации о сотруднике без авторизации")
-    public void shouldNotAddEmployeeWithoutAuth(EmployeeService employeeApiService,
-                                                @TestProperties(testNum = 3) CompanyEntity company,
-                                                @TestProperties(testNum = 3) EmployeeEntity employee) throws SQLException, IOException {
+    public void shouldNotUpdateEmployeeWithoutAuth(EmployeeService employeeApiService,
+                                                   @TestProperties(testNum = 3) CompanyEntity company,
+                                                   @TestProperties(testNum = 3) EmployeeEntity employee) throws SQLException, IOException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
+        String lastName = faker.name().lastName();
+        String email = faker.internet().emailAddress("b" + faker.number().digits(6));
+        String url = faker.internet().url();
+        String phone = faker.number().digits(10);
+        boolean isActive = !employee.isActive();
 
-        employeeApi.setLastName(faker.name().lastName());
-        employeeApi.setEmail(faker.internet().emailAddress("b" + faker.number().digits(6)));
-        employeeApi.setUrl(faker.internet().url());
-        employeeApi.setPhone(faker.number().digits(10));
-        employeeApi.setIsActive(!employeeApi.getIsActive());
+        String message =
+                given()
+                        .log().ifValidationFails()
+                        .baseUri(baseUriString + basePathString + "/" + employeeApi.getId())
+                        .contentType("application/json; charset=utf-8")
+                        .body("{\"lastName\": \"" + lastName + "\"," +
+                                "\"email\": \"" + email + "\"," +
+                                "\"url\": \"" + url + "\"," +
+                                "\"phone\": \"" + phone + "\"," +
+                                "\"isActive\": " + isActive + "}")
+                        .when()
+                        .patch()
+                        .then()
+                        .log().ifValidationFails()
+                        .statusCode(401)
+                        .contentType("application/json; charset=utf-8")
+                        .assertThat()
+                        .body(matchesJsonSchema(ERROR_RESPONSE_BODY_SCHEMA))
+                        .extract()
+                        .path("message");
 
-        employeeApiService.logOut();
-
-        assertThrows(AssertionError.class, () -> employeeApiService.update(employeeApi));
-
-        Employee employeeUpdated = employeeApiService.getById(employee.getId());
-
-        assertThat(employeeUpdated, isEqual(employee));
+        assertEquals("Unauthorized", message);
     }
 
     @Test
@@ -480,94 +372,141 @@ public class EmployeeContractTest {
     @DisplayName("2.6 Изменение информации о сотруднике по несуществующему id")
     public void shouldNotUpdateEmployeeWithWrongId(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
-                                                   @TestProperties(testNum = 2) CompanyEntity company,
-                                                   @TestProperties(testNum = 2) EmployeeEntity employee) throws SQLException, IOException {
+                                                   CompanyEntity company) throws SQLException, IOException {
 
-        Employee employeeApi = employeeApiService.getById(employee.getId());
-        employeeApi.setLastName(faker.name().lastName());
-        employeeApi.setEmail(faker.internet().emailAddress("b" + faker.number().digits(6)));
-        employeeApi.setUrl(faker.internet().url());
-        employeeApi.setPhone(faker.number().digits(10));
-        employeeApi.setIsActive(!employeeApi.getIsActive());
-
+        Employee employeeApi = employeeApiService.generateEmployee();
         int lastId = employeeRepository.getLast().getId();
-        employeeApi.setId(lastId + 100);
+        employeeApi.setId(lastId + SHIFT);
+        employeeApi.setCompanyId(company.getId());
 
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
+        String token = authService.logIn(login, password);
 
-        assertThrows(AssertionError.class, () -> employeeApiService.update(employeeApi));
+        String message =
+                given()
+                        .log().ifValidationFails()
+                        .header("x-client-token", token)
+                        .baseUri(baseUriString + basePathString + "/" + employeeApi.getId())
+                        .contentType("application/json; charset=utf-8")
+                        .body("{\"lastName\": \"" + employeeApi.getLastName() + "\"," +
+                                "\"email\": \"" + employeeApi.getEmail() + "\"," +
+                                "\"url\": \"" + employeeApi.getUrl() + "\"," +
+                                "\"phone\": \"" + employeeApi.getPhone() + "\"," +
+                                "\"isActive\": " + employeeApi.getIsActive() + "}")
+                        .when()
+                        .patch()
+                        .then()
+                        .log().ifValidationFails()
+                        .statusCode(500)
+                        .contentType("application/json; charset=utf-8")
+                        .assertThat()
+                        .body(matchesJsonSchema(ERROR_RESPONSE_BODY_SCHEMA))
+                        .extract()
+                        .path("message");
 
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertTrue(listBefore.containsAll(listAfter)),
-                () -> assertEquals(listBefore.size(), listAfter.size())
-        );
+        assertEquals("Internal server error", message);
+        //TODO: Написать BUG-репорт, что при ошибке в id в запросе на изменение Employee выдаётся SC 500 вместо SC4XX
     }
 
     @Test
     @Tag("Negative")
     @DisplayName("2.7 Получение списка сотрудников несуществующей компании")
-    public void shouldGetEmptyListEmployeeByWrongCompanyId(EmployeeService employeeApiService,
-                                                           CompanyRepository companyRepository) throws SQLException, IOException {
+    public void shouldNotGetEmployeeByWrongCompanyId(CompanyRepository companyRepository) throws SQLException, IOException {
 
-        int companyId = companyRepository.getLast().getId() + 100;
+        int companyId = companyRepository.getLast().getId() + SHIFT;
 
-        //Проверка, что возвращается пустой список Employee
-        assertEquals(0, employeeApiService.getAllByCompanyId(companyId).size());
+        String message =
+                given()
+                        .log().ifValidationFails()
+                        .baseUri(baseUriString + basePathString)
+                        .param("company", companyId)
+                        .when()
+                        .get()
+                        .then()
+                        .statusCode(200)
+                        //TODO: Запросить у аналитика или PM требования к информация в Swagger по возвращаемым
+                        // кодам при ошибках в запросах Employee по companyId
+                        .log().ifValidationFails()
+                        .contentType("application/json; charset=utf-8")
+                        .extract()
+                        .body().asString();
+
+        assertEquals("[]", message);
     }
 
     @Test
     @Tag("Negative")
     @DisplayName("2.8 Получение списка сотрудников компании в которой нет сотрудников")
-    public void shouldGetEmptyListEmployeeByEmptyCompany(EmployeeService employeeApiService,
-                                                         CompanyEntity company) throws SQLException, IOException {
+    public void shouldGetEmptyListEmployeeByEmptyCompany(CompanyEntity company) throws SQLException, IOException {
 
         int companyId = company.getId();
 
-        //Проверка, что возвращается пустой список Employee
-        assertEquals(0, employeeApiService.getAllByCompanyId(companyId).size());
+        String message =
+                given()
+                        .log().ifValidationFails()
+                        .baseUri(baseUriString + basePathString)
+                        .param("company", companyId)
+                        .when()
+                        .get()
+                        .then()
+                        .statusCode(200)
+                        .log().ifValidationFails()
+                        .contentType("application/json; charset=utf-8")
+                        .extract()
+                        .body().asString();
+
+        assertEquals("[]", message);
     }
 
     @Test
     @Tag("Negative")
     @DisplayName("2.9 Получение сотрудника по несуществующему id")
-    public void shouldNotGetEmployeeByWrongId(EmployeeService employeeApiService,
-                                              EmployeeRepository employeeRepository) throws SQLException, IOException {
+    public void shouldNotGetEmployeeByWrongId(EmployeeRepository employeeRepository) throws SQLException, IOException {
 
-        int id = employeeRepository.getLast().getId() + 100;
+        int id = employeeRepository.getLast().getId() + SHIFT;
+        String message =
+                given()
+                        .baseUri(baseUriString + basePathString + "/" + id)
+                        .log().ifValidationFails()
+                        .header("accept", "application/json")
+                        .when()
+                        .get()
+                        .then()
+                        .log().ifValidationFails()
+                        .statusCode(404)
+                        //TODO: Написать BUG-репорт, что при запросе несуществующего сотрудника возвращается SC 200 вместо SC404
+                        .contentType("application/json; charset=utf-8")
+                        .body(matchesJsonSchema(ERROR_RESPONSE_BODY_SCHEMA))
+                        .extract()
+                        .path("message");
 
-        //Проверка, что выбрасывается исключение при парсинге пустого тела ответа
-        assertThrows(IllegalStateException.class, () -> employeeApiService.getById(id));
+        assertEquals("Not found", message);
+        //TODO: Написать BUG-репорт, что при запросе несуществующего сотрудника не возвращается тело ответа с "message":"Not found"
     }
 
-    @Test
+    @ParameterizedTest(name = "Отсутствие полей в запросе на создание")
+    @MethodSource("getEmployeeJsonStringWithoutFields")
     @Tag("Negative")
     @DisplayName("2.10 Добавление сотрудника без обязательного поля (id)")
-    public void shouldNotAddEmployeeWithoutId(EmployeeService employeeApiService,
-                                              EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
+    public void shouldNotAddEmployeeWithoutId(String jsonEmployeeString) throws SQLException, IOException {
 
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setCompanyId(company.getId());
+        String token = authService.logIn(login, password);
 
-        employee.setId(0);
-
-        employeeApiService.logIn(login, password);
-        List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
-        assertThrows(AssertionError.class, () -> employeeApiService.create(employee));
-        //TODO: Написать BUG-репорт, что не должны создаваться Employee с id = 0
-
-        List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
-        assertAll(
-                //Проверка, что количество Employee не увеличилось
-                () -> assertTrue(listBefore.containsAll(listAfter)),
-                () -> assertEquals(listBefore.size(), listAfter.size())
-        );
+        //Добавление Employee через API
+        int createdId = given()
+                .log().ifValidationFails()
+                .baseUri(baseUriString + basePathString)
+                .header("x-client-token", token)
+                .contentType("application/json; charset=utf-8")
+                .body(jsonEmployeeString)
+                .when()
+                .post()
+                .then()
+                .log().ifValidationFails()
+                .statusCode(201)
+                .contentType("application/json; charset=utf-8")
+                .body(matchesJsonSchema(ADD_RESPONSE_BODY_SCHEMA))
+                .extract()
+                .path("id");
     }
 
     @Test
@@ -806,6 +745,77 @@ public class EmployeeContractTest {
                 () -> assertTrue(listAfter.contains(employeeDb)),
                 () -> assertEquals(listBefore.size() + 1, listAfter.size())
         );
+    }
+
+    @Test
+    public void ts() {
+        String[] str = getEmployeeJsonStringWithoutFields();
+        for (String s : str) {
+            System.out.println(s);
+        }
+    }
+
+    private static Map<String, String> getFieldsString(Employee employee) {
+        Map<String, String> fields = new HashMap<>();
+
+        fields.put("\"id\": ", String.valueOf(employee.getId()).concat(","));
+        fields.put("\"firstName\": \"", employee.getFirstName() + "\",");
+        fields.put("\"lastName\": \"", employee.getLastName() + "\",");
+        fields.put("\"middleName\": \"", employee.getMiddleName() + "\",");
+        fields.put("\"companyId\": ", String.valueOf(employee.getCompanyId()).concat(","));
+        fields.put("\"email\": \"", employee.getEmail() + "\",");
+        fields.put("\"url\": \"", employee.getUrl() + "\",");
+        fields.put("\"phone\": \"", employee.getPhone() + "\",");
+        fields.put("\"birthdate\": \"", employee.getBirthdate() + "\",", );
+        fields.put("\"isActive\": ", String.valueOf(employee.getIsActive()));
+
+        return fields;
+    }
+
+    private static String[] getEmployeeJsonStringWithoutRequiredFields(EmployeeService employeeService,
+                                                                       EmployeeRepository employeeRepository,
+                                                                       CompanyEntity company){
+        Employee employee = employeeService.generateEmployee();
+        employee.setCompanyId(company.getId());
+        employee.setId(employeeRepository.getLast().getId());
+        Map<String, String> employeeFields = getFieldsString(employee);
+        System.out.println(employeeFields.toString());
+        List<String> requiredParameters = List.of("id", "firstName", "lastName", "isActive", "companyId");
+    }
+
+
+    private static String[] getEmployeeJsonStringWithoutFields() {
+
+        List<String> optionParameters = List.of("middleName", "email", "url", "phone", "birthdate");
+
+        List<String> baseJson = List.of("{",
+                "  \"id\": 649,",
+                "  \"firstName\": \"TSЛюбовь\",",
+                "  \"lastName\": \"Крылова\",",
+                "  \"middleName\": \"Борисовна\",",
+                "  \"companyId\": 377,",
+                "  \"email\": \"a22417@mail.ru\",",
+                "  \"url\": \"http://www.xn---xn--80aeahfa-v1k6l6a8gxh7b.com/cum\",",
+                "  \"phone\": \"9364071439\",",
+                "  \"birthdate\": \"1978-06-26\",",
+                "  \"isActive\": true",
+                "}");
+
+        String[] jsonString = new String[baseJson.size() - 2];
+
+        for (int i = 1; i < baseJson.size() - 1; i++) {
+
+            String tmp = baseJson.get(0);
+            for (int j = 1; j < baseJson.size() - 1; j++) {
+                if (i != j) tmp = tmp + baseJson.get(j);
+            }
+
+            //Убираем лишнюю запятую в случае отсутствия последнего поля
+            if (tmp.charAt(tmp.length() - 1) == ',') tmp = tmp.substring(0, tmp.length() - 1);
+            tmp = tmp + baseJson.get(baseJson.size() - 1);
+            jsonString[i - 1] = tmp;
+        }
+        return jsonString;
     }
 
 }

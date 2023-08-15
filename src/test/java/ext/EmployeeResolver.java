@@ -11,12 +11,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmployeeResolver implements ParameterResolver, AfterAllCallback {
+public class EmployeeResolver implements ParameterResolver {
     private EmployeeRepository employeeRepository;
     private final String EMF_GLOBAL_KEY = "EntityManagerFactory";  //Название ключа EntityManagerFactory в хранилище
     private final String TEST_NUM_COMPANY_GLOBAL_KEY = "COMPANY";  //Название ключа EntityManagerFactory в хранилище
-    private final String TEST_COMPANY_NAME = "TEST COMPANY";
-    private List<Integer> employeeId = new ArrayList<>();
+//    private final String TEST_COMPANY_NAME = "TEST COMPANY";
+//    private List<Integer> employeeId = new ArrayList<>();
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
@@ -33,6 +33,7 @@ public class EmployeeResolver implements ParameterResolver, AfterAllCallback {
         //Вытаскиваем сохранённый EntityManager из extensionContext
         EntityManagerFactory entityManagerFactory = (EntityManagerFactory) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(EMF_GLOBAL_KEY);
         EntityManager em = entityManagerFactory.createEntityManager();
+//        System.out.println("\n---------------------------------------\nEmployeeResolver Implements\n---------------------------------------\n");
 
         employeeRepository = new EmployeeRepositoryHiber(em);
         try {
@@ -52,7 +53,7 @@ public class EmployeeResolver implements ParameterResolver, AfterAllCallback {
                     List<EmployeeEntity> employeeEntities = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         employeeEntities.add(i, employeeRepository.create(companyId));
-                        employeeId.add(i, employeeEntities.get(i).getId());
+//                        employeeId.add(i, employeeEntities.get(i).getId());
                     }
                     return employeeEntities;
                 }
@@ -60,18 +61,20 @@ public class EmployeeResolver implements ParameterResolver, AfterAllCallback {
 
             //Если количество не указано, или указано неправильно
             EmployeeEntity employee = employeeRepository.create(companyId);
-            employeeId.add(0, employee.getId());
+//            employeeId.add(0, employee.getId());
             return employee;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public void afterAll(ExtensionContext extensionContext) throws Exception {
-        if (employeeId.size() > 0)
-            for (Integer i : employeeId) {
-                employeeRepository.deleteById(i);
-            }
-    }
+//    @Override
+//    public void afterEach(ExtensionContext extensionContext) throws Exception {
+//        System.out.println("\n---------------------------------------\nEmployeeResolver AfterEachCallBack\n---------------------------------------\n");
+//        if (employeeId.size() > 0)
+//            for (Integer i : employeeId) {
+//                System.out.println("\n---------------------------------------\nEmployeeResolver DELETE!\n---------------------------------------\n");
+//                employeeRepository.deleteById(i);
+//            }
+//    }
 }

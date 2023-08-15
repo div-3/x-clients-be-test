@@ -2,6 +2,7 @@ package ext;
 
 import db.CompanyRepository;
 import db.CompanyRepositoryHiber;
+import db.EmployeeRepositoryHiber;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import model.db.CompanyEntity;
@@ -14,6 +15,8 @@ public class CompanyResolver implements ParameterResolver, AfterAllCallback {
     private final String EMF_GLOBAL_KEY = "EntityManagerFactory";  //Название ключа EntityManagerFactory в хранилище
     private final String TEST_NUM_COMPANY_GLOBAL_KEY = "COMPANY";  //Название ключа EntityManagerFactory в хранилище
     private final String TEST_COMPANY_NAME = "TEST COMPANY";
+    private EntityManagerFactory entityManagerFactory;
+    private EntityManager em;
     private int companyId = 0;
 
     @Override
@@ -25,8 +28,8 @@ public class CompanyResolver implements ParameterResolver, AfterAllCallback {
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         //Вытаскиваем сохранённый EntityManager из extensionContext
-        EntityManagerFactory entityManagerFactory = (EntityManagerFactory) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(EMF_GLOBAL_KEY);
-        EntityManager em = entityManagerFactory.createEntityManager();
+        entityManagerFactory = (EntityManagerFactory) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(EMF_GLOBAL_KEY);
+        em = entityManagerFactory.createEntityManager();
 
         companyRepository = new CompanyRepositoryHiber(em);
         try {
@@ -44,6 +47,20 @@ public class CompanyResolver implements ParameterResolver, AfterAllCallback {
 
     @Override
     public void afterAll(ExtensionContext extensionContext) throws Exception {
-        if (companyId != 0) companyRepository.deleteById(companyId);
+        if (companyId > 0){
+            //Вытаскиваем сохранённый EntityManager из extensionContext
+            EmployeeRepositoryHiber employeeRepository = new EmployeeRepositoryHiber(em);
+            employeeRepository.deleteAllByCompanyId(companyId);
+//            List<EmployeeEntity> employees = new ArrayList<>();
+//            try {
+//                employees = employeeRepository.getAllByCompanyId(companyId);
+//            }catch (Exception e){}
+//            if (employees.size() > 0 ){
+//                for (EmployeeEntity e: employees) {
+//                    employeeRepository.deleteById();
+//                }
+//            }
+            companyRepository.deleteById(companyId);
+        }
     }
 }

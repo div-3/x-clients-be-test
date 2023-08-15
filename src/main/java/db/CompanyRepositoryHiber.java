@@ -1,10 +1,8 @@
 package db;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import model.db.CompanyEntity;
-import model.db.EmployeeEntity;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -71,7 +69,7 @@ public class CompanyRepositoryHiber implements CompanyRepository{
         company.setChangedTimestamp(tmp);
 
         //Сохранение компании в БД
-        em.getTransaction().begin();
+        if (!em.getTransaction().isActive()) em.getTransaction().begin();
         em.persist(company);
         em.getTransaction().commit();
         return company.getId();
@@ -89,7 +87,7 @@ public class CompanyRepositoryHiber implements CompanyRepository{
         company.setChangedTimestamp(tmp);
 
         //Сохранение компании в БД
-        em.getTransaction().begin();
+        if (!em.getTransaction().isActive()) em.getTransaction().begin();
         em.persist(company);
         em.getTransaction().commit();
         return company.getId();
@@ -98,7 +96,8 @@ public class CompanyRepositoryHiber implements CompanyRepository{
     @Override
     public void deleteById(int id) {
         CompanyEntity company = em.find(CompanyEntity.class, id);
-        em.getTransaction().begin();
+        if (!em.getTransaction().isActive()) em.getTransaction().begin();
+        if (company == null) return;
         em.remove(company);
         em.getTransaction().commit();
         System.out.println("Удалена компания с id = " + id);

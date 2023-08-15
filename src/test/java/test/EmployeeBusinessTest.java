@@ -6,7 +6,7 @@ import db.EmployeeRepository;
 import ext.*;
 import ext.hibernate.HiberCompanyRepositoryResolver;
 import ext.hibernate.HiberEmployeeRepositoryResolver;
-import ext.hibernate.HiberSessionResolver;
+import ext.hibernate.HiberEMFResolver;
 import jakarta.persistence.EntityManagerFactory;
 import model.api.Employee;
 import model.db.CompanyEntity;
@@ -65,11 +65,12 @@ import static org.junit.jupiter.api.Assertions.*;
         EmployeeResolver.class,
         CompanyServiceResolver.class,
         EmployeeServiceResolver.class,
-        HiberSessionResolver.class,
+        HiberEMFResolver.class,
         HiberEmployeeRepositoryResolver.class,
         HiberCompanyRepositoryResolver.class})
 public class EmployeeBusinessTest {
     private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
+    private final int SHIFT = 100;  //Сдвиг от последнего найденного объекта для тестов с неправильными id
     private static Properties properties = new Properties();
     private static String baseUriString;
     private static String login;
@@ -77,8 +78,6 @@ public class EmployeeBusinessTest {
     private static Faker faker = new Faker(new Locale("ru"));
     private static List<Integer> companyToDelete = new ArrayList<>();
     private static List<Integer> employeeToDelete = new ArrayList<>();
-
-    private static int testNumCount = 0;
 
 
     //Инициализация Hibernate (EntityManagerFactory)
@@ -193,10 +192,10 @@ public class EmployeeBusinessTest {
         employeeApiService.logIn(login, password);
         int id = employeeApiService.update(employeeApi);
         //TODO: Написать BUG-репорт, что при успешном обновлении информации о сотруднике
-        // возвращается SC 201 вместо SC 200, как указано в Swagger
+        // возвращается SC 200 вместо SC 201, как указано в Swagger
 
         //TODO: Написать BUG-репорт, что при успешном обновлении информации о сотруднике
-        // возвращается тело не с полями, отличающимися от Swagger
+        // возвращается тело с полями, отличающимися от Swagger
 
         assertThat(employeeApi, isEqual(employeeRepository.getById(id)));
         //TODO: Написать BUG-репорт, что при обновлении employee не обновляется поле phone.
@@ -212,9 +211,11 @@ public class EmployeeBusinessTest {
 
         //Генерируем и создаём через API Employee для определённой Company
         List<Integer> employeeToCreateId = new ArrayList<>();
+        int tempId = employeeRepository.getLast().getId() + 1;
         for (int i = 0; i < 5; i++) {
             Employee empl = employeeApiService.generateEmployee();  //Генерируем Employee без id и companyId
             empl.setCompanyId(company.getId());     //Устанавливаем companyId
+            empl.setId(tempId + i);
 
             employeeApiService.logIn(login, password);
             int id = employeeApiService.create(empl);
@@ -238,14 +239,15 @@ public class EmployeeBusinessTest {
     @DisplayName("2.1 Добавление нового сотрудника без авторизации")
     public void shouldNotAddEmployeeWithoutAuth(EmployeeService employeeApiService,
                                                 EmployeeRepository employeeRepository,
-                                                CompanyEntity company) throws SQLException, IOException {
+                                                @TestProperties(testNum = 3) CompanyEntity company,
+                                                @TestProperties(testNum = 3, itemCount = 3)  List<EmployeeEntity> employee) throws SQLException, IOException {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
         int id = employeeRepository.getLast().getId();
-        Employee employee = employeeApiService.generateEmployee();
-        employee.setId(++id);
-        employee.setCompanyId(companyId);
+        Employee employeeTmp = employeeApiService.generateEmployee();
+        employeeTmp.setId(++id);
+        employeeTmp.setCompanyId(companyId);
 
         //Добавление Employee через API
         List<EmployeeEntity> listBefore = employeeRepository.getAllByCompanyId(companyId);
@@ -253,7 +255,7 @@ public class EmployeeBusinessTest {
 
         //Проверка, что при попытке создания Employee неавторизованным пользователем, появляется ошибка в employeeApiService
         assertThrows(AssertionError.class, () -> {
-            employeeApiService.create(employee);
+            employeeApiService.create(employeeTmp);
         });
 
         List<EmployeeEntity> listAfter = employeeRepository.getAllByCompanyId(companyId);
@@ -372,9 +374,9 @@ public class EmployeeBusinessTest {
     @Test
     @Tag("Negative")
     @DisplayName("2.5 Изменение информации о сотруднике без авторизации")
-    public void shouldNotAddEmployeeWithoutAuth(EmployeeService employeeApiService,
-                                                @TestProperties(testNum = 3) CompanyEntity company,
-                                                @TestProperties(testNum = 3) EmployeeEntity employee) throws SQLException, IOException {
+    public void shouldNotUpdateEmployeeWithoutAuth(EmployeeService employeeApiService,
+                                                @TestProperties(testNum = 4) CompanyEntity company,
+                                                @TestProperties(testNum = 4) EmployeeEntity employee) throws SQLException, IOException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
 
@@ -398,8 +400,8 @@ public class EmployeeBusinessTest {
     @DisplayName("2.6 Изменение информации о сотруднике по несуществующему id")
     public void shouldNotUpdateEmployeeWithWrongId(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
-                                                   @TestProperties(testNum = 4) CompanyEntity company,
-                                                   @TestProperties(testNum = 4) EmployeeEntity employee) throws SQLException, IOException {
+                                                   @TestProperties(testNum = 5) CompanyEntity company,
+                                                   @TestProperties(testNum = 5) EmployeeEntity employee) throws SQLException, IOException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
         employeeApi.setLastName(faker.name().lastName());
@@ -409,7 +411,7 @@ public class EmployeeBusinessTest {
         employeeApi.setIsActive(!employeeApi.getIsActive());
 
         int lastId = employeeRepository.getLast().getId();
-        employeeApi.setId(lastId + 100);
+        employeeApi.setId(lastId + SHIFT);
 
         employeeApiService.logIn(login, password);
         List<EmployeeEntity> listBefore = employeeRepository.getAll();
@@ -431,7 +433,7 @@ public class EmployeeBusinessTest {
     public void shouldGetEmptyListEmployeeByWrongCompanyId(EmployeeService employeeApiService,
                                                            CompanyRepository companyRepository) throws SQLException, IOException {
 
-        int companyId = companyRepository.getLast().getId() + 100;
+        int companyId = companyRepository.getLast().getId() + SHIFT;
 
         //Проверка, что возвращается пустой список Employee
         assertEquals(0, employeeApiService.getAllByCompanyId(companyId).size());
@@ -455,7 +457,7 @@ public class EmployeeBusinessTest {
     public void shouldNotGetEmployeeByWrongId(EmployeeService employeeApiService,
                                               EmployeeRepository employeeRepository) throws SQLException, IOException {
 
-        int id = employeeRepository.getLast().getId() + 100;
+        int id = employeeRepository.getLast().getId() + SHIFT;
 
         //Проверка, что выбрасывается исключение при парсинге пустого тела ответа
         assertThrows(IllegalStateException.class, () -> employeeApiService.getById(id));
