@@ -755,32 +755,51 @@ public class EmployeeContractTest {
         }
     }
 
-    private static Map<String, String> getFieldsString(Employee employee) {
-        Map<String, String> fields = new HashMap<>();
+    private static Map<String, Object> getFieldsString(Employee employee) {
+        Map<String, Object> fields = new HashMap<>();
 
-        fields.put("\"id\": ", String.valueOf(employee.getId()).concat(","));
-        fields.put("\"firstName\": \"", employee.getFirstName() + "\",");
-        fields.put("\"lastName\": \"", employee.getLastName() + "\",");
-        fields.put("\"middleName\": \"", employee.getMiddleName() + "\",");
-        fields.put("\"companyId\": ", String.valueOf(employee.getCompanyId()).concat(","));
-        fields.put("\"email\": \"", employee.getEmail() + "\",");
-        fields.put("\"url\": \"", employee.getUrl() + "\",");
-        fields.put("\"phone\": \"", employee.getPhone() + "\",");
-        fields.put("\"birthdate\": \"", employee.getBirthdate() + "\",", );
-        fields.put("\"isActive\": ", String.valueOf(employee.getIsActive()));
+        fields.put("\"id\": ", employee.getId());
+        fields.put("\"firstName\": \"", employee.getFirstName() + "\"");
+        fields.put("\"lastName\": \"", employee.getLastName() + "\"");
+        fields.put("\"middleName\": \"", employee.getMiddleName() + "\"");
+        fields.put("\"companyId\": ", employee.getCompanyId());
+        fields.put("\"email\": \"", employee.getEmail() + "\"");
+        fields.put("\"url\": \"", employee.getUrl() + "\"");
+        fields.put("\"phone\": \"", employee.getPhone() + "\"");
+        fields.put("\"birthdate\": \"", employee.getBirthdate() + "\"");
+        fields.put("\"isActive\": ", employee.getIsActive());
 
         return fields;
     }
 
-    private static String[] getEmployeeJsonStringWithoutRequiredFields(EmployeeService employeeService,
-                                                                       EmployeeRepository employeeRepository,
-                                                                       CompanyEntity company){
-        Employee employee = employeeService.generateEmployee();
-        employee.setCompanyId(company.getId());
-        employee.setId(employeeRepository.getLast().getId());
-        Map<String, String> employeeFields = getFieldsString(employee);
-        System.out.println(employeeFields.toString());
+    @Test
+    public void getEmployeeJsonStringWithoutRequiredFields(){
+        Employee employee = new Employee();
+        employee.setId(649);
+        employee.setFirstName("TSЛюбовь");
+        employee.setLastName("Крылова");
+        employee.setMiddleName("Борисовна");
+        employee.setCompanyId(377);
+        employee.setEmail("a22417@mail.ru");
+        employee.setUrl("http://www.xn---xn-fa-v1k6l6a8gxh7b.com/cum");
+        employee.setPhone("9364071439");
+        employee.setBirthdate("1978-06-26");
+        employee.setIsActive(true);
+
+        Map<String, Object> employeeFields = getFieldsString(employee);
+//        System.out.println(employeeFields.toString());
         List<String> requiredParameters = List.of("id", "firstName", "lastName", "isActive", "companyId");
+        for (String s : requiredParameters) {
+
+            System.out.println("Без: " + s);
+            Object o = employeeFields.get(s);
+            employeeFields.entrySet().removeIf(entry -> entry.getKey() == s);
+            String tmp = employeeFields.toString();
+            tmp = tmp.replaceAll("=", "");
+            System.out.println(tmp);
+            employeeFields.put(s, o);
+//            System.out.println(employeeFields);
+        }
     }
 
 
