@@ -86,7 +86,7 @@ public class CompanyRepositoryJDBC implements CompanyRepository {
                     Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
             preparedStatement.setInt(1, id);
             int count = preparedStatement.executeUpdate();
-            System.out.println("Удалена компания с id = " + id + " количество = " + count);
+            System.out.println("Удалена компания с id = " + id);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
