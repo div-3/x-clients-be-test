@@ -21,8 +21,7 @@ public class HiberEMFResolver implements ParameterResolver {
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        if (parameterContext.getParameter().getType().equals(EntityManagerFactory.class)) return true;
-        return false;
+        return parameterContext.getParameter().getType().equals(EntityManagerFactory.class);
     }
 
     @Override

@@ -20,11 +20,7 @@ public class JDBCCompanyRepositoryResolver implements ParameterResolver{
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        try {
-            Connection connection = (Connection) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(KEY);
-             return new CompanyRepositoryJDBC(connection);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        Connection connection = (Connection) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).get(KEY);
+        return new CompanyRepositoryJDBC(connection);
     }
 }

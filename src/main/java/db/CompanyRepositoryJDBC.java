@@ -10,7 +10,7 @@ import java.util.List;
 public class CompanyRepositoryJDBC implements CompanyRepository {
     Connection connection;
 
-    public CompanyRepositoryJDBC(Connection connection) throws SQLException {
+    public CompanyRepositoryJDBC(Connection connection) {
         this.connection = connection;
     }
 
@@ -93,7 +93,12 @@ public class CompanyRepositoryJDBC implements CompanyRepository {
     }
 
     @Override
-    public boolean clean(String prefix) {
+    public boolean clean(String prefix) throws SQLException {
+        String insertQuery = "DELETE FROM company c WHERE c.name LIKE 'TS_%';";
+//        String insertQuery = "SELECT * FROM company c WHERE c.name LIKE 'TS_%';";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery,
+                Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
+        int count = preparedStatement.executeUpdate();
         return false;
     }
 

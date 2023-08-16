@@ -10,14 +10,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class CompanyRepositoryHiber implements CompanyRepository {
-    private EntityManager em;
+    private final EntityManager em;
 
     public CompanyRepositoryHiber(EntityManager em) {
         this.em = em;
     }
 
     @Override
-    public List<CompanyEntity> getAll() throws SQLException {
+    public List<CompanyEntity> getAll() {
         TypedQuery<CompanyEntity> query = em.createQuery(
                 "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null", CompanyEntity.class);
         return query.getResultList();
@@ -33,7 +33,7 @@ public class CompanyRepositoryHiber implements CompanyRepository {
     }
 
     @Override
-    public List<CompanyEntity> getAll(boolean isActive) throws SQLException {
+    public List<CompanyEntity> getAll(boolean isActive) {
         TypedQuery<CompanyEntity> query = em.createQuery(
                 "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and isActive = :isActive",
                 CompanyEntity.class);
@@ -43,14 +43,14 @@ public class CompanyRepositoryHiber implements CompanyRepository {
     }
 
     @Override
-    public CompanyEntity getLast() throws SQLException {
+    public CompanyEntity getLast() {
         TypedQuery<CompanyEntity> query = em.createQuery(
                 "SELECT c FROM CompanyEntity c ORDER BY c.id DESC LIMIT 1", CompanyEntity.class);
         return query.getSingleResult();
     }
 
     @Override
-    public CompanyEntity getById(int id) throws SQLException {
+    public CompanyEntity getById(int id) {
 //        TypedQuery<CompanyEntity> query = em.createQuery(
 //                "SELECT c FROM CompanyEntity c WHERE c.deletedAt is null and c.id =:id", CompanyEntity.class);
 //        query.setParameter("id", id);

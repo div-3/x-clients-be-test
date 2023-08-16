@@ -32,7 +32,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<Employee> getAllByCompanyId(int companyId) throws IOException {
+    public List<Employee> getAllByCompanyId(int companyId) {
         return given()
                 .baseUri(uri + "/employee")
                 .log().ifValidationFails()
@@ -71,7 +71,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Employee getById(int id) throws IOException {
+    public Employee getById(int id) {
         return given()
                 .baseUri(uri + "/employee" + "/" + id)
                 .log().ifValidationFails()
@@ -89,7 +89,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public int create(Employee employee) throws IOException {
+    public int create(Employee employee) {
         return given()
                 .log().ifValidationFails()
                 .headers(headers)
@@ -128,7 +128,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     //    @Override
-    public int create(String name, String description) throws IOException {
+    public int create(String name, String description) {
         return given()
                 .log().ifValidationFails()
                 .headers(headers)

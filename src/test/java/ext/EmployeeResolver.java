@@ -36,34 +36,30 @@ public class EmployeeResolver implements ParameterResolver {
         EntityManager em = entityManagerFactory.createEntityManager();
 
         employeeRepository = new EmployeeRepositoryHiber(em);
-        try {
-            int companyId = 0;
+        int companyId = 0;
 
-            //Должен быть указан номер теста, чтобы получить соответствующий номер компании из хранилища
-            if (parameterContext.isAnnotated(TestProperties.class)) {
-                int testNum = parameterContext.findAnnotation(TestProperties.class).get().testNum();
-                companyId = (int) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL)
-                        .get(TEST_NUM_COMPANY_GLOBAL_KEY + testNum);
-            }
-
-            //Если задано количество Employee
-            if (parameterContext.isAnnotated(TestProperties.class)) {
-                int count = parameterContext.findAnnotation(TestProperties.class).get().itemCount();
-
-                if (count > 1) {
-                    List<EmployeeEntity> employeeEntities = new ArrayList<>();
-                    for (int i = 0; i < count; i++) {
-                        employeeEntities.add(i, employeeRepository.create(companyId));
-                    }
-                    return employeeEntities;
-                }
-            }
-
-            //Если количество не указано, или указано неправильно
-            EmployeeEntity employee = employeeRepository.create(companyId);
-            return employee;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        //Должен быть указан номер теста, чтобы получить соответствующий номер компании из хранилища
+        if (parameterContext.isAnnotated(TestProperties.class)) {
+            int testNum = parameterContext.findAnnotation(TestProperties.class).get().testNum();
+            companyId = (int) extensionContext.getStore(ExtensionContext.Namespace.GLOBAL)
+                    .get(TEST_NUM_COMPANY_GLOBAL_KEY + testNum);
         }
+
+        //Если задано количество Employee
+        if (parameterContext.isAnnotated(TestProperties.class)) {
+            int count = parameterContext.findAnnotation(TestProperties.class).get().itemCount();
+
+            if (count > 1) {
+                List<EmployeeEntity> employeeEntities = new ArrayList<>();
+                for (int i = 0; i < count; i++) {
+                    employeeEntities.add(i, employeeRepository.create(companyId));
+                }
+                return employeeEntities;
+            }
+        }
+
+        //Если количество не указано, или указано неправильно
+        EmployeeEntity employee = employeeRepository.create(companyId);
+        return employee;
     }
 }

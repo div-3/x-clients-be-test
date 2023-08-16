@@ -12,8 +12,7 @@ public class HiberEmployeeRepositoryResolver implements ParameterResolver {
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        if (parameterContext.getParameter().getType().equals(EmployeeRepository.class)) return true;
-        return false;
+        return parameterContext.getParameter().getType().equals(EmployeeRepository.class);
     }
 
     @Override

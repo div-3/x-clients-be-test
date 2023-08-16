@@ -51,7 +51,7 @@ public class AuthService {
     }
 
     public void logOut(String login) {
-        authInfo.remove(login);
+        authInfo.entrySet().removeIf(entry -> entry.getKey().contains(login));
     }
 
     public static class SingletonHolder {

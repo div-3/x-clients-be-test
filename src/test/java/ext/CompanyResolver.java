@@ -2,12 +2,14 @@ package ext;
 
 import db.CompanyRepository;
 import db.CompanyRepositoryHiber;
-import db.EmployeeRepositoryHiber;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import model.db.CompanyEntity;
 import net.datafaker.Faker;
-import org.junit.jupiter.api.extension.*;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 
 import java.sql.SQLException;
 import java.util.Locale;
@@ -24,8 +26,7 @@ public class CompanyResolver implements ParameterResolver {
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
-        if (parameterContext.getParameter().getType().equals(CompanyEntity.class)) return true;
-        return false;
+        return parameterContext.getParameter().getType().equals(CompanyEntity.class);
     }
 
     @Override

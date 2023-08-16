@@ -15,8 +15,7 @@ public class CompanyServiceResolver implements ParameterResolver {
     private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        if (parameterContext.getParameter().getType().equals(CompanyService.class)) return true;
-        return false;
+        return parameterContext.getParameter().getType().equals(CompanyService.class);
     }
 
     @Override

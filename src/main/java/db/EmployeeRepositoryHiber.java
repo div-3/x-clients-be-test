@@ -6,7 +6,6 @@ import model.db.EmployeeEntity;
 import net.datafaker.Faker;
 
 import java.sql.Date;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository {
     }
 
     @Override
-    public List<EmployeeEntity> getAllByCompanyId(int companyId) throws SQLException {
+    public List<EmployeeEntity> getAllByCompanyId(int companyId) {
         TypedQuery<EmployeeEntity> query = em.createQuery(
                 "SELECT e FROM EmployeeEntity e WHERE companyId = :id", EmployeeEntity.class);
         query.setParameter("id", companyId);
@@ -31,7 +30,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository {
     }
 
     @Override
-    public EmployeeEntity getById(int id) throws SQLException {
+    public EmployeeEntity getById(int id) {
 //        TypedQuery<EmployeeEntity> query = em.createQuery(
 //                "SELECT e FROM EmployeeEntity e WHERE e.id = :id", EmployeeEntity.class);
 //        query.setParameter("id", id);
@@ -43,7 +42,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository {
     }
 
     @Override
-    public int create(EmployeeEntity e) throws SQLException {
+    public int create(EmployeeEntity e) {
         int lastId = getLast().getId();
         e.setId(++lastId);
 
@@ -55,7 +54,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository {
     }
 
     @Override
-    public EmployeeEntity create(int companyId) throws SQLException {
+    public EmployeeEntity create(int companyId) {
 
         EmployeeEntity employee = new EmployeeEntity();
         int lastId = getLast().getId();
@@ -92,7 +91,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository {
     }
 
     @Override
-    public int update(EmployeeEntity e) throws SQLException {
+    public int update(EmployeeEntity e) {
         e.setChangeTimestamp(Timestamp.valueOf(LocalDateTime.now()));
         if (!em.getTransaction().isActive()) em.getTransaction().begin();
         em.persist(e);

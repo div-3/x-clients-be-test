@@ -4,20 +4,47 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8b344d2-5027-4642-b583-7ea5d4fbb24e" name="Changes" comment="Позитивные контрактные тесты:&#10; * 5. Изменение компании по ID +&#10; * 6. Удаление компании по ID +">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="b0baa7c7-c8e8-4409-b07c-0479ac1d2b50" name="Changes" comment="Часть 3">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/api/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/api/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/api/CompanyService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/api/CompanyService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/api/CompanyServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/api/CompanyServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/api/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/api/EmployeeService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/api/EmployeeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/api/EmployeeServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/db/CompanyRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/db/CompanyRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/db/CompanyRepositoryHiber.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/db/CompanyRepositoryHiber.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/db/CompanyRepositoryJDBC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/db/CompanyRepositoryJDBC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/db/EmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/db/EmployeeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/db/EmployeeRepositoryHiber.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/db/EmployeeRepositoryHiber.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/jdbcTest/JDBCTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/jdbcTest/JDBCTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/model/api/Employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/api/Employee.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/model/api/EmployeeToCreate.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ext/CompanyResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ext/CompanyResolver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ext/CompanyServiceResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ext/CompanyServiceResolver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ext/EmployeeResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ext/EmployeeResolver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ext/EmployeeServiceResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ext/EmployeeServiceResolver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ext/IsCompanyEqual.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ext/IsCompanyEqual.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ext/JDBCCompanyRepositoryResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ext/JDBCCompanyRepositoryResolver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ext/hibernate/HiberCompanyRepositoryResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ext/hibernate/HiberCompanyRepositoryResolver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ext/hibernate/HiberEMFResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ext/hibernate/HiberEMFResolver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ext/hibernate/HiberEmployeeRepositoryResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ext/hibernate/HiberEmployeeRepositoryResolver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/test/CompanyBusinessTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/test/CompanyBusinessTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/test/EmployeeBusinessTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/test/EmployeeBusinessTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/test/EmployeeContractTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/test/EmployeeContractTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CodeInsightWorkspaceSettings">
+    <option name="optimizeImportsOnTheFly" value="true" />
+  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -25,12 +52,12 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="EmployeeContractTest" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="2SouR0jxFuB4DLCbyj3pzFdRzFs" />
+  <component name="ProjectId" id="2TVE06kxpQjNe4NbGKmRZYAlpRJ" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -38,24 +65,18 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "TODO_SCOPE": "All Places",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "F:/!QA/!INNOPOLIS/AQA/x-clients-be-test/src/main/resources",
-    "onboarding.tips.debug.path": "D:/Ivan/!QA/x-clients-be-test/src/main/java/org/example/Main.java"
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "MavenSettings"
   }
 }]]></component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="F:\!QA\!INNOPOLIS\AQA\x-clients-be-test\src\main\resources" />
-    </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="" />
+      <recent name="model.db" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.CompanyContractTest.shouldDeleteCompanyById">
-    <configuration name="CompanyContractTest (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.CompanyContractTest">
+    <configuration name="CompanyBusinessTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
       <extension name="coverage">
         <pattern>
@@ -64,7 +85,7 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="test" />
-      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
+      <option name="MAIN_CLASS_NAME" value="test.CompanyBusinessTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -72,14 +93,20 @@
     </configuration>
     <configuration name="CompanyContractTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
-      <option name="PACKAGE_NAME" value="" />
-      <option name="MAIN_CLASS_NAME" value="CompanyContractTest" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test" />
+      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CompanyContractTest.shouldDeleteCompanyById" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="CompanyContractTest.shouldAddNewCompany" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
       <extension name="coverage">
         <pattern>
@@ -89,13 +116,13 @@
       </extension>
       <option name="PACKAGE_NAME" value="test" />
       <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
-      <option name="METHOD_NAME" value="shouldDeleteCompanyById(db.CompanyRepository)" />
+      <option name="METHOD_NAME" value="shouldAddNewCompany(db.CompanyRepository)" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CompanyContractTest.shouldGetCompanyById" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="EmployeeContractTest.getEmployeeJsonStringWithoutRequiredFields" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
       <extension name="coverage">
         <pattern>
@@ -104,77 +131,118 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="test" />
-      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
-      <option name="METHOD_NAME" value="shouldGetCompanyById(db.CompanyRepository)" />
+      <option name="MAIN_CLASS_NAME" value="test.EmployeeContractTest" />
+      <option name="METHOD_NAME" value="getEmployeeJsonStringWithoutRequiredFields" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CompanyContractTest.shouldPatchCompanyById (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="test in x-clients-be-test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="x-clients-be-test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="test.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="test" />
-      <option name="MAIN_CLASS_NAME" value="test.CompanyContractTest" />
-      <option name="METHOD_NAME" value="shouldPatchCompanyById(db.CompanyRepository)" />
-      <option name="TEST_OBJECT" value="method" />
+      <option name="TEST_OBJECT" value="directory" />
+      <dir value="$PROJECT_DIR$/src/test/java/test" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.CompanyContractTest.shouldDeleteCompanyById" />
-        <item itemvalue="JUnit.CompanyContractTest.shouldPatchCompanyById (1)" />
-        <item itemvalue="JUnit.CompanyContractTest.shouldGetCompanyById" />
-        <item itemvalue="JUnit.CompanyContractTest (1)" />
         <item itemvalue="JUnit.CompanyContractTest" />
+        <item itemvalue="JUnit.CompanyBusinessTest" />
+        <item itemvalue="JUnit.CompanyContractTest.shouldAddNewCompany" />
+        <item itemvalue="JUnit.test in x-clients-be-test" />
+        <item itemvalue="JUnit.EmployeeContractTest.getEmployeeJsonStringWithoutRequiredFields" />
       </list>
     </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="d8b344d2-5027-4642-b583-7ea5d4fbb24e" name="Changes" comment="" />
-      <created>1689825245428</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1689825245428</updated>
-    </task>
-    <task id="LOCAL-00001" summary="Start">
-      <created>1689825516021</created>
+    <task id="LOCAL-00001" summary="gitignore">
+      <created>1691051578248</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1689825516021</updated>
+      <updated>1691051578248</updated>
     </task>
-    <task id="LOCAL-00002" summary="Start">
-      <created>1689825587967</created>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b0baa7c7-c8e8-4409-b07c-0479ac1d2b50" name="Changes" comment="gitignore" />
+      <created>1691119637424</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1691119637424</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Сделал Hamcrest matcher">
+      <created>1691136233119</created>
       <option name="number" value="00002" />
       <option name="presentableId" value="LOCAL-00002" />
       <option name="project" value="LOCAL" />
-      <updated>1689825587967</updated>
+      <updated>1691136233119</updated>
     </task>
-    <task id="LOCAL-00003" summary=".gitignore update">
-      <created>1689825741190</created>
+    <task id="LOCAL-00003" summary="Add Hibernate (part 1)">
+      <created>1691394932480</created>
       <option name="number" value="00003" />
       <option name="presentableId" value="LOCAL-00003" />
       <option name="project" value="LOCAL" />
-      <updated>1689825741190</updated>
+      <updated>1691394932480</updated>
     </task>
-    <task id="LOCAL-00004" summary="Позитивные контрактные тесты:&#10; * 5. Изменение компании по ID +&#10; * 6. Удаление компании по ID +">
-      <created>1690218209150</created>
+    <task id="LOCAL-00004" summary="Add Hibernate (part 2)">
+      <created>1691487044804</created>
       <option name="number" value="00004" />
       <option name="presentableId" value="LOCAL-00004" />
       <option name="project" value="LOCAL" />
-      <updated>1690218209150</updated>
+      <updated>1691487044804</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Hibernate added!">
+      <created>1691572265499</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1691572265499</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Hibernate improvements.">
+      <created>1691658426761</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1691658426761</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Доработка тестов для работы через внешний maven">
+      <created>1691742090587</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1691742090587</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Восстановил CompanyContractTest">
+      <created>1691980712794</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1691980712794</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Добавил негативные тесты 2.1 - 2.18">
+      <created>1692004974283</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1692004974283</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Часть 2">
+      <created>1692088323040</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1692088323040</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Часть 3">
+      <created>1692091206877</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1692091206877</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -188,7 +256,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="master/master" />
+                        <option value="master/EmployeeContractTest" />
                       </list>
                     </value>
                   </entry>
@@ -201,9 +269,33 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Start" />
-    <MESSAGE value=".gitignore update" />
-    <MESSAGE value="Позитивные контрактные тесты:&#10; * 5. Изменение компании по ID +&#10; * 6. Удаление компании по ID +" />
-    <option name="LAST_COMMIT_MESSAGE" value="Позитивные контрактные тесты:&#10; * 5. Изменение компании по ID +&#10; * 6. Удаление компании по ID +" />
+    <MESSAGE value="gitignore" />
+    <MESSAGE value="Сделал Hamcrest matcher" />
+    <MESSAGE value="Add Hibernate (part 1)" />
+    <MESSAGE value="Add Hibernate (part 2)" />
+    <MESSAGE value="Hibernate added!" />
+    <MESSAGE value="Hibernate improvements." />
+    <MESSAGE value="Доработка тестов для работы через внешний maven" />
+    <MESSAGE value="Восстановил CompanyContractTest" />
+    <MESSAGE value="Добавил негативные тесты 2.1 - 2.18" />
+    <MESSAGE value="Часть 2" />
+    <MESSAGE value="Часть 3" />
+    <option name="LAST_COMMIT_MESSAGE" value="Часть 3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java</url>
+          <line>140</line>
+          <option name="timeStamp" value="22" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/test/java/test/CompanyContractTest.java</url>
+          <line>143</line>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

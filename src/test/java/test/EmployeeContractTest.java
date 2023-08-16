@@ -42,13 +42,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * 2. Негативные:
  * 2.1 Добавление нового сотрудника без авторизации +
  * 2.2 Добавление нового сотрудника к отсутствующей компании +
- * 2.5 Изменение информации о сотруднике без авторизации +
- * 2.6 Изменение информации о сотруднике по несуществующему id +
- * 2.7 Получение списка сотрудников несуществующей компании +
- * 2.8 Получение списка сотрудников компании в которой нет сотрудников +
- * 2.9 Получение сотрудника по несуществующему id +
- * 2.10 Не добавление сотрудника без обязательного поля (набор параметризованных тестов) +
- * 2.11 Добавление сотрудника без необязательного поля (набор параметризованных тестов) +
+ * 2.3 Изменение информации о сотруднике без авторизации +
+ * 2.4 Изменение информации о сотруднике по не-существующему id +
+ * 2.5 Получение списка сотрудников несуществующей компании +
+ * 2.6 Получение списка сотрудников компании в которой нет сотрудников +
+ * 2.7 Получение сотрудника по не-существующему id +
+ * 2.8 Не добавление сотрудника без обязательного поля (набор параметризованных тестов) +
+ * 2.9 Добавление сотрудника без необязательного поля (набор параметризованных тестов) +
  * */
 
 
@@ -76,8 +76,6 @@ public class EmployeeContractTest {
     private static String password = "";
     private final AuthService authService = AuthService.getInstance();
     private final Faker faker = new Faker(new Locale("ru"));
-    private static List<Integer> companyToDelete = new ArrayList<>();
-    private static List<Integer> employeeToDelete = new ArrayList<>();
 
 
     //Инициализация Hibernate (EntityManagerFactory)
@@ -92,27 +90,20 @@ public class EmployeeContractTest {
 
     @BeforeEach
     public void coolDownBefore() throws InterruptedException {
-        Thread.sleep(1000);
+        Thread.sleep(500);
     }
 
     @AfterEach
     public void coolDownAfter() throws InterruptedException {
-        Thread.sleep(1000);
+        Thread.sleep(500);
     }
 
     //Очистка тестовых данных
     @AfterAll
     public static void cleanTD(CompanyRepository companyRepository,
-                               EmployeeRepository employeeRepository) {
+                               EmployeeRepository employeeRepository) throws SQLException {
         employeeRepository.clean("");
         companyRepository.clean("");
-
-//        for (int i : employeeToDelete) {
-//            employeeRepository.deleteById(i);
-//        }
-//        for (int i : companyToDelete) {
-//            companyRepository.deleteById(i);
-//        }
     }
 
     //----------------------------------------------------------------------------------------------------------
@@ -123,7 +114,7 @@ public class EmployeeContractTest {
     @DisplayName("1.1 Добавление нового сотрудника к компании")
     public void shouldAddEmployee(EmployeeService employeeApiService,
                                   EmployeeRepository employeeRepository,
-                                  CompanyEntity company) throws SQLException, IOException {
+                                  CompanyEntity company) {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
@@ -158,8 +149,6 @@ public class EmployeeContractTest {
                 .extract()
                 .path("id");
 
-        employeeToDelete.add(createdId);
-
         assertEquals(id, createdId);
     }
 
@@ -169,7 +158,7 @@ public class EmployeeContractTest {
     public void shouldGetEmployeeByCompanyId(EmployeeService employeeApiService,
                                              EmployeeRepository employeeRepository,
                                              @TestProperties(testNum = 1) CompanyEntity company,
-                                             @TestProperties(testNum = 1, itemCount = 3) List<EmployeeEntity> employeesBd) throws SQLException, IOException {
+                                             @TestProperties(testNum = 1, itemCount = 3) List<EmployeeEntity> employeesBd) {
 
         int companyId = company.getId();
 
@@ -199,7 +188,7 @@ public class EmployeeContractTest {
     @DisplayName("1.3 Получение сотрудника по id")
     public void shouldGetEmployeeById(EmployeeService employeeApiService,
                                       @TestProperties(testNum = 2) CompanyEntity company,
-                                      @TestProperties(testNum = 2) EmployeeEntity employee) throws SQLException, IOException {
+                                      @TestProperties(testNum = 2) EmployeeEntity employee) {
 
         int id = employee.getId();
         Employee employeeApi = given()
@@ -229,7 +218,7 @@ public class EmployeeContractTest {
     public void shouldUpdateEmployeeLastName(EmployeeService employeeApiService,
                                              EmployeeRepository employeeRepository,
                                              @TestProperties(testNum = 3) CompanyEntity company,
-                                             @TestProperties(testNum = 3) EmployeeEntity employee) throws SQLException, IOException {
+                                             @TestProperties(testNum = 3) EmployeeEntity employee) throws IOException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
         String lastName = faker.name().lastName();
@@ -269,7 +258,7 @@ public class EmployeeContractTest {
     @DisplayName("2.1 Добавление нового сотрудника без авторизации")
     public void shouldNotAddEmployeeWithoutAuth(EmployeeService employeeApiService,
                                                 EmployeeRepository employeeRepository,
-                                                CompanyEntity company) throws SQLException, IOException {
+                                                CompanyEntity company) {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
@@ -303,7 +292,7 @@ public class EmployeeContractTest {
     @DisplayName("2.2 Добавление нового сотрудника к отсутствующей компании")
     public void shouldNotAddEmployeeToAbsentCompany(EmployeeService employeeApiService,
                                                     EmployeeRepository employeeRepository,
-                                                    CompanyRepository companyRepository) throws SQLException, IOException {
+                                                    CompanyRepository companyRepository) throws SQLException {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = companyRepository.getLast().getId() + SHIFT;  //Установка id несуществующей компании
@@ -338,10 +327,10 @@ public class EmployeeContractTest {
 
     @Test
     @Tag("Negative")
-    @DisplayName("2.5 Изменение информации о сотруднике без авторизации")
+    @DisplayName("2.3 Изменение информации о сотруднике без авторизации")
     public void shouldNotUpdateEmployeeWithoutAuth(EmployeeService employeeApiService,
                                                    @TestProperties(testNum = 3) CompanyEntity company,
-                                                   @TestProperties(testNum = 3) EmployeeEntity employee) throws SQLException, IOException {
+                                                   @TestProperties(testNum = 3) EmployeeEntity employee) throws IOException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
         String lastName = faker.name().lastName();
@@ -376,10 +365,10 @@ public class EmployeeContractTest {
 
     @Test
     @Tag("Negative")
-    @DisplayName("2.6 Изменение информации о сотруднике по несуществующему id")
+    @DisplayName("2.4 Изменение информации о сотруднике по несуществующему id")
     public void shouldNotUpdateEmployeeWithWrongId(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) throws SQLException, IOException {
+                                                   CompanyEntity company) {
 
         Employee employeeApi = employeeApiService.generateEmployee();
         int lastId = employeeRepository.getLast().getId();
@@ -416,8 +405,8 @@ public class EmployeeContractTest {
 
     @Test
     @Tag("Negative")
-    @DisplayName("2.7 Получение списка сотрудников несуществующей компании")
-    public void shouldNotGetEmployeeByWrongCompanyId(CompanyRepository companyRepository) throws SQLException, IOException {
+    @DisplayName("2.5 Получение списка сотрудников несуществующей компании")
+    public void shouldNotGetEmployeeByWrongCompanyId(CompanyRepository companyRepository) throws SQLException {
 
         int companyId = companyRepository.getLast().getId() + SHIFT;
 
@@ -442,8 +431,8 @@ public class EmployeeContractTest {
 
     @Test
     @Tag("Negative")
-    @DisplayName("2.8 Получение списка сотрудников компании в которой нет сотрудников")
-    public void shouldGetEmptyListEmployeeByEmptyCompany(CompanyEntity company) throws SQLException, IOException {
+    @DisplayName("2.6 Получение списка сотрудников компании в которой нет сотрудников")
+    public void shouldGetEmptyListEmployeeByEmptyCompany(CompanyEntity company) {
 
         int companyId = company.getId();
 
@@ -466,8 +455,8 @@ public class EmployeeContractTest {
 
     @Test
     @Tag("Negative")
-    @DisplayName("2.9 Получение сотрудника по несуществующему id")
-    public void shouldNotGetEmployeeByWrongId(EmployeeRepository employeeRepository) throws SQLException, IOException {
+    @DisplayName("2.7 Получение сотрудника по несуществующему id")
+    public void shouldNotGetEmployeeByWrongId(EmployeeRepository employeeRepository) {
 
         int id = employeeRepository.getLast().getId() + SHIFT;
         String message =
@@ -493,8 +482,8 @@ public class EmployeeContractTest {
     @ParameterizedTest(name = "Отсутствие полей в запросе на создание")
     @MethodSource("getEmployeeJsonStringWithoutRequiredFields")
     @Tag("Negative")
-    @DisplayName("2.10 Не добавление сотрудника без обязательного поля:")
-    public void shouldNotAddEmployeeWithoutRequiredField(String jsonEmployeeString) throws SQLException, IOException, InterruptedException {
+    @DisplayName("2.8 Не добавление сотрудника без обязательного поля:")
+    public void shouldNotAddEmployeeWithoutRequiredField(String jsonEmployeeString) {
 
         String token = authService.logIn(login, password);
 
@@ -523,8 +512,8 @@ public class EmployeeContractTest {
     @ParameterizedTest(name = "Отсутствие полей в запросе на создание")
     @MethodSource("getEmployeeJsonStringWithoutOptionalFields")
     @Tag("Negative")
-    @DisplayName("2.11 Добавление сотрудника без необязательного поля:")
-    public void shouldAddEmployeeWithoutOptionalFields(String jsonEmployeeString) throws SQLException, IOException, InterruptedException {
+    @DisplayName("2.9 Добавление сотрудника без необязательного поля:")
+    public void shouldAddEmployeeWithoutOptionalFields(String jsonEmployeeString) {
 
         String token = authService.logIn(login, password);
 
@@ -546,7 +535,6 @@ public class EmployeeContractTest {
                         .extract()
                         .path("id");
 
-        employeeToDelete.add(createdId);
         //TODO: Написать BUG-репорт, что не создаются Employee без поля "phone" (в Swagger отмечен как необязательный)
     }
 

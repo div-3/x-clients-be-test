@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class JDBCTest {
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
         //Получение параметров подключения из файла
         Properties JDBCProperties = getProperties();
 
@@ -20,7 +20,6 @@ public class JDBCTest {
                 JDBCProperties.getProperty("password")))
             {
             //Получение и печать списка компаний
-//            printList(getCarListFromDB(connection));
             printList(getCarListFromDB(connection));
 
             System.out.println("----------------------\nДобавляем машины\n---------------------");

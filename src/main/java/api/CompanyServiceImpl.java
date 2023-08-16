@@ -33,7 +33,7 @@ public class CompanyServiceImpl implements CompanyService{
     }
 
     @Override
-    public List<Company> getAll() throws IOException {
+    public List<Company> getAll() {
         return given()
                 .baseUri(uri + "/company")
                 .headers(headers)
@@ -48,23 +48,23 @@ public class CompanyServiceImpl implements CompanyService{
     }
 
     @Override
-    public List<Company> getAll(boolean isActive) throws IOException {
+    public List<Company> getAll(boolean isActive) {
         return null;
     }
 
     @Override
-    public Company getById(int id) throws IOException {
+    public Company getById(int id) {
         return null;
     }
 
     @Override
-    public int create(String name) throws IOException {
+    public int create(String name) {
 
         return 0;
     }
 
     @Override
-    public int create(String name, String description) throws IOException {
+    public int create(String name, String description) {
         return given()
                 .log().ifValidationFails()
                 .headers(headers)
@@ -104,23 +104,8 @@ public class CompanyServiceImpl implements CompanyService{
 
     @Override
     public void logIn(String login, String password) {
-//        this.token = given()
-//                .baseUri(uri + "/auth/login")
-//                .log().ifValidationFails(LogDetail.ALL)             //Логирование при ошибке
-//                .contentType("application/json; charset=utf-8")
-//                .body("{\"username\": \"" + login + "\", \"password\": \"" + password + "\"}")
-//                .when()
-//                .post()
-//                .then()
-//                .log().ifValidationFails()
-//                .statusCode(201)                                    //Проверка статус-кода
-//                .contentType("application/json; charset=utf-8")     //Проверка content-type
-//                .extract()
-//                .path("userToken").toString();
-
         this.token = authService.logIn(login, password);
         if (!token.equals("")) {
-//            isAuth = true;
             //Если залогинены, то добавляем токен в headers
             headers.put("x-client-token", token);
         }

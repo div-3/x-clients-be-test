@@ -7,14 +7,14 @@ import java.util.List;
 
 public interface EmployeeRepository {
 
-        List<EmployeeEntity> getAllByCompanyId(int companyId) throws SQLException;
+        List<EmployeeEntity> getAllByCompanyId(int companyId);
 
-        EmployeeEntity getById(int id) throws SQLException;
+        EmployeeEntity getById(int id);
 
-        int create(EmployeeEntity e) throws SQLException;
-        EmployeeEntity create(int companyId) throws SQLException;
+        int create(EmployeeEntity e);
+        EmployeeEntity create(int companyId);
 
-        int update(EmployeeEntity e) throws SQLException;
+        int update(EmployeeEntity e);
 
         void deleteById(int id);
         EmployeeEntity getLast();

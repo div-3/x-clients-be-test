@@ -7,15 +7,15 @@ import java.util.List;
 
 public interface CompanyService {
     void setURI(String uri);
-    List<Company> getAll() throws IOException;
+    List<Company> getAll();
 
-    List<Company> getAll(boolean isActive) throws IOException;
+    List<Company> getAll(boolean isActive);
 
-    Company getById(int id) throws IOException;
+    Company getById(int id);
 
-    int create(String name) throws IOException;
+    int create(String name);
 
-    int create(String name, String description) throws IOException;
+    int create(String name, String description);
 
     void deleteById(int id);
 
