@@ -111,7 +111,7 @@ public class EmployeeBusinessTest {
     @DisplayName("1.1 Добавление нового сотрудника к компании")
     public void shouldAddEmployee(EmployeeService employeeApiService,
                                   EmployeeRepository employeeRepository,
-                                  CompanyEntity company) {
+                                  CompanyEntity company) throws InterruptedException {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
@@ -142,10 +142,9 @@ public class EmployeeBusinessTest {
     @DisplayName("1.2 Получение списка сотрудников компании")
     public void shouldGetEmployeeByCompanyId(EmployeeService employeeApiService,
                                              EmployeeRepository employeeRepository,
-                                             CompanyEntity company) {
+                                             CompanyEntity company) throws InterruptedException {
 
         int companyId = company.getId();
-
         List<Employee> listBefore = employeeApiService.getAllByCompanyId(companyId);
 
         assertEquals(0, listBefore.size());
@@ -180,8 +179,7 @@ public class EmployeeBusinessTest {
     public void shouldUpdateEmployeeLastName(EmployeeService employeeApiService,
                                              EmployeeRepository employeeRepository,
                                              @TestProperties(testNum = 2) CompanyEntity company,
-                                             @TestProperties(testNum = 2) EmployeeEntity employee) {
-
+                                             @TestProperties(testNum = 2) EmployeeEntity employee) throws InterruptedException {
         Employee employeeApi = employeeApiService.getById(employee.getId());
 
         employeeApi.setLastName(faker.name().lastName());
@@ -191,6 +189,7 @@ public class EmployeeBusinessTest {
         employeeApi.setIsActive(!employeeApi.getIsActive());
 
         employeeApiService.logIn(login, password);
+
         int id = employeeApiService.update(employeeApi);
 
         assertThat(employeeApi, isEqual(employeeRepository.getById(id)));
@@ -203,7 +202,7 @@ public class EmployeeBusinessTest {
     @DisplayName("1.5 Добавление 5 новых сотрудников к компании")
     public void shouldAdd5Employee(EmployeeService employeeApiService,
                                    EmployeeRepository employeeRepository,
-                                   CompanyEntity company) {
+                                   CompanyEntity company) throws InterruptedException {
 
         //Генерируем и создаём через API Employee для определённой Company
         List<Integer> employeeToCreateId = new ArrayList<>();
@@ -212,8 +211,9 @@ public class EmployeeBusinessTest {
             Employee empl = employeeApiService.generateEmployee();  //Генерируем Employee без id и companyId
             empl.setCompanyId(company.getId());     //Устанавливаем companyId
             empl.setId(tempId + i);
-
+            employeeApiService.logOut();
             employeeApiService.logIn(login, password);
+            Thread.sleep(1000);
             int id = employeeApiService.create(empl);
             empl.setId(id);                         //Устанавливаем Id
             employeeToCreateId.add(id);
@@ -263,11 +263,13 @@ public class EmployeeBusinessTest {
     @DisplayName("2.2 Добавление нового сотрудника к отсутствующей компании")
     public void shouldNotAddEmployeeToAbsentCompany(EmployeeService employeeApiService,
                                                     EmployeeRepository employeeRepository,
-                                                    CompanyRepository companyRepository) throws SQLException {
+                                                    CompanyRepository companyRepository) throws SQLException, InterruptedException {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = companyRepository.getLast().getId();
+
         int id = employeeRepository.getLast().getId();
+
         Employee employee = employeeApiService.generateEmployee();
         employee.setId(++id);
         employee.setCompanyId(++companyId);
@@ -290,7 +292,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.3 Добавление уже существующего сотрудника (поля)")
     public void shouldNotAddEmployeeDuplicate(EmployeeService employeeApiService,
                                               EmployeeRepository employeeRepository,
-                                              CompanyEntity company) {
+                                              CompanyEntity company) throws InterruptedException {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
@@ -304,7 +306,9 @@ public class EmployeeBusinessTest {
         int createdId = employeeApiService.create(employee);
 
         List<EmployeeEntity> listBefore = employeeRepository.getAll();
+
         createdId = employeeApiService.create(employee);
+
         List<EmployeeEntity> listAfter = employeeRepository.getAll();
 
         assertAll(
@@ -322,11 +326,12 @@ public class EmployeeBusinessTest {
     @DisplayName("2.4 Добавление сотрудника на уже существующий id")
     public void shouldNotAddEmployeeWithOccupiedId(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) {
+                                                   CompanyEntity company) throws InterruptedException {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
         int id = employeeRepository.getLast().getId();
+
         Employee employee = employeeApiService.generateEmployee();
         employee.setId(++id);
         employee.setCompanyId(companyId);
@@ -363,7 +368,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.5 Изменение информации о сотруднике без авторизации")
     public void shouldNotUpdateEmployeeWithoutAuth(EmployeeService employeeApiService,
                                                    @TestProperties(testNum = 4) CompanyEntity company,
-                                                   @TestProperties(testNum = 4) EmployeeEntity employee) {
+                                                   @TestProperties(testNum = 4) EmployeeEntity employee) throws InterruptedException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
 
@@ -389,7 +394,7 @@ public class EmployeeBusinessTest {
     public void shouldNotUpdateEmployeeWithWrongId(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
                                                    @TestProperties(testNum = 5) CompanyEntity company,
-                                                   @TestProperties(testNum = 5) EmployeeEntity employee) {
+                                                   @TestProperties(testNum = 5) EmployeeEntity employee) throws InterruptedException {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
         employeeApi.setLastName(faker.name().lastName());
@@ -400,14 +405,10 @@ public class EmployeeBusinessTest {
 
         int lastId = employeeRepository.getLast().getId();
         employeeApi.setId(lastId + SHIFT);
-
         employeeApiService.logIn(login, password);
         List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
         assertThrows(AssertionError.class, () -> employeeApiService.update(employeeApi));
-
         List<EmployeeEntity> listAfter = employeeRepository.getAll();
-
         assertAll(
                 //Проверка, что количество Employee не увеличилось
                 () -> assertTrue(listBefore.containsAll(listAfter)),
@@ -562,7 +563,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.14 Добавление сотрудника без необязательного поля (middleName)")
     public void shouldAddEmployeeWithoutMiddleName(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) {
+                                                   CompanyEntity company) throws InterruptedException {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -572,10 +573,8 @@ public class EmployeeBusinessTest {
 
         employeeApiService.logIn(login, password);
         List<EmployeeEntity> listBefore = employeeRepository.getAll();
-
         int id = employeeApiService.create(employee);
         EmployeeEntity employeeDb = employeeRepository.getById(id);
-
         List<EmployeeEntity> listAfter = employeeRepository.getAll();
 
         assertAll(

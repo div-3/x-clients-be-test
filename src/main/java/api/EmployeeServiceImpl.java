@@ -77,6 +77,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .baseUri(uri + "/employee" + "/" + id)
                 .log().ifValidationFails()
                 .headers(headers)
+                .header("accept", "application/json")
                 .when()
                 .get()
                 .then()
@@ -96,6 +97,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .log().ifValidationFails()
                 .headers(headers)
                 .baseUri(uri + "/employee")
+                .header("accept", "application/json")
                 .contentType("application/json; charset=utf-8")
                 .body(employee)
                 .when()
@@ -113,7 +115,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .log().ifValidationFails()
                 .headers(headers)
                 .baseUri(uri + "/employee" + "/" + employee.getId())
-                .contentType("application/json; charset=utf-8")
+                .contentType("application/json")
+                .header("accept", "application/json")
                 .body("{\"lastName\": \"" + employee.getLastName() + "\"," +
                         "\"email\": \"" + employee.getEmail() + "\"," +
                         "\"url\": \"" + employee.getUrl() + "\"," +
@@ -136,6 +139,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .headers(headers)
                 .baseUri(uri + "/employee")
                 .contentType("application/json; charset=utf-8")
+                .header("accept", "application/json")
                 .body("{\"name\": \"" + name + "\",\"description\": \"" + description + "\"}")
                 .when()
                 .post()
