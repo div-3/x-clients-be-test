@@ -47,7 +47,9 @@ public class EmployeeEntity {
     public EmployeeEntity() {
     }
 
-    public EmployeeEntity(int id, boolean isActive, Timestamp createTimestamp, Timestamp changeTimestamp, String firstName, String lastName, String middleName, String phone, String email, String avatarUrl, Date birthdate, int companyId) {
+    public EmployeeEntity(int id, boolean isActive, Timestamp createTimestamp, Timestamp changeTimestamp,
+                          String firstName, String lastName, String middleName, String phone, String email,
+                          String avatarUrl, Date birthdate, int companyId) {
         this.id = id;
         this.isActive = isActive;
         this.createTimestamp = createTimestamp;
@@ -163,12 +165,19 @@ public class EmployeeEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EmployeeEntity employee = (EmployeeEntity) o;
-        return id == employee.id && isActive == employee.isActive && companyId == employee.companyId && Objects.equals(createTimestamp, employee.createTimestamp) && Objects.equals(changeTimestamp, employee.changeTimestamp) && Objects.equals(firstName, employee.firstName) && Objects.equals(lastName, employee.lastName) && Objects.equals(middleName, employee.middleName) && Objects.equals(phone, employee.phone) && Objects.equals(email, employee.email) && Objects.equals(avatarUrl, employee.avatarUrl) && Objects.equals(birthdate, employee.birthdate);
+        return id == employee.id && isActive == employee.isActive && companyId == employee.companyId &&
+                Objects.equals(createTimestamp, employee.createTimestamp)
+                && Objects.equals(changeTimestamp, employee.changeTimestamp)
+                && Objects.equals(firstName, employee.firstName) && Objects.equals(lastName, employee.lastName)
+                && Objects.equals(middleName, employee.middleName) && Objects.equals(phone, employee.phone)
+                && Objects.equals(email, employee.email) && Objects.equals(avatarUrl, employee.avatarUrl)
+                && Objects.equals(birthdate, employee.birthdate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, isActive, createTimestamp, changeTimestamp, firstName, lastName, middleName, phone, email, avatarUrl, birthdate, companyId);
+        return Objects.hash(id, isActive, createTimestamp, changeTimestamp, firstName, lastName, middleName,
+                phone, email, avatarUrl, birthdate, companyId);
     }
 
     @Override

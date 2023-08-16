@@ -13,7 +13,7 @@ import java.util.Properties;
 
 import static io.restassured.RestAssured.given;
 
-public class CompanyServiceImpl implements CompanyService{
+public class CompanyServiceImpl implements CompanyService {
     private String uri;
     private String login = "";
     private String password = "";
@@ -44,7 +44,8 @@ public class CompanyServiceImpl implements CompanyService{
                 .response()
                 .then()
                 .extract()
-                .body().as(new TypeRef<List<Company>>() {});
+                .body().as(new TypeRef<List<Company>>() {
+                });
     }
 
     @Override
@@ -68,9 +69,8 @@ public class CompanyServiceImpl implements CompanyService{
         return given()
                 .log().ifValidationFails()
                 .headers(headers)
-                .header("accept","application/json")
+                .header("accept", "application/json")
                 .baseUri(uri + "/company")
-//                .contentType("application/json; charset=utf-8")
                 .contentType("application/json")
                 .body("{\"name\": \"" + name + "\",\"description\": \"" + description + "\"}")
                 .when()
@@ -115,7 +115,6 @@ public class CompanyServiceImpl implements CompanyService{
     public void logOut() {
         authService.logOut(login);
         token = "";
-//        isAuth = false;
         //Если разлогинены, то убираем токен из headers
         headers.remove("x-client-token");
     }

@@ -72,7 +72,7 @@ public class EmployeeRepositoryHiber implements EmployeeRepository {
         employee.setAvatarUrl(faker.internet().url());
 //        employee.setPhone(faker.phoneNumber().phoneNumber()); //Не проходит по формату
 
-        //TODO: Написать BUG-репорт - при создании с неправильным телефоном возвращается ошибка 500 вместо 400
+        //TODO: 1. Написать BUG-репорт - при создании с неправильным телефоном возвращается ошибка 500 вместо 400
         employee.setPhone(faker.number().digits(10));
 
         Timestamp tmp = Timestamp.valueOf(LocalDateTime.now());
@@ -151,8 +151,6 @@ public class EmployeeRepositoryHiber implements EmployeeRepository {
                 "SELECT e FROM EmployeeEntity e WHERE firstName like 'TS_%'", EmployeeEntity.class);
 //        query.setParameter("prefix", prefix);
         List<EmployeeEntity> list = query.getResultList();
-//        System.out.println("----------------------\n Список на удаление\n-----------------------");
-//        System.out.println(list);
         for (EmployeeEntity e : list) {
             deleteById(e.getId());
         }

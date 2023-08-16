@@ -1,11 +1,10 @@
 package model.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-//TODO: Написать BUG-репорт на несоответствие наборов полей в запросе POST нового сотрудника и требованиях
-// в Swagger (присутствуют лишние поля: "createDateTime", "lastChangedDateTime")
 //@JsonIgnoreProperties(ignoreUnknown = false)
 public class Employee {
 
@@ -16,22 +15,22 @@ public class Employee {
     private int companyId;
     private String email;
 
-    //TODO: Написать BUG-репорт на несоответствие поля "url" в запросе POST нового сотрудника и "avatar_url"
-    // в запросах GET по id сотрудника, GET по id компании
+    //TODO: 2. Написать BUG-репорт, что при запросе Employee через API поле "url" меняется на "avatar_url"
 //    @JsonProperty("avatar_url")
     private String url;
     private String phone;
 
-    //TODO: Написать BUG-репорт на несоответствие формата поля "birthdate" в запросах GET по id сотрудника,
+    //TODO: 3. Написать BUG-репорт на несоответствие формата поля "birthdate" в запросах GET по id сотрудника,
     // GET по id компании ("birthdate": "2023-08-12") и требованиях в Swagger ("birthdate": "2023-08-12T10:55:01.426Z")
     private String birthdate;
-//    @JsonProperty("isActive")
+    //    @JsonProperty("isActive")
     private boolean isActive;
 
     public Employee() {
     }
 
-    public Employee(int id, String firstName, String lastName, String middleName, int companyId, String email, String url, String phone, String birthdate, boolean isActive) {
+    public Employee(int id, String firstName, String lastName, String middleName, int companyId, String email,
+                    String url, String phone, String birthdate, boolean isActive) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

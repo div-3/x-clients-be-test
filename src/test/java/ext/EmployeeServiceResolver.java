@@ -13,15 +13,19 @@ import static ext.CommonHelper.getProperties;
 
 public class EmployeeServiceResolver implements ParameterResolver {
     private final static String PROPERTIES_FILE_PATH = "src/main/resources/API_x_client.properties";
+    private final static String BASE_URI_PROP = "baseURI";
+
     @Override
-    public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+    public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+            throws ParameterResolutionException {
         return parameterContext.getParameter().getType().equals(EmployeeService.class);
     }
 
     @Override
-    public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+    public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+            throws ParameterResolutionException {
         Properties properties = getProperties(PROPERTIES_FILE_PATH);
-        String baseUri = properties.getProperty("baseURI");
+        String baseUri = properties.getProperty(BASE_URI_PROP);
         return new EmployeeServiceImpl(baseUri);
     }
 }

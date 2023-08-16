@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface EmployeeService {
     void setURI(String uri);
+
     List<Employee> getAllByCompanyId(int companyId);
 
     Employee generateEmployee();
@@ -19,8 +20,6 @@ public interface EmployeeService {
     void deleteById(int id);
 
     void deleteByCompanyId(int companyId);
-
-    Employee edit(Employee employee);
 
     void logIn(String login, String password);
 

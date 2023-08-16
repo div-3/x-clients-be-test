@@ -5,9 +5,11 @@ import db.EmployeeRepositoryHiber;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import model.db.EmployeeEntity;
-import org.junit.jupiter.api.extension.*;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,8 @@ public class EmployeeResolver implements ParameterResolver {
     private final String TEST_NUM_COMPANY_GLOBAL_KEY = "COMPANY";  //Название ключа EntityManagerFactory в хранилище
 
     @Override
-    public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+    public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+            throws ParameterResolutionException {
         if (parameterContext.getParameter().getType().equals(EmployeeEntity.class)) return true;
         if (parameterContext.isAnnotated(TestProperties.class)) {
             if (parameterContext.findAnnotation(TestProperties.class).get().itemCount() > 1)
@@ -59,7 +62,6 @@ public class EmployeeResolver implements ParameterResolver {
         }
 
         //Если количество не указано, или указано неправильно
-        EmployeeEntity employee = employeeRepository.create(companyId);
-        return employee;
+        return employeeRepository.create(companyId);
     }
 }

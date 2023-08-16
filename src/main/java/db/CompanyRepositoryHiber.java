@@ -23,6 +23,7 @@ public class CompanyRepositoryHiber implements CompanyRepository {
         return query.getResultList();
 
         //Тот же запрос, но через Hibenate API
+
 //        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 //        CriteriaQuery<CompanyDBEntity> criteriaQuery = criteriaBuilder.createQuery(CompanyDBEntity.class);
 //        Root<CompanyDBEntity> companyRoot = criteriaQuery.from(CompanyDBEntity.class);
@@ -112,12 +113,9 @@ public class CompanyRepositoryHiber implements CompanyRepository {
                 "SELECT c FROM CompanyEntity c WHERE name like 'TS_%'", CompanyEntity.class);
 //        query.setParameter("prefix", prefix);
         List<CompanyEntity> list = query.getResultList();
-//        System.out.println("----------------------\n Список компаний на удаление\n-----------------------");
-//        System.out.println(list);
         for (CompanyEntity c : list) {
             deleteById(c.getId());
         }
         return true;
     }
-
 }

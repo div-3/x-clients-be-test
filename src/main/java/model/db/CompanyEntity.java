@@ -7,17 +7,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-/*Для Hibernate надо:
-* 1. Подключить в maven
-* 2. Создать Data-класс (POJO)
-* 3. Желательно имплементить к нему интерфейс Serializable
-* 4. Добавить аннотации:
-* 4.1. @Entity
-* 4.2. @Table(name = "company")   - не обязательно, но можно указать название таблицы в БД
-* 4.3. @Column(name = "description", nullable = true, length = 300) - не обязательно, но можно для каждого поля указать ограничения из БД и название столбца
- * 4.4. @Id - для первичного ключа
-* 4.5. @GeneratedValue(strategy = GenerationType.IDENTITY) - определяет способ создания ключа при заполнении таблицы
-* */
 @Entity
 //@Entity(name = "company")
 @Table(name = "company", schema = "public", catalog = "x_clients_db_r06g")
@@ -49,7 +38,8 @@ public class CompanyEntity implements Serializable {
     public CompanyEntity() {
     }
 
-    public CompanyEntity(int id, boolean isActive, Timestamp createDateTime, Timestamp changedTimestamp, String name, String description, Timestamp deletedAt) {
+    public CompanyEntity(int id, boolean isActive, Timestamp createDateTime, Timestamp changedTimestamp,
+                         String name, String description, Timestamp deletedAt) {
         this.id = id;
         this.isActive = isActive;
         this.createDateTime = createDateTime;
@@ -120,7 +110,11 @@ public class CompanyEntity implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CompanyEntity companyEntity = (CompanyEntity) o;
-        return id == companyEntity.id && isActive == companyEntity.isActive && Objects.equals(createDateTime, companyEntity.createDateTime) && Objects.equals(changedTimestamp, companyEntity.changedTimestamp) && Objects.equals(name, companyEntity.name) && Objects.equals(description, companyEntity.description) && Objects.equals(deletedAt, companyEntity.deletedAt);
+        return id == companyEntity.id && isActive == companyEntity.isActive
+                && Objects.equals(createDateTime, companyEntity.createDateTime)
+                && Objects.equals(changedTimestamp, companyEntity.changedTimestamp)
+                && Objects.equals(name, companyEntity.name) && Objects.equals(description, companyEntity.description)
+                && Objects.equals(deletedAt, companyEntity.deletedAt);
     }
 
     @Override

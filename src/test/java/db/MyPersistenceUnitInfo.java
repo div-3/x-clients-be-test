@@ -27,7 +27,6 @@ public class MyPersistenceUnitInfo implements PersistenceUnitInfo {
         return List.of(
                 CompanyEntity.class.getName(),
                 EmployeeEntity.class.getName()
-//                Car.class.getName()
         );
     }
 

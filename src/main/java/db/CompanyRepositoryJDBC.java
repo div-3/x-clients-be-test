@@ -57,7 +57,7 @@ public class CompanyRepositoryJDBC implements CompanyRepository {
     @Override
     public int create(String name, String description) throws SQLException {
         int count = 0;
-        while (count < 10){
+        while (count < 10) {
             String insertQuery = "insert into company (\"name\", \"description\", \"id\") values (?, ?, ?);";
             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery,
                     Statement.RETURN_GENERATED_KEYS);    //Включение возврата созданной записи
@@ -65,13 +65,12 @@ public class CompanyRepositoryJDBC implements CompanyRepository {
             preparedStatement.setString(2, description);
             int id = getLast().getId() + 1;     //Получение id последне компании, чтобы создать после неё
             preparedStatement.setInt(3, id);
-            try{
+            try {
                 preparedStatement.executeUpdate();
                 ResultSet createdId = preparedStatement.getGeneratedKeys();
                 createdId.next();
                 return createdId.getInt(1);
-            }
-            catch (PSQLException e){
+            } catch (PSQLException e) {
                 count++;
             }
         }

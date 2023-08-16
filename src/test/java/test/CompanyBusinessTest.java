@@ -12,7 +12,6 @@ import net.datafaker.Faker;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -85,7 +84,7 @@ public class CompanyBusinessTest {
     @Test
     @Tag("Positive")
     @DisplayName("1.1 Добавление новой компании")
-    public void shouldAddCompany(CompanyService apiService, CompanyRepository repository) throws SQLException, IOException {
+    public void shouldAddCompany(CompanyService apiService, CompanyRepository repository) throws SQLException {
         apiService.logIn(login, password);
 
         int id = apiService.create(companyName, companyDescription);
@@ -98,7 +97,7 @@ public class CompanyBusinessTest {
     @Test
     @Tag("Positive")
     @DisplayName("1.2 Получение списка компаний GET")
-    public void shouldGetCompanyList(CompanyService apiService, CompanyRepository repository) throws SQLException, IOException {
+    public void shouldGetCompanyList(CompanyService apiService, CompanyRepository repository) throws SQLException {
         List<CompanyEntity> companiesDb = repository.getAll();
         List<Company> companiesApi = apiService.getAll();
 

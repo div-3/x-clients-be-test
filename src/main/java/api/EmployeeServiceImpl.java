@@ -63,6 +63,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setEmail(faker.internet().emailAddress("a" + faker.number().digits(5)));
         employee.setUrl(faker.internet().url());
 //        employee.setPhone(faker.phoneNumber().phoneNumber()); //Не проходит по формату
+
         //TODO: Написать BUG-репорт - при создании с неправильным телефоном возвращается ошибка 500 вместо 400
         employee.setPhone(faker.number().digits(10));
         employee.setBirthdate(faker.date().birthday("YYYY-MM-dd"));
@@ -84,7 +85,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .response()
                 .then()
                 .extract()
-                .body().as(new TypeRef<Employee>() {}
+                .body().as(new TypeRef<Employee>() {
+                           }
                 );
     }
 
@@ -121,7 +123,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .patch()
                 .then()
                 .log().ifValidationFails()
-                .statusCode(201)
+                .statusCode(200)
                 .contentType("application/json; charset=utf-8")
                 .extract().path("id");
     }
@@ -152,11 +154,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public void deleteByCompanyId(int companyId) {
 
-    }
-
-    @Override
-    public Employee edit(Employee employee) {
-        return null;
     }
 
     @Override

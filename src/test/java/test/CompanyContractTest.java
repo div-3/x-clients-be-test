@@ -62,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 7. Деактивировать компанию по ID (доделать)*/
 
 //В тестах используется для работы: с БД - JDBC, с API - RestAssured.
-//Тесты выполняются в последовательном  режиме
+//Тесты выполняются в последовательном режиме
 @DisplayName("Company contract tests:")
 @ExtendWith({JDBCConnectionResolver.class, JDBCCompanyRepositoryResolver.class})
 public class CompanyContractTest {
@@ -276,7 +276,7 @@ public class CompanyContractTest {
                 .log().ifValidationFails()
                 //-----------------------BUG--------------------------------//
                 .statusCode(200)            //TODO: Добавить негативный тест на получение GET отсутствующей компании.
-                //TODO: Завести BUG-репорт. SC должен быть 404, если компании нет (в негативном тесте)
+                //TODO: 4. Написать BUG-репорт. SC должен быть 404, если компании нет (в негативном тесте)
 //                .header("Content-Length", nullValue())               //Проверка, что Content-Length = null
                 .header("Content-Length", equalTo("0"))      //Проверка, что "Content-Length" = "0"
                 .body(emptyOrNullString());                            //Проверка, что тело ответа пустое

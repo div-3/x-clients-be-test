@@ -13,7 +13,6 @@ public class Company {
     private String name;
     private String description;
 
-    //TODO: Написать BUG-репорт на несоответствие полей в API-запросах описанию в Swagger
     public Company() {
     }
 

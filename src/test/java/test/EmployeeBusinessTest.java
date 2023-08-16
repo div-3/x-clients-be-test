@@ -5,8 +5,8 @@ import db.CompanyRepository;
 import db.EmployeeRepository;
 import ext.*;
 import ext.hibernate.HiberCompanyRepositoryResolver;
-import ext.hibernate.HiberEmployeeRepositoryResolver;
 import ext.hibernate.HiberEMFResolver;
+import ext.hibernate.HiberEmployeeRepositoryResolver;
 import jakarta.persistence.EntityManagerFactory;
 import model.api.Employee;
 import model.db.CompanyEntity;
@@ -15,7 +15,6 @@ import net.datafaker.Faker;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,12 +87,12 @@ public class EmployeeBusinessTest {
 
     @BeforeEach
     public void coolDownBefore() throws InterruptedException {
-        Thread.sleep(500);
+        Thread.sleep(1000);
     }
 
     @AfterEach
     public void coolDownAfter() throws InterruptedException {
-        Thread.sleep(500);
+        Thread.sleep(1000);
     }
 
     //Очистка тестовых данных
@@ -112,7 +111,7 @@ public class EmployeeBusinessTest {
     @DisplayName("1.1 Добавление нового сотрудника к компании")
     public void shouldAddEmployee(EmployeeService employeeApiService,
                                   EmployeeRepository employeeRepository,
-                                  CompanyEntity company) throws SQLException, IOException {
+                                  CompanyEntity company) {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
@@ -130,10 +129,10 @@ public class EmployeeBusinessTest {
         //Проверки
         assertAll(
                 () -> assertThat(employee, isEqual(employeeDb)),
-                //TODO: Написать BUG-репорт, что при создании Employee через API удаляется email
+                //TODO: 5. Написать BUG-репорт, что при создании Employee через API удаляется email
 
                 () -> assertEquals(id, createdId)
-                //TODO: Написать BUG-репорт, что при создании Employee через API изменяется заданный id
+                //TODO: 6. Написать BUG-репорт, что при создании Employee через API изменяется заданный id
                 // и возвращается автоматически присвоенный
         );
     }
@@ -143,7 +142,7 @@ public class EmployeeBusinessTest {
     @DisplayName("1.2 Получение списка сотрудников компании")
     public void shouldGetEmployeeByCompanyId(EmployeeService employeeApiService,
                                              EmployeeRepository employeeRepository,
-                                             CompanyEntity company) throws SQLException, IOException {
+                                             CompanyEntity company) {
 
         int companyId = company.getId();
 
@@ -159,7 +158,7 @@ public class EmployeeBusinessTest {
         //Проверки:
         assertEquals(1, listAfter.size());
         assertThat(listAfter.get(0), isEqual(employeeCreated));
-        //TODO: Написать BUG-репорт, что при запросе Employee через API поле "url" меняется на "avatar_url"
+        //TODO: 2. Написать BUG-репорт, что при запросе Employee через API поле "url" меняется на "avatar_url"
     }
 
     @Test
@@ -167,11 +166,12 @@ public class EmployeeBusinessTest {
     @DisplayName("1.3 Получение сотрудника по id")
     public void shouldGetEmployeeById(EmployeeService employeeApiService,
                                       @TestProperties(testNum = 1) CompanyEntity company,
-                                      @TestProperties(testNum = 1) EmployeeEntity employee) throws IOException {
+                                      @TestProperties(testNum = 1) EmployeeEntity employee) {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
 
         assertThat(employeeApi, isEqual(employee));
+        //TODO: 2. Написать BUG-репорт, что при запросе Employee через API поле "url" меняется на "avatar_url"
     }
 
     @Test
@@ -180,7 +180,7 @@ public class EmployeeBusinessTest {
     public void shouldUpdateEmployeeLastName(EmployeeService employeeApiService,
                                              EmployeeRepository employeeRepository,
                                              @TestProperties(testNum = 2) CompanyEntity company,
-                                             @TestProperties(testNum = 2) EmployeeEntity employee) throws SQLException, IOException {
+                                             @TestProperties(testNum = 2) EmployeeEntity employee) {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
 
@@ -192,14 +192,9 @@ public class EmployeeBusinessTest {
 
         employeeApiService.logIn(login, password);
         int id = employeeApiService.update(employeeApi);
-        //TODO: Написать BUG-репорт, что при успешном обновлении информации о сотруднике
-        // возвращается SC 200 вместо SC 201, как указано в Swagger
-
-        //TODO: Написать BUG-репорт, что при успешном обновлении информации о сотруднике
-        // возвращается тело с полями, отличающимися от Swagger
 
         assertThat(employeeApi, isEqual(employeeRepository.getById(id)));
-        //TODO: Написать BUG-репорт, что при обновлении employee не обновляется поле phone.
+        //TODO: 7. Написать BUG-репорт, что при обновлении employee не обновляется поле phone.
     }
 
 
@@ -208,7 +203,7 @@ public class EmployeeBusinessTest {
     @DisplayName("1.5 Добавление 5 новых сотрудников к компании")
     public void shouldAdd5Employee(EmployeeService employeeApiService,
                                    EmployeeRepository employeeRepository,
-                                   CompanyEntity company) throws SQLException, IOException {
+                                   CompanyEntity company) {
 
         //Генерируем и создаём через API Employee для определённой Company
         List<Integer> employeeToCreateId = new ArrayList<>();
@@ -240,7 +235,7 @@ public class EmployeeBusinessTest {
     public void shouldNotAddEmployeeWithoutAuth(EmployeeService employeeApiService,
                                                 EmployeeRepository employeeRepository,
                                                 @TestProperties(testNum = 3) CompanyEntity company,
-                                                @TestProperties(testNum = 3, itemCount = 3) List<EmployeeEntity> employee) throws SQLException {
+                                                @TestProperties(testNum = 3, itemCount = 3) List<EmployeeEntity> employee) {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
@@ -295,7 +290,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.3 Добавление уже существующего сотрудника (поля)")
     public void shouldNotAddEmployeeDuplicate(EmployeeService employeeApiService,
                                               EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws IOException {
+                                              CompanyEntity company) {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
@@ -315,7 +310,7 @@ public class EmployeeBusinessTest {
         assertAll(
                 //Проверка, что количество Employee не увеличилось
                 () -> assertTrue(listBefore.containsAll(listAfter)),
-                //TODO: Написать BUG-репорт, что можно создать дубликата Employee
+                //TODO: 8. Написать BUG-репорт, что можно создать дубликата Employee
                 //TODO: Доработать тест по результатам исправления BUG-репорт по возможности создания дубликатов Employee
 
                 () -> assertEquals(listBefore.size(), listAfter.size())
@@ -327,7 +322,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.4 Добавление сотрудника на уже существующий id")
     public void shouldNotAddEmployeeWithOccupiedId(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) throws IOException {
+                                                   CompanyEntity company) {
 
         //Создание объекта Employee с тестовыми данными
         int companyId = company.getId();
@@ -355,8 +350,8 @@ public class EmployeeBusinessTest {
         assertAll(
                 //Проверка, что количество Employee не увеличилось
                 () -> assertTrue(listBefore.containsAll(listAfter)),
-                //TODO: Написать BUG-репорт, что можно добавить нового Employee на уже занятый id (фактически новому
-                // Employee выдаётся автоматически новый id) связан с BUG-репортом об игнорировании id при
+                //TODO: 9. Написать BUG-репорт, что можно добавить нового Employee на уже занятый id (фактически новому
+                // Employee выдаётся автоматически новый id) связан с BUG-репортом № 6 об игнорировании id при
                 // создании нового Employee
 
                 () -> assertEquals(listBefore.size(), listAfter.size())
@@ -368,7 +363,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.5 Изменение информации о сотруднике без авторизации")
     public void shouldNotUpdateEmployeeWithoutAuth(EmployeeService employeeApiService,
                                                    @TestProperties(testNum = 4) CompanyEntity company,
-                                                   @TestProperties(testNum = 4) EmployeeEntity employee) throws IOException {
+                                                   @TestProperties(testNum = 4) EmployeeEntity employee) {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
 
@@ -385,6 +380,7 @@ public class EmployeeBusinessTest {
         Employee employeeUpdated = employeeApiService.getById(employee.getId());
 
         assertThat(employeeUpdated, isEqual(employee));
+        //TODO: 2. Написать BUG-репорт, что при запросе Employee через API поле "url" меняется на "avatar_url"
     }
 
     @Test
@@ -393,7 +389,7 @@ public class EmployeeBusinessTest {
     public void shouldNotUpdateEmployeeWithWrongId(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
                                                    @TestProperties(testNum = 5) CompanyEntity company,
-                                                   @TestProperties(testNum = 5) EmployeeEntity employee) throws IOException {
+                                                   @TestProperties(testNum = 5) EmployeeEntity employee) {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
         employeeApi.setLastName(faker.name().lastName());
@@ -423,7 +419,7 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.7 Получение списка сотрудников несуществующей компании")
     public void shouldGetEmptyListEmployeeByWrongCompanyId(EmployeeService employeeApiService,
-                                                           CompanyRepository companyRepository) throws SQLException, IOException {
+                                                           CompanyRepository companyRepository) throws SQLException {
 
         int companyId = companyRepository.getLast().getId() + SHIFT;
 
@@ -435,7 +431,7 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.8 Получение списка сотрудников компании в которой нет сотрудников")
     public void shouldGetEmptyListEmployeeByEmptyCompany(EmployeeService employeeApiService,
-                                                         CompanyEntity company) throws IOException {
+                                                         CompanyEntity company) {
 
         int companyId = company.getId();
 
@@ -471,7 +467,7 @@ public class EmployeeBusinessTest {
         List<EmployeeEntity> listBefore = employeeRepository.getAll();
 
         assertThrows(AssertionError.class, () -> employeeApiService.create(employee));
-        //TODO: Написать BUG-репорт, что не должны создаваться Employee с id = 0
+        //TODO: 10. Написать BUG-репорт, что не должны создаваться Employee с id = 0
 
         List<EmployeeEntity> listAfter = employeeRepository.getAll();
 
@@ -540,8 +536,7 @@ public class EmployeeBusinessTest {
     @Tag("Negative")
     @DisplayName("2.13 Добавление сотрудника без обязательного поля (companyId)")
     public void shouldNotAddEmployeeWithoutCompanyId(EmployeeService employeeApiService,
-                                                     EmployeeRepository employeeRepository,
-                                                     CompanyEntity company) {
+                                                     EmployeeRepository employeeRepository) {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setId(employeeRepository.getLast().getId() + 1);
@@ -567,7 +562,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.14 Добавление сотрудника без необязательного поля (middleName)")
     public void shouldAddEmployeeWithoutMiddleName(EmployeeService employeeApiService,
                                                    EmployeeRepository employeeRepository,
-                                                   CompanyEntity company) throws SQLException, IOException {
+                                                   CompanyEntity company) {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -597,7 +592,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.15 Добавление сотрудника без необязательного поля (email)")
     public void shouldAddEmployeeWithoutEmail(EmployeeService employeeApiService,
                                               EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
+                                              CompanyEntity company) {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -627,7 +622,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.16 Добавление сотрудника без необязательного поля (url)")
     public void shouldAddEmployeeWithoutUrl(EmployeeService employeeApiService,
                                             EmployeeRepository employeeRepository,
-                                            CompanyEntity company) throws SQLException, IOException {
+                                            CompanyEntity company) {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -650,6 +645,8 @@ public class EmployeeBusinessTest {
                 () -> assertTrue(listAfter.contains(employeeDb)),
                 () -> assertEquals(listBefore.size() + 1, listAfter.size())
         );
+
+        //TODO: 11. Написать BUG-репорт, что при ошибке в запросе на создание Employee выдаётся SC 500 вместо SC4XX
     }
 
     @Test
@@ -657,7 +654,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.17 Добавление сотрудника без необязательного поля (phone)")
     public void shouldAddEmployeeWithoutPhone(EmployeeService employeeApiService,
                                               EmployeeRepository employeeRepository,
-                                              CompanyEntity company) throws SQLException, IOException {
+                                              CompanyEntity company) {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());
@@ -669,7 +666,7 @@ public class EmployeeBusinessTest {
         List<EmployeeEntity> listBefore = employeeRepository.getAll();
 
         int id = employeeApiService.create(employee);
-        //TODO: Написать BUG-репорт, что не создаётся Employee без номера телефона (SC 500),
+        //TODO: 12. Написать BUG-репорт, что не создаётся Employee без номера телефона (SC 500),
         // в Swagger поле Phone не отмечено как обязательное
 
         EmployeeEntity employeeDb = employeeRepository.getById(id);
@@ -690,7 +687,7 @@ public class EmployeeBusinessTest {
     @DisplayName("2.18 Добавление сотрудника без необязательного поля (birthdate)")
     public void shouldAddEmployeeWithoutBirthdate(EmployeeService employeeApiService,
                                                   EmployeeRepository employeeRepository,
-                                                  CompanyEntity company) throws SQLException, IOException {
+                                                  CompanyEntity company) {
 
         Employee employee = employeeApiService.generateEmployee();
         employee.setCompanyId(company.getId());

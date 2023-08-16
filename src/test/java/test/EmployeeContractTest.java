@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -28,7 +27,7 @@ import static ext.IsEmployeeEqual.isEqual;
 import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /*
@@ -74,8 +73,8 @@ public class EmployeeContractTest {
     private static String basePathString = "";
     private static String login = "";
     private static String password = "";
-    private final AuthService authService = AuthService.getInstance();
-    private final Faker faker = new Faker(new Locale("ru"));
+    private final AuthService AUTH_SERVICE = AuthService.getInstance();
+    private final Faker FAKER = new Faker(new Locale("ru"));
 
 
     //Инициализация Hibernate (EntityManagerFactory)
@@ -123,7 +122,7 @@ public class EmployeeContractTest {
         employee.setId(id);
         employee.setCompanyId(companyId);
 
-        String token = authService.logIn(login, password);
+        String token = AUTH_SERVICE.logIn(login, password);
 
         //Добавление Employee через API
         int createdId = given()
@@ -155,9 +154,7 @@ public class EmployeeContractTest {
     @Test
     @Tag("Positive")
     @DisplayName("1.2 Получение списка сотрудников компании")
-    public void shouldGetEmployeeByCompanyId(EmployeeService employeeApiService,
-                                             EmployeeRepository employeeRepository,
-                                             @TestProperties(testNum = 1) CompanyEntity company,
+    public void shouldGetEmployeeByCompanyId(@TestProperties(testNum = 1) CompanyEntity company,
                                              @TestProperties(testNum = 1, itemCount = 3) List<EmployeeEntity> employeesBd) {
 
         int companyId = company.getId();
@@ -174,8 +171,7 @@ public class EmployeeContractTest {
                         .log().ifValidationFails()
                         .contentType("application/json; charset=utf-8")
                         .body(matchesJsonSchema(GET_ALL_BODY_SCHEMA))
-                        //TODO: Написать BUG-репорт, что формат тела ответа на GET запрос не совпадает
-                        // с требованиями в Swagger ("avatar_url" вместо "url")
+                        //TODO: 2. Написать BUG-репорт, что при запросе Employee через API поле "url" меняется на "avatar_url"
                         .extract()
                         .body().as(new TypeRef<List<Employee>>() {
                         });
@@ -202,8 +198,7 @@ public class EmployeeContractTest {
                 .statusCode(200)
                 .contentType("application/json; charset=utf-8")
                 .body(matchesJsonSchema(GET_ONE_BODY_SCHEMA))
-                //TODO: Написать BUG-репорт, что формат тела ответа на GET запрос не совпадает
-                // с требованиями в Swagger ("avatar_url" вместо "url")
+                //TODO: 2. Написать BUG-репорт, что при запросе Employee через API поле "url" меняется на "avatar_url"
                 .extract()
                 .body().as(new TypeRef<Employee>() {
                            }
@@ -216,18 +211,17 @@ public class EmployeeContractTest {
     @Tag("Positive")
     @DisplayName("1.4 Изменение информации о сотруднике")
     public void shouldUpdateEmployeeLastName(EmployeeService employeeApiService,
-                                             EmployeeRepository employeeRepository,
                                              @TestProperties(testNum = 3) CompanyEntity company,
-                                             @TestProperties(testNum = 3) EmployeeEntity employee) throws IOException {
+                                             @TestProperties(testNum = 3) EmployeeEntity employee) {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
-        String lastName = faker.name().lastName();
-        String email = faker.internet().emailAddress("b" + faker.number().digits(6));
-        String url = faker.internet().url();
-        String phone = faker.number().digits(10);
+        String lastName = FAKER.name().lastName();
+        String email = FAKER.internet().emailAddress("b" + FAKER.number().digits(6));
+        String url = FAKER.internet().url();
+        String phone = FAKER.number().digits(10);
         boolean isActive = !employee.isActive();
 
-        String token = authService.logIn(login, password);
+        String token = AUTH_SERVICE.logIn(login, password);
 
         int id = given()
                 .log().ifValidationFails()
@@ -301,7 +295,7 @@ public class EmployeeContractTest {
         employee.setId(id);
         employee.setCompanyId(companyId);
 
-        String token = authService.logIn(login, password);
+        String token = AUTH_SERVICE.logIn(login, password);
 
         //Добавление Employee через API
         String message =
@@ -322,7 +316,7 @@ public class EmployeeContractTest {
                         .path("message");
 
         assertEquals("Internal server error", message);
-        //TODO: Написать BUG-репорт, что при ошибке в запросе на создание Employee выдаётся SC 500 вместо SC4XX
+        //TODO: 11. Написать BUG-репорт, что при ошибке в запросе на создание Employee выдаётся SC 500 вместо SC4XX
     }
 
     @Test
@@ -330,13 +324,13 @@ public class EmployeeContractTest {
     @DisplayName("2.3 Изменение информации о сотруднике без авторизации")
     public void shouldNotUpdateEmployeeWithoutAuth(EmployeeService employeeApiService,
                                                    @TestProperties(testNum = 3) CompanyEntity company,
-                                                   @TestProperties(testNum = 3) EmployeeEntity employee) throws IOException {
+                                                   @TestProperties(testNum = 3) EmployeeEntity employee) {
 
         Employee employeeApi = employeeApiService.getById(employee.getId());
-        String lastName = faker.name().lastName();
-        String email = faker.internet().emailAddress("b" + faker.number().digits(6));
-        String url = faker.internet().url();
-        String phone = faker.number().digits(10);
+        String lastName = FAKER.name().lastName();
+        String email = FAKER.internet().emailAddress("b" + FAKER.number().digits(6));
+        String url = FAKER.internet().url();
+        String phone = FAKER.number().digits(10);
         boolean isActive = !employee.isActive();
 
         String message =
@@ -375,7 +369,7 @@ public class EmployeeContractTest {
         employeeApi.setId(lastId + SHIFT);
         employeeApi.setCompanyId(company.getId());
 
-        String token = authService.logIn(login, password);
+        String token = AUTH_SERVICE.logIn(login, password);
 
         String message =
                 given()
@@ -400,7 +394,7 @@ public class EmployeeContractTest {
                         .path("message");
 
         assertEquals("Internal server error", message);
-        //TODO: Написать BUG-репорт, что при ошибке в id в запросе на изменение Employee выдаётся SC 500 вместо SC4XX
+        //TODO: 13. Написать BUG-репорт, что при ошибке в id в URI запроса на изменение Employee выдаётся SC 500 вместо SC4XX
     }
 
     @Test
@@ -469,14 +463,14 @@ public class EmployeeContractTest {
                         .then()
                         .log().ifValidationFails()
                         .statusCode(404)
-                        //TODO: Написать BUG-репорт, что при запросе несуществующего сотрудника возвращается SC 200 вместо SC404
+                        //TODO: 14. Написать BUG-репорт, что при запросе несуществующего сотрудника возвращается SC 200 вместо SC404
                         .contentType("application/json; charset=utf-8")
                         .body(matchesJsonSchema(ERROR_RESPONSE_BODY_SCHEMA))
                         .extract()
                         .path("message");
 
         assertEquals("Not found", message);
-        //TODO: Написать BUG-репорт, что при запросе несуществующего сотрудника не возвращается тело ответа с "message":"Not found"
+        //TODO: 15. Написать BUG-репорт, что при запросе несуществующего сотрудника не возвращается тело ответа с "message":"Not found"
     }
 
     @ParameterizedTest(name = "Отсутствие полей в запросе на создание")
@@ -485,7 +479,7 @@ public class EmployeeContractTest {
     @DisplayName("2.8 Не добавление сотрудника без обязательного поля:")
     public void shouldNotAddEmployeeWithoutRequiredField(String jsonEmployeeString) {
 
-        String token = authService.logIn(login, password);
+        String token = AUTH_SERVICE.logIn(login, password);
 
         //Добавление Employee через API
         String message =
@@ -506,7 +500,8 @@ public class EmployeeContractTest {
                         .path("message");
 
         assertEquals("Internal server error", message);
-        //TODO: Написать BUG-репорт, что создаются Employee без полей: "id", "isActive" (в Swagger отмечены как обязательные)
+        //TODO: 16. Написать BUG-репорт, что создаются Employee без поля "id" (в Swagger отмечено как обязательное)
+        //TODO: 17. Написать BUG-репорт, что создаются Employee без поля "isActive" (в Swagger отмечено как обязательное)
     }
 
     @ParameterizedTest(name = "Отсутствие полей в запросе на создание")
@@ -515,7 +510,7 @@ public class EmployeeContractTest {
     @DisplayName("2.9 Добавление сотрудника без необязательного поля:")
     public void shouldAddEmployeeWithoutOptionalFields(String jsonEmployeeString) {
 
-        String token = authService.logIn(login, password);
+        String token = AUTH_SERVICE.logIn(login, password);
 
         //Добавление Employee через API
         int createdId =
@@ -535,7 +530,7 @@ public class EmployeeContractTest {
                         .extract()
                         .path("id");
 
-        //TODO: Написать BUG-репорт, что не создаются Employee без поля "phone" (в Swagger отмечен как необязательный)
+        //TODO: 18. Написать BUG-репорт, что не создаются Employee без поля "phone" (в Swagger отмечен как необязательный)
     }
 
     //Провайдер JSON строк с полями Employee (без обязательных полей)
