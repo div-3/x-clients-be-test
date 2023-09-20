@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ext.CommonHelper.getProperties;
 import static ext.IsCompanyEqual.isEqual;
@@ -106,9 +107,18 @@ public class CompanyBusinessTest {
 
         //Перекладываем в Map для быстрого поиска
         Map<Integer, CompanyEntity> mapDb = new HashMap<>();
-        for (CompanyEntity c : companiesDb) {
-            mapDb.put(c.getId(), c);
-        }
+
+        mapDb = companiesDb
+                .stream()
+                .collect(Collectors.toMap(
+                        c -> c.getId(),
+                        c -> c
+                ));
+
+        //Или
+//        for (CompanyEntity c : companiesDb) {
+//            mapDb.put(c.getId(), c);
+//        }
 
         for (Company c : companiesApi) {
             assertThat(c, isEqual(mapDb.get(c.getId())));
